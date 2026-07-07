@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shares - Countries App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="navbar"></div>
+
+    <div class="page-container">
+        <div id="alertBox"></div>
+
+        <h1 class="page-title">Shares &amp; Reviews</h1>
+
+        <div class="card">
+            <div class="form-row" style="max-width:300px;">
+                <label for="countryFilter">Filter by country</label>
+                <select id="countryFilter"><option value="">All countries</option></select>
+            </div>
+        </div>
+
+        <div id="newShareBox" class="card">
+            <h3>Post a new share</h3>
+            <form id="newShareForm">
+                <div class="form-row" style="max-width:300px;">
+                    <label for="newShareCountry">Country</label>
+                    <select id="newShareCountry" required></select>
+                </div>
+                <div class="form-row">
+                    <label for="newShareContent">Your review / recommendation</label>
+                    <textarea id="newShareContent" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn">Post Share</button>
+            </form>
+        </div>
+
+        <div id="sharesContainer"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/mockData.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/shares.js"></script>
+</body>
+</html>

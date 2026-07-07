@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Country Details - Countries App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="navbar"></div>
+
+    <div class="page-container">
+        <div id="alertBox"></div>
+
+        <p><a href="countries-list.html">&larr; Back to Countries</a></p>
+
+        <div class="card">
+            <div id="countryDetailsView"><p class="muted">Loading...</p></div>
+
+            <div class="card-actions" style="margin-top:16px;">
+                <a id="editCountryBtn" class="btn btn-outline" href="#">Edit</a>
+                <button id="deleteCountryBtn" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+
+        <div id="userListActions" class="card">
+            <h3>My Lists</h3>
+            <div class="card-actions">
+                <button id="addVisitedBtn" class="btn btn-outline">Mark as Visited</button>
+                <button id="addWishlistBtn" class="btn btn-outline">Add to Wishlist</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Shares &amp; Reviews for this country</h3>
+            <div id="sharesList"></div>
+
+            <form id="shareForm" style="margin-top:16px;" class="hide-if-logged-out">
+                <div class="form-row">
+                    <label for="shareContent">Share your experience</label>
+                    <textarea id="shareContent" rows="3" placeholder="Write a short review..."></textarea>
+                </div>
+                <button type="submit" class="btn">Post Share</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/mockData.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/countryDetails.js"></script>
+    <script>
+        $(function () {
+            $("#shareForm").toggle(Auth.isLoggedIn());
+        });
+    </script>
+</body>
+</html>

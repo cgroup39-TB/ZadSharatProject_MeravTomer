@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Users - Countries App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="navbar"></div>
+
+    <div class="page-container">
+        <div id="alertBox"></div>
+
+        <h1 class="page-title">Manage Users</h1>
+        <p class="muted">Locked users cannot log in or post shares.</p>
+
+        <table id="adminUsersTable" class="card">
+            <thead>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/mockData.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>

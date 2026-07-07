@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Country Form - Countries App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="navbar"></div>
+
+    <div class="page-container">
+        <div id="alertBox"></div>
+
+        <p><a href="countries-list.html">&larr; Back to Countries</a></p>
+
+        <h1 class="page-title" id="formTitle">Add / Edit Country</h1>
+
+        <form id="countryForm" class="card">
+            <div class="form-grid">
+                <div class="form-row">
+                    <label for="apiCountryCode">Country code (e.g. ISR)</label>
+                    <input type="text" id="apiCountryCode" maxlength="3" required>
+                </div>
+                <div class="form-row">
+                    <label for="commonName">Common name</label>
+                    <input type="text" id="commonName" required>
+                </div>
+                <div class="form-row">
+                    <label for="officialName">Official name</label>
+                    <input type="text" id="officialName" required>
+                </div>
+                <div class="form-row">
+                    <label for="capital">Capital</label>
+                    <input type="text" id="capital" required>
+                </div>
+                <div class="form-row">
+                    <label for="region">Region</label>
+                    <input type="text" id="region" required>
+                </div>
+                <div class="form-row">
+                    <label for="subregion">Subregion</label>
+                    <input type="text" id="subregion">
+                </div>
+                <div class="form-row">
+                    <label for="population">Population</label>
+                    <input type="number" id="population" min="0" required>
+                </div>
+                <div class="form-row">
+                    <label for="area">Area (km&sup2;)</label>
+                    <input type="number" id="area" min="0" required>
+                </div>
+                <div class="form-row">
+                    <label for="currencyName">Currency name</label>
+                    <input type="text" id="currencyName">
+                </div>
+                <div class="form-row">
+                    <label for="currencySymbol">Currency symbol</label>
+                    <input type="text" id="currencySymbol">
+                </div>
+                <div class="form-row">
+                    <label for="flagPng">Flag image URL (PNG)</label>
+                    <input type="url" id="flagPng">
+                </div>
+                <div class="form-row">
+                    <label for="flagSvg">Flag image URL (SVG)</label>
+                    <input type="url" id="flagSvg">
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="languages">Languages (comma separated)</label>
+                <input type="text" id="languages" placeholder="Hebrew, Arabic">
+            </div>
+
+            <button type="submit" class="btn">Save Country</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/mockData.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/countryDetails.js"></script>
+</body>
+</html>

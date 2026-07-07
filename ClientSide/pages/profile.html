@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile - Countries App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="navbar"></div>
+
+    <div class="page-container">
+        <div id="alertBox"></div>
+
+        <h1 class="page-title">My Profile</h1>
+
+        <div class="card" style="max-width:480px;">
+            <form id="profileForm">
+                <div class="form-row">
+                    <label for="name">Full name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-row">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <button type="submit" class="btn">Save changes</button>
+            </form>
+        </div>
+
+        <p><a href="preferences.html">Manage my personal preferences &rarr;</a></p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/mockData.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/common.js"></script>
+    <script>
+        $(function () {
+            Auth.requireAuth();
+
+            const user = Auth.getCurrentUser();
+            $("#name").val(user.name);
+            $("#email").val(user.email);
+
+            $("#profileForm").on("submit", function (e) {
+                e.preventDefault();
+                Auth.updateProfile({
+                    name: $("#name").val().trim(),
+                    email: $("#email").val().trim()
+                })
+                    .done(function () { Common.showAlert("Profile updated.", "success"); })
+                    .fail(Common.showError);
+            });
+        });
+    </script>
+</body>
+</html>
