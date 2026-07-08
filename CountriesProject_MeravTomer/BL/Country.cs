@@ -1,7 +1,10 @@
-﻿namespace CountriesProject_MeravTomer.BL
+﻿using CountriesProject_MeravTomer.DAL;
+
+namespace CountriesProject_MeravTomer.BL
 {
     public class Country
     {
+        private int id;
         private string cca3;
         private string name;
         private string officialName;
@@ -18,6 +21,7 @@
         private List<string> borders;
 
 
+        private int Id { get => id; set => id = value; }
         public string Cca3 { get; set; }           
         public string Name { get; set; }
         public string OfficialName { get; set; }
@@ -28,7 +32,7 @@
         public double Area { get; set; }              
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-        public string FlagUrl { get; set; }
+        public string FlagUrl { get; set; }                            
         public Dictionary<string, string> Languages { get; set; }     
         public Dictionary<string, Currency> Currencies { get; set; }   
         public List<string> Borders { get; set; }   
@@ -39,9 +43,10 @@
     
         }
 
-        public Country(string cca3, string name, string officialName, string capital, string region, string subregion, int population, double area,
+        public Country(int id,string cca3, string name, string officialName, string capital, string region, string subregion, int population, double area,
                       double latitude, double longitude, string flagUrl, Dictionary<String, String> languages, Dictionary<String, Currency> currencies, List<string> borders)
-        {
+        { 
+            Id= id;
             Cca3 = cca3;
             Name = name;
             OfficialName = officialName;
@@ -59,14 +64,57 @@
         }
 
 
+        public Country Insert()
+        {             // כאן תוכל להוסיף לוגיקה להוספת המדינה למסד הנתונים או לכל מקום אחר שבו אתה רוצה לשמור את המידע.
+            // לדוגמה, אם יש לך מחלקת Repository או Service שמטפלת בהוספה למסד הנתונים, תוכל לקרוא לה כאן.
+            // לדוגמה:
+            // CountryRepository.Add(this);
 
-       
+            DBCountryServices dBCountryServices = new DBCountryServices();
+          //  string 
 
-                
+            return this; // מחזיר את האובייקט הנוכחי לאחר ההוספה}
+
+
+
 
         }
 
-        
+        public List<Country> Read() {
+
+            DBCountryServices dbs = new DBCountryServices();
+            return dbs.ReadAllCountries();
+
+        }
+
+
+
+        public Country ReadById(int countryId)
+        {
+
+            DBCountryServices dbs = new DBCountryServices();
+            return dbs.ReadCountryById(countryId);
+
+        }
+
+        public Country ReadByCc3(string cca3)
+        {
+
+            DBCountryServices dbs = new DBCountryServices();
+            return dbs.ReadCountryByCca3(cca3);
+
+        }
+
+        public int Delete(int countryId) //Beni said if i change database so better to create new object and use the class method else i can use static methods
+        {
+            DBCountryServices dbs = new DBCountryServices();
+            return dbs.DeleteCountry(countryId);
+        }
+
+
+
+
+
     }
     
     
