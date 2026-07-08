@@ -5,6 +5,8 @@ using System.Web;
 using System.Data.SqlClient;
 using System.Data;
 using System.Text;
+using CountriesProject_MeravTomer.BL;
+using System.Xml.Linq;
 
 namespace CountriesProject_MeravTomer.DAL
 {
@@ -15,109 +17,115 @@ namespace CountriesProject_MeravTomer.DAL
         {
         }
 
-        ////--------------------------------------------------------------------------------------------------
-        //// This method creates a connection to the database according to the connectionString name in the web.config 
-        ////--------------------------------------------------------------------------------------------------
-        //public SqlConnection connect(String conString)
-        //{
+        //--------------------------------------------------------------------------------------------------
+        // This method creates a connection to the database according to the connectionString name in the web.config 
+        //--------------------------------------------------------------------------------------------------
+        public SqlConnection connect(String conString)
+        {
 
-        //    // read the connection string from the configuration file
-        //    IConfigurationRoot configuration = new ConfigurationBuilder()
-        //    .AddJsonFile("appsettings.json").Build();
-        //    string cStr = configuration.GetConnectionString(conString);
-        //    SqlConnection connectionToDb = new SqlConnection(cStr);
-        //    connectionToDb.Open();
-        //    return connectionToDb;
-        //}
+            // read the connection string from the configuration file
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json").Build();
+            string cStr = configuration.GetConnectionString(conString);
+            SqlConnection connectionToDb = new SqlConnection(cStr);
+            connectionToDb.Open();
+            return connectionToDb;
+        }
 
-        ////---------------------------------------------------------------------------------
-        //// Create the SqlCommand
-        ////---------------------------------------------------------------------------------
-        //private SqlCommand CreateCommandWithStoredProcedureGeneral(String spName, SqlConnection con, Dictionary<string, object> paramDic)
-        //{
+        //---------------------------------------------------------------------------------
+        // Create the SqlCommand
+        //---------------------------------------------------------------------------------
+        private SqlCommand CreateCommandWithStoredProcedureGeneral(String spName, SqlConnection con, Dictionary<string, object> paramDic)
+        {
 
-        //    SqlCommand cmd = new SqlCommand(); // create the command object
+            SqlCommand cmd = new SqlCommand(); // create the command object
 
-        //    cmd.Connection = con;              // assign the connection to the command object
+            cmd.Connection = con;              // assign the connection to the command object
 
-        //    cmd.CommandText = spName;      // can be Select, Insert, Update, Delete 
+            cmd.CommandText = spName;      // can be Select, Insert, Update, Delete 
 
-        //    cmd.CommandTimeout = 10;           // Time to wait for the execution' The default is 30 seconds
+            cmd.CommandTimeout = 10;           // Time to wait for the execution' The default is 30 seconds
 
-        //    cmd.CommandType = System.Data.CommandType.StoredProcedure; // the type of the command, can also be text
+            cmd.CommandType = System.Data.CommandType.StoredProcedure; // the type of the command, can also be text
 
-        //    if (paramDic != null)
-        //        foreach (KeyValuePair<string, object> param in paramDic)
-        //        {
-        //            cmd.Parameters.AddWithValue(param.Key, param.Value);
+            if (paramDic != null)
+                foreach (KeyValuePair<string, object> param in paramDic)
+                {
+                    cmd.Parameters.AddWithValue(param.Key, param.Value);
 
-        //        }
-
-
-        //    return cmd;
-        //}
+                }
 
 
+            return cmd;
+        }
 
-        ////--------------------------------------------------------------------------------------------------
-        //// Returning a list of all games in the GamesTable
-        ////--------------------------------------------------------------------------------------------------
 
-        //public List<Game> ReadAllGames()
-        //{
-        //    SqlConnection con;
-        //    SqlCommand cmd;
-        //    List<Game> games = new List<Game>();
 
-        //    try
-        //    {
-        //        con = connect("myProjDB");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
+        //--------------------------------------------------------------------------------------------------
+        // Returning a list of all games in the GamesTable
+        //--------------------------------------------------------------------------------------------------
 
-        //    cmd = CreateCommandWithStoredProcedureGeneral("spReadAllGames_MD_TB2", con, null);
+        public List<Country> ReadAllCountries()
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+            List<Country> countries = new List<Country>();
 
-        //    try
-        //    {
-        //        SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
-        //        while (dataReader.Read())
-        //        {
-        //            Game g = new Game();
+            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllGames_MD_TB2", con, null);
 
-        //            g.Id = Convert.ToInt32(dataReader["dbGameId"]);
-        //            g.SteamAppId = Convert.ToInt32(dataReader["SteamAppId"]);
-        //            g.Name = dataReader["Name"].ToString();
-        //            g.SteamUrl = dataReader["SteamUrl"].ToString();
-        //            g.CapsuleImage = dataReader["CapsuleImage"].ToString();
-        //            g.ReleaseDate = dataReader["ReleaseDate"].ToString();
-        //            g.ReviewSummary = dataReader["ReviewSummary"].ToString();
-        //            g.Price = Convert.ToInt32(dataReader["Price"]);
-        //            g.Tags = GetTagsByGameId(g.Id);
-        //            g.Windows = Convert.ToBoolean(dataReader["Windows"]);
-        //            g.Mac = Convert.ToBoolean(dataReader["Mac"]);
-        //            g.Linux = Convert.ToBoolean(dataReader["Linux"]);
+            try
+            {
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 
-        //            games.Add(g);
-        //        }
+                while (dataReader.Read())
+                {
+                    Country c = new Country();
 
-        //        return games;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close();
-        //        }
-        //    }
-        //}
+                    c.Id = Convert.ToInt32(dataReader["dbCountryId"]);
+                    c.Cca3 = dataReader["Cca3"].ToString();
+                    c.Name = dataReader["Name"].ToString();
+                    c.OfficialName = dataReader["OfficialName"].ToString();
+                    c.Capital = dataReader["Capital"].ToString();
+                    c.Region = dataReader["Region"].ToString();
+                    c.SubRegion = dataReader["SubRegion"].ToString();
+                    c.Population = Convert.ToInt32(dataReader["Population"]);
+                    c.Area = Convert.ToInt32(dataReader["Population"]);
+                    c.Latitude = Convert.ToBoolean(dataReader["Latitude"]);
+                    c.Longitude = Convert.ToBoolean(dataReader["Longitude"]);
+                    c.FlagUrl = Convert.ToBoolean(dataReader["FlagUrl"]);
+
+
+                    //  Languages = new Dictionary<string, string>();
+                    //   Currencies = new Dictionary<string, Currency>();
+                    //Borders = new List<string> ;
+
+
+                    countries.Add(c);
+                }
+
+                return countries;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
 
 
         ////--------------------------------------------------------------------------------------------------
