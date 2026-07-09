@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Text;
 using CountriesProject_MeravTomer.BL;
-using System.Xml.Linq;
+
 
 namespace CountriesProject_MeravTomer.DAL
 {
@@ -88,20 +88,23 @@ namespace CountriesProject_MeravTomer.DAL
 
                 while (dataReader.Read())
                 {
-                    Country c = new Country();
+           
 
+                    Country c = new Country();
                     c.Id = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.Cca3 = dataReader["Cca3"].ToString();
+                    c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.OfficialName = dataReader["OfficialName"].ToString();
-                    c.Capital = dataReader["Capital"].ToString();
+                    c.Capital = dataReader["Capital"].ToString()
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .ToList();
                     c.Region = dataReader["Region"].ToString();
                     c.SubRegion = dataReader["SubRegion"].ToString();
-                    c.Population = Convert.ToInt32(dataReader["Population"]);
-                    c.Area = Convert.ToInt32(dataReader["Population"]);
-                    c.Latitude = Convert.ToBoolean(dataReader["Latitude"]);
-                    c.Longitude = Convert.ToBoolean(dataReader["Longitude"]);
-                    c.FlagUrl = Convert.ToBoolean(dataReader["FlagUrl"]);
+                    c.Population = Convert.ToInt64(dataReader["Population"]);
+                    c.Area = Convert.ToDouble(dataReader["Area"]);
+                    c.Latitude = Convert.ToDouble(dataReader["Latitude"]);
+                    c.Longitude = Convert.ToDouble(dataReader["Longitude"]);
+                    c.FlagUrl = dataReader["FlagUrl"].ToString();
 
 
                     //  Languages = new Dictionary<string, string>();
@@ -126,7 +129,149 @@ namespace CountriesProject_MeravTomer.DAL
                 }
             }
         }
+        public Dictionary<string, string> ReadLanguagesByCountryId(int countryId)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+            Dictionary<string, string> languages = new Dictionary<string, string>();
 
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@CountryId", countryId);
+
+            cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryLanguages_GetByCountryId", con, paramDic);
+
+            try
+            {
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (dataReader.Read())
+                {
+                    string code = dataReader["LanguageCode"].ToString();
+                    string name = dataReader["LanguageName"].ToString();
+                    languages[code] = name;
+                }
+
+                return languages;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
+
+
+        public Dictionary<string, Currency> ReadCurrenciesByCountryId(int countryId)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+            Dictionary<string, Currency> currencies = new Dictionary<string, Currency>();
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@CountryId", countryId);
+
+            cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryCurrencies_GetByCountryId", con, paramDic);
+
+            try
+            {
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (dataReader.Read())
+                {
+                    string code = dataReader["CurrencyCode"].ToString();
+
+                    Currency currency = new Currency();
+                    currency.Name = dataReader["CurrencyName"].ToString();
+                    currency.Symbol = dataReader["CurrencySymbol"] == DBNull.Value
+                        ? null
+                        : dataReader["CurrencySymbol"].ToString();
+
+                    currencies[code] = currency;
+                }
+
+                return currencies;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
+
+
+        public List<string> ReadBordersByCountryId(int countryId)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+            List<string> borders = new List<string>();
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@CountryId", countryId);
+
+            cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryBorders_GetByCountryId", con, paramDic);
+
+            try
+            {
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (dataReader.Read())
+                {
+                    borders.Add(dataReader["BorderCca3"].ToString());
+                }
+
+                return borders;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
 
         ////--------------------------------------------------------------------------------------------------
         //// This method reading a specific game by its gameId from the dataBase
