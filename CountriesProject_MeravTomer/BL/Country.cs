@@ -165,7 +165,29 @@ namespace CountriesProject_MeravTomer.BL
     
     public class Currency
     {
+       
+        private string name;
+        private string symbol;
+
+
+        
         public string Name { get; set; }
-        public string? Symbol { get; set; }  // לפעמים אין symbol
+        public string Symbol { get; set; }  // לפעמים אין symbol
+
+
+        public Currency(string code, string name, string symbol)
+        {
+           
+            Name = name;
+            Symbol = symbol;
+        }
+
+        public Currency() { }
+
+        
     }
+
+
+
+
 }

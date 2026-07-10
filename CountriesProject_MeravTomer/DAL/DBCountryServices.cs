@@ -674,54 +674,55 @@ namespace CountriesProject_MeravTomer.DAL
         //    }
         //}
 
-        ////--------------------------------------------------------------------------------------------------
-        //// This method inserts a game to the GamesTable(GamesTable_MD_TB2) 
-        ////--------------------------------------------------------------------------------------------------
-        //public int InsertGame(Game game)
-        //{
-        //    SqlConnection con;
-        //    SqlCommand cmd;
+        //--------------------------------------------------------------------------------------------------
+        // This method inserts a game to the GamesTable(GamesTable_MD_TB2) 
+        //--------------------------------------------------------------------------------------------------
+        public int InsertCountry(Country country)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
 
-        //    try
-        //    {
-        //        con = connect("myProjDB");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
-        //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-        //    paramDic.Add("@SteamAppId", game.SteamAppId);
-        //    paramDic.Add("@Name", game.Name);
-        //    paramDic.Add("@SteamUrl", game.SteamUrl);
-        //    paramDic.Add("@CapsuleImage", game.CapsuleImage);
-        //    paramDic.Add("@ReleaseDate", game.ReleaseDate);
-        //    paramDic.Add("@ReviewSummary", game.ReviewSummary);
-        //    paramDic.Add("@Price", game.Price);
-        //    paramDic.Add("@Windows", game.Windows);
-        //    paramDic.Add("@Mac", game.Mac);
-        //    paramDic.Add("@Linux", game.Linux);
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@CCA3", country.Cca3);
+            paramDic.Add("@Name", country.Name);
+            paramDic.Add("@OfficialName", country.OfficialName);
+            paramDic.Add("@Capital", country.Capital);
+            paramDic.Add("@Region", country.Region);
+            paramDic.Add("@SubRegion", country.SubRegion);
+            paramDic.Add("@Population", country.Population);
+            paramDic.Add("@Area", country.Area);
+            paramDic.Add("@Latitude", country.Latitude);
+            paramDic.Add("@Longitude", country.Longitude);
+            paramDic.Add("@FlagUrl", country.FlagUrl);
 
-        //    cmd = CreateCommandWithStoredProcedureGeneral("spInsertGame_MD_TB2", con, paramDic);
+            cmd = CreateCommandWithStoredProcedureGeneral("spInsertCountry_MD_TB2", con, paramDic);
 
-        //    try
-        //    {
-        //        object result = cmd.ExecuteScalar();
-        //        return Convert.ToInt32(result);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //    finally
-        //    {
-        //        if (con != null)
-        //        {
-        //            con.Close();
-        //        }
-        //    }
-        //}
+            try
+            {
+                object result = cmd.ExecuteScalar();
+                return Convert.ToInt32(result);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
 
 
         ////--------------------------------------------------------------------------------------------------
@@ -768,7 +769,7 @@ namespace CountriesProject_MeravTomer.DAL
         ////--------------------------------------------------------------------------------------------------
         //// Updates a game in the gameTable (updating tags will do seperately)
         ////--------------------------------------------------------------------------------------------------
-        public int UpdateGame(int countryId, Country country)
+        public int UpdateCountry(int countryId, Country country)
         {
             SqlConnection con;
             SqlCommand cmd;
@@ -866,7 +867,139 @@ namespace CountriesProject_MeravTomer.DAL
         }
 
 
+        public void InsertCountryLanguages(int countryId, Dictionary<string, string> languages)
+        {
+            if (languages == null || languages.Count == 0)
+            {
+                return;
+            }
 
+            SqlConnection con;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            try
+            {
+                foreach (KeyValuePair<string, string> language in languages)
+                {
+                    Dictionary<string, object> paramDic = new Dictionary<string, object>();
+                    paramDic.Add("@CountryId", countryId);
+                    paramDic.Add("@LanguageCode", language.Key);
+                    paramDic.Add("@LanguageName", language.Value);
+
+                    SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryLanguages_Insert", con, paramDic);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
+
+
+        public void InsertCountryCurrencies(int countryId, Dictionary<string, Currency> currencies)
+        {
+            if (currencies == null || currencies.Count == 0)
+            {
+                return;
+            }
+
+            SqlConnection con;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            try
+            {
+                foreach (KeyValuePair<string, Currency> currency in currencies)
+                {
+                    Dictionary<string, object> paramDic = new Dictionary<string, object>();
+                    paramDic.Add("@CountryId", countryId);
+                    paramDic.Add("@CurrencyCode", currency.Key);
+                    paramDic.Add("@CurrencyName", currency.Value.Name);
+                    paramDic.Add("@CurrencySymbol", (object)currency.Value.Symbol ?? DBNull.Value);
+
+                    SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryCurrencies_Insert", con, paramDic);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
+
+
+        public void InsertCountryBorders(int countryId, List<string> borders)
+        {
+            if (borders == null || borders.Count == 0)
+            {
+                return;
+            }
+
+            SqlConnection con;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            try
+            {
+                foreach (string border in borders)
+                {
+                    Dictionary<string, object> paramDic = new Dictionary<string, object>();
+                    paramDic.Add("@CountryId", countryId);
+                    paramDic.Add("@Border", border);
+
+                    SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryBorders_Insert", con, paramDic);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
 
         ////--------------------------------------------------------------------------------------------------
         //// This method Reads all Tags of Games

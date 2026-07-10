@@ -2,11 +2,12 @@
 using ServerSideCountriesProject_MeravTomer.DAL.dto;
 using System.Diagnostics.Metrics;
 
+
 namespace ServerSideCountriesProject_MeravTomer.DAL
 {
     public class CountriesAPIService
     {
-        private const string BaseUrl = "https://restcountries.com/v3.1";
+        private const string BaseUrl = "https://api.restcountries.com/countries/v5";
         private const string Fields = "cca3,name,capital,region,subregion,population,area,latlng,flags,languages,currencies,borders";
 
         private readonly HttpClient httpClient;
@@ -60,9 +61,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             Country country = new Country();
 
             country.Cca3 = dto.Cca3;
-            country.Name = dto.Name?.Common ?? string.Empty;
+            country.Name = dto.Name;
             country.OfficialName = dto.Name?.Official ?? string.Empty;
-            country.Capital = dto.Capital ?? new List<string>();
+            country.Capital = dto.Capital
             country.Region = dto.Region;
             country.SubRegion = dto.Subregion;
             country.Population = dto.Population;

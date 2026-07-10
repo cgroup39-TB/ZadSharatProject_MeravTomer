@@ -1,30 +1,32 @@
-﻿CREATE PROCEDURE spInsertGame_MD_TB2
-    @SteamAppId INT,
-    @Name NVARCHAR(200),
-    @SteamUrl NVARCHAR(500),
-    @CapsuleImage NVARCHAR(500),
-    @ReleaseDate NVARCHAR(50),
-    @ReviewSummary NVARCHAR(20),
-    @Price INT,
-    @Windows BIT,
-    @Mac BIT,
-    @Linux BIT
+﻿CREATE PROCEDURE spInsertCountry_MD_TB2
+    @CCA3  NVARCHAR(4),
+    @Name NVARCHAR(50),
+    @OfficialName NVARCHAR(50),
+    --@Capital NVARCHAR(500),
+    @Region NVARCHAR(50),
+    @SubRegion NVARCHAR(20),
+    @Population BIGINT,
+    @Area FLOAT,
+    @Latitude FLOAT,
+    @Longitude FLOAT,
+    @FlagUrl NVARCHAR(500)
 AS
 BEGIN
     --SET NOCOUNT ON;
 
-    INSERT INTO GamesTable_MD_TB2
+    INSERT INTO CountriesTable_MD_TB2
     (
-        SteamAppId,
+        CCA3,
         [Name],
-        SteamUrl,
-        CapsuleImage,
-        ReleaseDate,
-        ReviewSummary,
-        Price,
-        Windows,
-        Mac,
-        Linux
+        OfficialName,
+      --  Capital,
+        Region,
+        SubRegion,
+        [Population],
+        Area,
+        Latitude,
+        Longitude,
+        FlagUrl
     )
     VALUES
     (

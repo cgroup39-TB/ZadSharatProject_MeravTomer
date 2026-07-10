@@ -1,6 +1,7 @@
 ﻿using CountriesProject_MeravTomer.BL;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ServerSideCountriesProject_MeravTomer.DAL;
 
 namespace CountriesProject_MeravTomer.Controllers
 {
@@ -137,6 +138,23 @@ namespace CountriesProject_MeravTomer.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+
+
+        private readonly CountriesAPIService _countriesService;
+
+        public CountriesController(CountriesAPIService countriesService) // <-- כאן ה-DI מזריק
+        {
+            _countriesService = countriesService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var countries = await _countriesService.GetCountriesAsync();
+            return Ok(countries);
+        }
+
 
         ////POST api/<GamesController>/
         //[HttpPost("oneTimeLoadData")]
