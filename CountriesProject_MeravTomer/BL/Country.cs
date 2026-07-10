@@ -16,37 +16,37 @@ namespace CountriesProject_MeravTomer.BL
         private double latitude;
         private double longitude;
         private string flagUrl;
-        private Dictionary<String,String> languages;
+        private Dictionary<String, String> languages;
         private Dictionary<String, Currency> currencies;
         private List<string> borders;
 
 
-        private int Id { get => id; set => id = value; }
-        public string Cca3 { get; set; }           
+        public int Id { get => id; set => id = value; }
+        public string Cca3 { get; set; }
         public string Name { get; set; }
         public string OfficialName { get; set; }
-        public List<string> Capital { get; set; }     
+        public List<string> Capital { get; set; }
         public string Region { get; set; }
-        public string SubRegion { get; set; }        
-        public long Population { get; set; }           
-        public double Area { get; set; }              
+        public string SubRegion { get; set; }
+        public long Population { get; set; }
+        public double Area { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-        public string FlagUrl { get; set; }                            
-        public Dictionary<string, string> Languages { get; set; }     
-        public Dictionary<string, Currency> Currencies { get; set; }   
-        public List<string> Borders { get; set; }   
-        
+        public string FlagUrl { get; set; }
+        public Dictionary<string, string> Languages { get; set; }
+        public Dictionary<string, Currency> Currencies { get; set; }
+        public List<string> Borders { get; set; }
+
 
         public Country()
         {
-    
+
         }
 
-        public Country(int id,string cca3, string name, string officialName, string capital, string region, string subregion, int population, double area,
+        public Country(int id, string cca3, string name, string officialName, string capital, string region, string subregion, int population, double area,
                       double latitude, double longitude, string flagUrl, Dictionary<String, String> languages, Dictionary<String, Currency> currencies, List<string> borders)
-        { 
-            Id= id;
+        {
+            Id = id;
             Cca3 = cca3;
             Name = name;
             OfficialName = officialName;
@@ -60,7 +60,7 @@ namespace CountriesProject_MeravTomer.BL
             FlagUrl = flagUrl;
             Languages = new Dictionary<string, string>();
             Currencies = new Dictionary<string, Currency>();
-            Borders = new List<string> ;
+            Borders = new List<string>() ;
         }
 
 
@@ -71,7 +71,7 @@ namespace CountriesProject_MeravTomer.BL
             // CountryRepository.Add(this);
 
             DBCountryServices dBCountryServices = new DBCountryServices();
-          //  string 
+            //  string 
 
             return this; // מחזיר את האובייקט הנוכחי לאחר ההוספה}
 
@@ -97,12 +97,53 @@ namespace CountriesProject_MeravTomer.BL
 
         }
 
-        public Country ReadByCc3(string cca3)
+        public Country ReadByName(string countryName)
         {
 
             DBCountryServices dbs = new DBCountryServices();
-            return dbs.ReadCountryByCca3(cca3);
+            return dbs.ReadCountryByName(countryName);
 
+        }
+
+        public List<Country> ReadByRegion(string countryRegion)
+        {
+
+            DBCountryServices dbs = new DBCountryServices();
+            return dbs.ReadCountriesByRegion(countryRegion);
+
+        }
+
+        public List<Country> ReadByLanguage(string languageName) {
+
+            DBCountryServices dbs = new DBCountryServices();
+
+        }
+        public List<Country> ReadByCurrency(string currency)
+        {
+
+            DBCountryServices dbs = new DBCountryServices();
+
+        }
+        //מידע לסינון ומיון
+        //public Country ReadByPopulation()
+        //{
+
+        //    DBCountryServices dbs = new DBCountryServices();
+
+        //}
+
+        //public Country ReadByArea(double languageName)  
+        //{
+
+        //    DBCountryServices dbs = new DBCountryServices();
+
+        //}
+
+        public int UpdateCountry(int countryId, Country updatedCountry) //Beni said if i change database so better to create new object and use the class method else i can use static methods
+        {
+
+            DBCountryServices dbs = new DBCountryServices();
+            return dbs.UpdateGame(countryId, updatedCountry);
         }
 
         public int Delete(int countryId) //Beni said if i change database so better to create new object and use the class method else i can use static methods

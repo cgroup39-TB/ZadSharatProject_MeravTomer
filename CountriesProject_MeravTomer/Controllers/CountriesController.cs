@@ -1,83 +1,155 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CountriesProject_MeravTomer.BL;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CountriesProject_MeravTomer.Controllers
 {
+
+    [Route("api/[controller]")]
+    [ApiController]
     public class CountriesController : Controller
     {
+
         // GET: CountriesController
-        public ActionResult Index()
+
+        [HttpGet]
+        public IEnumerable<Country> Get()
         {
-            return View();
+            Country country = new Country();
+            return country.Read();
+        }
+        //GET1 BY dbGameID A GAME SO EDIT IN CLIEND SIDE
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            Country country = new Country();
+            Country result = country.ReadById(id);
+
+            if (result == null)
+            {
+                return NotFound("Country not found");
+            }
+
+            return Ok(result);
         }
 
-        // GET: CountriesController/Details/5
-        public ActionResult Details(int id)
+        //GET2 BY steamAppId A GAME FROM DATABASE
+        [HttpGet("getBySteamAppId/{steamAppId}")]
+        public IActionResult GetByRegion(string region)
         {
-            return View();
+            Country country = new Country();
+
+            Country result = country.ReadByRegion(region);
+
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
         }
 
-        // GET: CountriesController/Create
-        public ActionResult Create()
+
+        // GET3: api/<GamesController> #Query String Version1?-- this is QueryString the parameter comes through the headline of the website URL
+        [HttpGet("getByName")]
+        public IEnumerable<Country> GetByName(string countryName)
         {
-            return View();
+            Country country = new Country();
+            return (IEnumerable<Country>)country.ReadByName(countryName);
         }
 
-        // POST: CountriesController/Create
+        // GET3.2  api/<GamesController> #Query String Version2? what is the difference between those 2?-- this is RouteParameter Way meaning its part of the api URL
+        [HttpGet("getByNameR/{gameName}")]
+        public IEnumerable<Country> GetByNameR(string gameName)
+        {
+            Country game = new Country();
+            return game.ReadByContainName(gameName);
+        }
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public IActionResult Post([FromBody] Country game)
+        {
+            Country insertedGame = game.Insert();
+
+            if (insertedGame == null)
+            {
+                return BadRequest("Game was not inserted");
+            }
+
+            return Ok(insertedGame);
+        }
+
+        // PUT api/<GamesController>/5
+        [HttpPut("{id}")]
+        public IActionResult UpdateGame(int id, [FromBody] Country updatedCountry)
+        {
+            Country country = new Country();
+            int result = country.UpdateCountry(id, updatedCountry);
+
+            if (result == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok(new { message = "Country updated successfully" });
+        }
+
+        // DELETE api/<GamesController>/5
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            Country game = new Country();
+            int result = game.Delete(id);
+
+            if (result == 0)
+            {
+                return NotFound(new { message = "Game was not found" });
+            }
+
+            return Ok(new { message = "Game was deleted successfully" });
+        }
+
+        // GET: api/<GamesController> -gets all the tags that are existing 
+        [HttpGet("getAllTags")]
+        public IActionResult GetAllTags()
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                Country game = new Country();
+                return Ok(game.GetAllExistingTags());
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return BadRequest(ex.Message);
             }
         }
-
-        // GET: CountriesController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: CountriesController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // GET: api/<GamesController> -gets all the games that are having one of the tags in the string
+        [HttpGet("getByTags")]
+        public IActionResult GetByTags(string tags)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                Country game = new Country();
+                return Ok(game.GetGamesByTags(tags));
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return BadRequest(ex.Message);
             }
         }
 
-        // GET: CountriesController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: CountriesController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        ////POST api/<GamesController>/
+        //[HttpPost("oneTimeLoadData")]
+        //public IActionResult OneTimeLoadData([FromBody] List<Game> games)
+        //{
+        //    try
+        //    {
+        //        return Ok(Country.OneTimeLoadData(games));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
     }
 }
