@@ -40,7 +40,7 @@ namespace CountriesProject_MeravTomer.Controllers
         {
             Country country = new Country();
 
-            Country result = country.ReadByRegion(region);
+            List <Country> result = country.ReadByRegion(region);
 
             if (result == null)
             {
