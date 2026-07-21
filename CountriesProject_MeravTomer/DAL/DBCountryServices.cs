@@ -8,7 +8,7 @@ using System.Text;
 using CountriesProject_MeravTomer.BL;
 
 
-namespace CountriesProject_MeravTomer.DAL
+namespace ServerSideCountriesProject_MeravTomer.DAL
 {
     public class DBCountryServices
     {
@@ -62,7 +62,7 @@ namespace CountriesProject_MeravTomer.DAL
 
 
         //--------------------------------------------------------------------------------------------------
-        // Returning a list of all games in the GamesTable
+        // Returning a list of all countries in the CountriesTable
         //--------------------------------------------------------------------------------------------------
 
         public List<Country> ReadAllCountries()
@@ -80,7 +80,7 @@ namespace CountriesProject_MeravTomer.DAL
                 throw ex;
             }
 
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllGames_MD_TB2", con, null);
+            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllCountries_MD_TB2", con, null);
 
             try
             {
@@ -95,22 +95,18 @@ namespace CountriesProject_MeravTomer.DAL
                     c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.OfficialName = dataReader["OfficialName"].ToString();
-                    c.Capital = dataReader["Capital"].ToString()
-                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                    .ToList();
+                    c.Capital = dataReader["Capital"].ToString();
                     c.Region = dataReader["Region"].ToString();
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
-                    c.Latitude = Convert.ToDouble(dataReader["Latitude"]);
-                    c.Longitude = Convert.ToDouble(dataReader["Longitude"]);
+                    //c.Latitude = Convert.ToDouble(dataReader["Latitude"]);
+                    //c.Longitude = Convert.ToDouble(dataReader["Longitude"]);
                     c.FlagUrl = dataReader["FlagUrl"].ToString();
 
-
-                    //  Languages = new Dictionary<string, string>();
-                    //   Currencies = new Dictionary<string, Currency>();
-                    //Borders = new List<string> ;
-
+                    c.Borders = new List<string>(dataReader["Borders"].ToString()
+                                                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                        .ToList());
 
                     countries.Add(c);
                 }
@@ -134,7 +130,7 @@ namespace CountriesProject_MeravTomer.DAL
        
      
         //--------------------------------------------------------------------------------------------------
-        // This method reading a specific game by its gameId from the dataBase
+        // This method reading a specific country by its countryId from the dataBase
         //--------------------------------------------------------------------------------------------------
          public Country ReadCountryById(int id) { 
 
@@ -153,7 +149,7 @@ namespace CountriesProject_MeravTomer.DAL
                 Dictionary<string, object> paramDic = new Dictionary<string, object>();
                 paramDic.Add("@Id", id);
 
-                cmd = CreateCommandWithStoredProcedureGeneral("spReadGameById_MD_TB2", con, paramDic);
+                cmd = CreateCommandWithStoredProcedureGeneral("spReadCountryById_MD_TB2", con, paramDic);
 
                 try
                 {
@@ -166,18 +162,17 @@ namespace CountriesProject_MeravTomer.DAL
                         c.Cca3 = dataReader["CCA3"].ToString();
                         c.Name = dataReader["Name"].ToString();
                         c.OfficialName = dataReader["OfficialName"].ToString();
-                        c.Capital = dataReader["Capital"].ToString()
-                                                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                        .ToList();
+                        c.Capital = dataReader["Capital"].ToString();
                         c.Region = dataReader["Region"].ToString();
                         c.SubRegion = dataReader["SubRegion"].ToString();
                         c.Population = Convert.ToInt64(dataReader["Population"]);
                         c.Area = Convert.ToDouble(dataReader["Area"]);
-                        c.Latitude = Convert.ToDouble(dataReader["Latitude"]);
-                        c.Longitude = Convert.ToDouble(dataReader["Longitude"]);
                         c.FlagUrl = dataReader["FlagUrl"].ToString();
+                        c.Borders = new List<string>(dataReader["Borders"].ToString()
+                                                       .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                       .ToList());
 
-                        return c;
+                    return c;
                     }
 
                     return null;
@@ -195,12 +190,14 @@ namespace CountriesProject_MeravTomer.DAL
                 }
             }
 
-
-        public Dictionary<string, string> ReadLanguagesByCountryId(int countryId)
+        //--------------------------------------------------------------------------------------------------
+        // This method reading languages of a specific country by its countryId from the dataBase
+        //--------------------------------------------------------------------------------------------------
+        public List<Language> ReadLanguagesByCountryId(int countryId)
         {
             SqlConnection con;
             SqlCommand cmd;
-            Dictionary<string, string> languages = new Dictionary<string, string>();
+            List<Language> languages = new List<Language>();
 
             try
             {
@@ -224,7 +221,8 @@ namespace CountriesProject_MeravTomer.DAL
                 {
                     string code = dataReader["LanguageCode"].ToString();
                     string name = dataReader["LanguageName"].ToString();
-                    languages[code] = name;
+                    languages.Add(new Language(code, name));
+                 
                 }
 
                 return languages;
@@ -242,12 +240,14 @@ namespace CountriesProject_MeravTomer.DAL
             }
         }
 
-
-        public Dictionary<string, Currency> ReadCurrenciesByCountryId(int countryId)
+        //--------------------------------------------------------------------------------------------------
+        // This method reading currencies of a specific country by its countryId from the dataBase
+        //--------------------------------------------------------------------------------------------------
+        public List<Currency> ReadCurrenciesByCountryId(int countryId)
         {
             SqlConnection con;
             SqlCommand cmd;
-            Dictionary<string, Currency> currencies = new Dictionary<string, Currency>();
+            List<Currency> currencies = new List<Currency>();
 
             try
             {
@@ -270,14 +270,10 @@ namespace CountriesProject_MeravTomer.DAL
                 while (dataReader.Read())
                 {
                     string code = dataReader["CurrencyCode"].ToString();
+                    string name = dataReader["CurrencyName"].ToString();
+                    string symbol = dataReader["CurrencySymbol"].ToString();
 
-                    Currency currency = new Currency();
-                    currency.Name = dataReader["CurrencyName"].ToString();
-                    currency.Symbol = dataReader["CurrencySymbol"] == DBNull.Value
-                        ? null
-                        : dataReader["CurrencySymbol"].ToString();
-
-                    currencies[code] = currency;
+                    currencies.Add(new Currency(code, name, symbol));
                 }
 
                 return currencies;
@@ -296,53 +292,7 @@ namespace CountriesProject_MeravTomer.DAL
         }
 
 
-        public List<string> ReadBordersByCountryId(int countryId)
-        {
-            SqlConnection con;
-            SqlCommand cmd;
-            List<string> borders = new List<string>();
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@CountryId", countryId);
-
-            cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryBorders_GetByCountryId", con, paramDic);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-                    borders.Add(dataReader["BorderCca3"].ToString());
-                }
-
-                return borders;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
-        }
-
-
-
-
+      
 
         //--------------------------------------------------------------------------------------------------
         // This method Reads all games containing a specific name from the GamesTable 
@@ -413,7 +363,7 @@ namespace CountriesProject_MeravTomer.DAL
         
 
         //--------------------------------------------------------------------------------------------------
-        // This method reading a specific country by its CCA3 from the dataBase
+        // This method reading a specific country by its name from the dataBase
         //--------------------------------------------------------------------------------------------------
         public Country ReadCountryByName(string countryName)
 
@@ -449,15 +399,11 @@ namespace CountriesProject_MeravTomer.DAL
                     c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.OfficialName = dataReader["OfficialName"].ToString();
-                    c.Capital = dataReader["Capital"].ToString()
-                                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                    .ToList();
+                    c.Capital = dataReader["Capital"].ToString();
                     c.Region = dataReader["Region"].ToString();
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
-                    c.Latitude = Convert.ToDouble(dataReader["Latitude"]);
-                    c.Longitude = Convert.ToDouble(dataReader["Longitude"]);
                     c.FlagUrl = dataReader["FlagUrl"].ToString();
 
 
@@ -544,68 +490,6 @@ namespace CountriesProject_MeravTomer.DAL
         }
 
 
-
-        //RETURNS A LIST<Country> of a specific User's (his game Collection)
-        public List<Country> GetUserCountries(int userId)
-        {
-            SqlConnection con;
-            SqlCommand cmd;
-            List<Country> countries = new List<Country>();
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@UserId", userId);
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spGetUserCountries_MD_TB2", con, paramDic);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-                    Country c = new Country();
-
-                    c.Id = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.Cca3 = dataReader["CCA3"].ToString();
-                    c.Name = dataReader["Name"].ToString();
-                    c.OfficialName = dataReader["OfficialName"].ToString();
-                    c.Capital = dataReader["Capital"].ToString()
-                                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                    .ToList();
-                    c.Region = dataReader["Region"].ToString();
-                    c.SubRegion = dataReader["SubRegion"].ToString();
-                    c.Population = Convert.ToInt64(dataReader["Population"]);
-                    c.Area = Convert.ToDouble(dataReader["Area"]);
-                    c.Latitude = Convert.ToDouble(dataReader["Latitude"]);
-                    c.Longitude = Convert.ToDouble(dataReader["Longitude"]);
-                    c.FlagUrl = dataReader["FlagUrl"].ToString();
-
-                    countries.Add(c);
-                }
-
-                return countries;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
-        }
 
         ////Returns recommended games for a specific user according to his games tags
         //public List<Game> GetRecommendedGames(int userId)
@@ -700,9 +584,10 @@ namespace CountriesProject_MeravTomer.DAL
             paramDic.Add("@SubRegion", country.SubRegion);
             paramDic.Add("@Population", country.Population);
             paramDic.Add("@Area", country.Area);
-            paramDic.Add("@Latitude", country.Latitude);
-            paramDic.Add("@Longitude", country.Longitude);
+            //paramDic.Add("@Latitude", country.Latitude);
+            //paramDic.Add("@Longitude", country.Longitude);
             paramDic.Add("@FlagUrl", country.FlagUrl);
+            paramDic.Add("@Borders", string.Join(",", country.Borders));
 
             cmd = CreateCommandWithStoredProcedureGeneral("spInsertCountry_MD_TB2", con, paramDic);
 
@@ -767,7 +652,7 @@ namespace CountriesProject_MeravTomer.DAL
         //}
 
         ////--------------------------------------------------------------------------------------------------
-        //// Updates a game in the gameTable (updating tags will do seperately)
+        //// Updates a country in the countryTable (updating len curr and  will do seperately)
         ////--------------------------------------------------------------------------------------------------
         public int UpdateCountry(int countryId, Country country)
         {
@@ -794,9 +679,12 @@ namespace CountriesProject_MeravTomer.DAL
             paramDic.Add("SubRegion", country.SubRegion);
             paramDic.Add("@Population", country.Population);
             paramDic.Add("@Area", country.Area);
-            paramDic.Add("Latitude", country.Latitude);
-            paramDic.Add("@Longitude", country.Longitude);
+            //paramDic.Add("Latitude", country.Latitude);
+            //paramDic.Add("@Longitude", country.Longitude);
             paramDic.Add("@FlagUrl", country.FlagUrl);
+            paramDic.Add("@Borders",string.Join(",", country.Borders));
+
+         
 
             cmd = CreateCommandWithStoredProcedureGeneral("spUpdateCountry_MD_TB2", con, paramDic);
 
@@ -822,6 +710,7 @@ namespace CountriesProject_MeravTomer.DAL
                     con.Close();
                 }
             }
+          
         }
 
         //--------------------------------------------------------------------------------------------------
@@ -847,27 +736,27 @@ namespace CountriesProject_MeravTomer.DAL
 
             cmd = CreateCommandWithStoredProcedureGeneral("spDeleteCountry_MD_TB2", con, paramDic);
 
-            //try
-            //{
-            //    DeleteTagsByGameId(gameId);
-            //    int numEffected = cmd.ExecuteNonQuery();
-            //    return numEffected;
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw ex;
-            //}
-            //finally
-            //{
-            //    if (con != null)
-            //    {
-            //        con.Close();
-            //    }
-            //}
+        //    try
+        //    {
+        //        DeleteTagsByGameId(gameId);
+        //        int numEffected = cmd.ExecuteNonQuery();
+        //        return numEffected;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //    finally
+        //    {
+        //        if (con != null)
+        //        {
+        //            con.Close();
+        //        }
+        //    }
         }
 
 
-        public void InsertCountryLanguages(int countryId, Dictionary<string, string> languages)
+        public void InsertCountryLanguages(int countryId, List<Language> languages)
         {
             if (languages == null || languages.Count == 0)
             {
@@ -887,12 +776,12 @@ namespace CountriesProject_MeravTomer.DAL
 
             try
             {
-                foreach (KeyValuePair<string, string> language in languages)
+                foreach (Language language in languages)
                 {
                     Dictionary<string, object> paramDic = new Dictionary<string, object>();
                     paramDic.Add("@CountryId", countryId);
-                    paramDic.Add("@LanguageCode", language.Key);
-                    paramDic.Add("@LanguageName", language.Value);
+                    paramDic.Add("@LanguageCode", language.Code);
+                    paramDic.Add("@LanguageName", language.Name);
 
                     SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryLanguages_Insert", con, paramDic);
                     cmd.ExecuteNonQuery();
@@ -912,7 +801,7 @@ namespace CountriesProject_MeravTomer.DAL
         }
 
 
-        public void InsertCountryCurrencies(int countryId, Dictionary<string, Currency> currencies)
+        public void InsertCountryCurrencies(int countryId, List<Currency> currencies)
         {
             if (currencies == null || currencies.Count == 0)
             {
@@ -932,13 +821,13 @@ namespace CountriesProject_MeravTomer.DAL
 
             try
             {
-                foreach (KeyValuePair<string, Currency> currency in currencies)
+                foreach (Currency currency in currencies)
                 {
                     Dictionary<string, object> paramDic = new Dictionary<string, object>();
                     paramDic.Add("@CountryId", countryId);
-                    paramDic.Add("@CurrencyCode", currency.Key);
-                    paramDic.Add("@CurrencyName", currency.Value.Name);
-                    paramDic.Add("@CurrencySymbol", (object)currency.Value.Symbol ?? DBNull.Value);
+                    paramDic.Add("@CurrencyCode", currency.Code);
+                    paramDic.Add("@CurrencyName", currency.Name);
+                    paramDic.Add("@CurrencySymbol", currency.Symbol);
 
                     SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryCurrencies_Insert", con, paramDic);
                     cmd.ExecuteNonQuery();
@@ -958,48 +847,6 @@ namespace CountriesProject_MeravTomer.DAL
         }
 
 
-        public void InsertCountryBorders(int countryId, List<string> borders)
-        {
-            if (borders == null || borders.Count == 0)
-            {
-                return;
-            }
-
-            SqlConnection con;
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            try
-            {
-                foreach (string border in borders)
-                {
-                    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                    paramDic.Add("@CountryId", countryId);
-                    paramDic.Add("@Border", border);
-
-                    SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryBorders_Insert", con, paramDic);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
-        }
 
         ////--------------------------------------------------------------------------------------------------
         //// This method Reads all Tags of Games

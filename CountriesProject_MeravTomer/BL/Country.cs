@@ -13,11 +13,9 @@ namespace CountriesProject_MeravTomer.BL
         private string subRegion;
         private int population;
         private double area;
-        private double latitude;
-        private double longitude;
         private string flagUrl;
-        private Dictionary<String, String> languages;
-        private Dictionary<String, Currency> currencies;
+        private List<Language> languages;
+        private List<Currency> currencies;
         private List<string> borders;
 
 
@@ -25,16 +23,14 @@ namespace CountriesProject_MeravTomer.BL
         public string Cca3 { get; set; }
         public string Name { get; set; }
         public string OfficialName { get; set; }
-        public List<string> Capital { get; set; }
+        public string Capital { get; set; }
         public string Region { get; set; }
         public string SubRegion { get; set; }
         public long Population { get; set; }
         public double Area { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
         public string FlagUrl { get; set; }
-        public Dictionary<string, string> Languages { get; set; }
-        public Dictionary<string, Currency> Currencies { get; set; }
+        public List<Language> Languages { get; set; }
+        public List<Currency> Currencies { get; set; }
         public List<string> Borders { get; set; }
 
 
@@ -43,23 +39,21 @@ namespace CountriesProject_MeravTomer.BL
 
         }
 
-        public Country(int id, string cca3, string name, string officialName, string capital, string region, string subregion, int population, double area,
-                      double latitude, double longitude, string flagUrl, Dictionary<String, String> languages, Dictionary<String, Currency> currencies, List<string> borders)
+        public Country(int id, string cca3, string name, string officialName, string capital, string region, string subregion, long population, double area,
+                       string flagUrl, List<Language> languages, List<Currency> currencies, List<string> borders)
         {
             Id = id;
             Cca3 = cca3;
             Name = name;
             OfficialName = officialName;
-            Capital = new List<string> { capital };
+            Capital = capital ;
             Region = region;
             SubRegion = subregion;
             Population = population;
             Area = area;
-            Latitude = latitude;
-            Longitude = longitude;
             FlagUrl = flagUrl;
-            Languages = new Dictionary<string, string>();
-            Currencies = new Dictionary<string, Currency>();
+            Languages = new List<Language>();
+            Currencies = new List<Currency>();
             Borders = new List<string>() ;
         }
 
@@ -157,27 +151,41 @@ namespace CountriesProject_MeravTomer.BL
 
 
     }
-    
-    
-    
-    
-    
-    
+
+
+
+
+    public class Language
+    {
+        private string code;
+        private string name;
+        public string Code { get; set; }
+        public string Name { get; set; }
+
+        public Language(string code, string name)
+        {
+            Code = code;
+            Name = name;
+        }
+
+        public Language() { }
+    }
+
+   
     public class Currency
     {
-       
+        private string code;
         private string name;
         private string symbol;
 
-
-        
+        public string Code { get; set; }
         public string Name { get; set; }
         public string Symbol { get; set; }  // לפעמים אין symbol
 
 
         public Currency(string code, string name, string symbol)
         {
-           
+            Code = code;
             Name = name;
             Symbol = symbol;
         }

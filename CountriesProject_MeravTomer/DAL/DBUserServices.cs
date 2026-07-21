@@ -1,7 +1,10 @@
-﻿using CountriesProject_MeravTomer.BL;
+﻿using System;
+using ServerSideCountriesProject_MeravTomer.DAL;
 using System.Data;
+using System.Data.SqlClient;
+using CountriesProject_MeravTomer.BL;
 
-namespace ServerSideCountriesProject_MeravTomer.DAL
+namespace  CountriesProject_MeravTomer.BL
 {
     public class DBUserServices
     {
@@ -9,269 +12,269 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
     }
 
     //--------------------------------------------------------------------------------------------------
-    // This method creates a connection to the database according to the connectionString name in the web.config 
+    // This method creates a connection to the database according to the connectionString name in the web.config
     //--------------------------------------------------------------------------------------------------
-    //public SqlConnection connect(String conString)
-    //{
+    public SqlConnection connect(String conString)
+    {
 
-    //    // read the connection string from the configuration file
-    //    IConfigurationRoot configuration = new ConfigurationBuilder()
-    //    .AddJsonFile("appsettings.json").Build();
-    //    string cStr = configuration.GetConnectionString(conString);
-    //    SqlConnection connectionToDb = new SqlConnection(cStr);
-    //    connectionToDb.Open();
-    //    return connectionToDb;
-    //}
+        // read the connection string from the configuration file
+        IConfigurationRoot configuration = new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json").Build();
+        string cStr = configuration.GetConnectionString(conString);
+        SqlConnection connectionToDb = new SqlConnection(cStr);
+        connectionToDb.Open();
+        return connectionToDb;
+    }
 
-    ////---------------------------------------------------------------------------------
-    //// Create the SqlCommand
-    ////---------------------------------------------------------------------------------
-    //private SqlCommand CreateCommandWithStoredProcedureGeneral(String spName, SqlConnection con, Dictionary<string, object> paramDic)
-    //{
+    //---------------------------------------------------------------------------------
+    // Create the SqlCommand
+    //---------------------------------------------------------------------------------
+    private SqlCommand CreateCommandWithStoredProcedureGeneral(String spName, SqlConnection con, Dictionary<string, object> paramDic)
+    {
 
-    //    SqlCommand cmd = new SqlCommand(); // create the command object
+        SqlCommand cmd = new SqlCommand(); // create the command object
 
-    //    cmd.Connection = con;              // assign the connection to the command object
+        cmd.Connection = con;              // assign the connection to the command object
 
-    //    cmd.CommandText = spName;      // can be Select, Insert, Update, Delete 
+        cmd.CommandText = spName;      // can be Select, Insert, Update, Delete 
 
-    //    cmd.CommandTimeout = 10;           // Time to wait for the execution' The default is 30 seconds
+        cmd.CommandTimeout = 10;           // Time to wait for the execution' The default is 30 seconds
 
-    //    cmd.CommandType = System.Data.CommandType.StoredProcedure; // the type of the command, can also be text
+        cmd.CommandType = System.Data.CommandType.StoredProcedure; // the type of the command, can also be text
 
-    //    if (paramDic != null)
-    //        foreach (KeyValuePair<string, object> param in paramDic)
-    //        {
-    //            cmd.Parameters.AddWithValue(param.Key, param.Value);
+        if (paramDic != null)
+            foreach (KeyValuePair<string, object> param in paramDic)
+            {
+                cmd.Parameters.AddWithValue(param.Key, param.Value);
 
-    //        }
+            }
 
 
-    //    return cmd;
-    //}
+        return cmd;
+    }
 
-    ////Insert User into the db
-    //public int InsertUser(User user)
-    //{
-    //    SqlConnection con;
-    //    SqlCommand cmd;
+    //Insert User into the db
+    public int InsertUser(User user)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
 
-    //    try
-    //    {
-    //        con = connect("myProjDB");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
 
-    //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-    //    paramDic.Add("@Name", user.Name);
-    //    paramDic.Add("@Email", user.Email);
-    //    paramDic.Add("@Password", user.Password);
-    //    paramDic.Add("@Active", user.Active);
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@Name", user.Name);
+        paramDic.Add("@Email", user.Email);
+        paramDic.Add("@Password", user.Password);
+        paramDic.Add("@Active", user.Active);
 
-    //    cmd = CreateCommandWithStoredProcedureGeneral("spInsertUser_MD_TB2", con, paramDic);
+        cmd = CreateCommandWithStoredProcedureGeneral("spInsertUser_MD_TB2", con, paramDic);
 
-    //    try
-    //    {
-    //        int numEffected = cmd.ExecuteNonQuery();
-    //        return numEffected;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
-    //    finally
-    //    {
-    //        if (con != null)
-    //        {
-    //            con.Close();
-    //        }
-    //    }
-    //}
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+            {
+                con.Close();
+            }
+        }
+    }
 
-    ////Reads ALL Users in the db
-    //public List<User> ReadAllUsers()
-    //{
-    //    SqlConnection con;
-    //    SqlCommand cmd;
-    //    List<User> users = new List<User>();
+    //Reads ALL Users in the db
+    public List<User> ReadAllUsers()
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        List<User> users = new List<User>();
 
-    //    try
-    //    {
-    //        con = connect("myProjDB");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
 
-    //    cmd = CreateCommandWithStoredProcedureGeneral("spReadAllUsers_MD_TB2", con, null);
+        cmd = CreateCommandWithStoredProcedureGeneral("spReadAllUsers_MD_TB2", con, null);
 
-    //    try
-    //    {
-    //        SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+        try
+        {
+            SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 
-    //        while (dataReader.Read())
-    //        {
-    //            User u = new User();
+            while (dataReader.Read())
+            {
+                User u = new User();
 
-    //            u.Id = Convert.ToInt32(dataReader["dbUserId"]);
-    //            u.Name = dataReader["Name"].ToString();
-    //            u.Email = dataReader["Email"].ToString();
-    //            u.Password = dataReader["Password"].ToString();
-    //            u.Active = Convert.ToBoolean(dataReader["Active"]);
+                u.Id = Convert.ToInt32(dataReader["dbUserId"]);
+                u.Name = dataReader["Name"].ToString();
+                u.Email = dataReader["Email"].ToString();
+                u.Password = dataReader["Password"].ToString();
+                u.Active = Convert.ToBoolean(dataReader["Active"]);
 
-    //            users.Add(u);
-    //        }
+                users.Add(u);
+            }
 
-    //        return users;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
-    //    finally
-    //    {
-    //        if (con != null)
-    //        {
-    //            con.Close();
-    //        }
-    //    }
-    //}
+            return users;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+            {
+                con.Close();
+            }
+        }
+    }
 
-    ////Reads A User in the db that has the specific email
-    //public User ReadUserByEmail(string email)
-    //{
-    //    SqlConnection con;
-    //    SqlCommand cmd;
+    //Reads A User in the db that has the specific email
+    public User ReadUserByEmail(string email)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
 
-    //    try
-    //    {
-    //        con = connect("myProjDB");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
 
-    //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-    //    paramDic.Add("@Email", email);
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@Email", email);
 
-    //    cmd = CreateCommandWithStoredProcedureGeneral("spReadUserByEmail_MD_TB2", con, paramDic);
+        cmd = CreateCommandWithStoredProcedureGeneral("spReadUserByEmail_MD_TB2", con, paramDic);
 
-    //    try
-    //    {
-    //        SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+        try
+        {
+            SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 
-    //        if (dataReader.Read())
-    //        {
-    //            User u = new User();
+            if (dataReader.Read())
+            {
+                User u = new User();
 
-    //            u.Id = Convert.ToInt32(dataReader["dbUserId"]);
-    //            u.Name = dataReader["Name"].ToString();
-    //            u.Email = dataReader["Email"].ToString();
-    //            u.Password = dataReader["Password"].ToString();
-    //            u.Active = Convert.ToBoolean(dataReader["Active"]);
+                u.Id = Convert.ToInt32(dataReader["dbUserId"]);
+                u.Name = dataReader["Name"].ToString();
+                u.Email = dataReader["Email"].ToString();
+                u.Password = dataReader["Password"].ToString();
+                u.Active = Convert.ToBoolean(dataReader["Active"]);
 
-    //            return u;
-    //        }
+                return u;
+            }
 
-    //        return null;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
-    //    finally
-    //    {
-    //        if (con != null)
-    //        {
-    //            con.Close();
-    //        }
-    //    }
-    //}
+            return null;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+            {
+                con.Close();
+            }
+        }
+    }
 
-    ////DELETES A User in the db by it userId
-    //public int DeleteUser(int userId)
-    //{
-    //    SqlConnection con;
-    //    SqlCommand cmd;
+    //DELETES A User in the db by it userId
+    public int DeleteUser(int userId)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
 
-    //    try
-    //    {
-    //        con = connect("myProjDB");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
 
-    //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-    //    paramDic.Add("@Id", userId);
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@Id", userId);
 
-    //    cmd = CreateCommandWithStoredProcedureGeneral("spDeleteUser_MD_TB2", con, paramDic);
+        cmd = CreateCommandWithStoredProcedureGeneral("spDeleteUser_MD_TB2", con, paramDic);
 
-    //    try
-    //    {
-    //        int numEffected = cmd.ExecuteNonQuery();
-    //        return numEffected;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
-    //    finally
-    //    {
-    //        if (con != null)
-    //        {
-    //            con.Close();
-    //        }
-    //    }
-    //}
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+            {
+                con.Close();
+            }
+        }
+    }
 
-    ////UPDATES A User in the db by its userId
-    //public int UpdateUser(int userToUpdateId, User user)
-    //{
-    //    SqlConnection con;
-    //    SqlCommand cmd;
+    //UPDATES A User in the db by its userId
+    public int UpdateUser(int userToUpdateId, User user)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
 
-    //    try
-    //    {
-    //        con = connect("myProjDB");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
 
-    //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-    //    paramDic.Add("@Id", userToUpdateId);
-    //    paramDic.Add("@Name", user.Name);
-    //    paramDic.Add("@Email", user.Email);
-    //    paramDic.Add("@Password", user.Password);
-    //    paramDic.Add("@Active", user.Active);
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@Id", userToUpdateId);
+        paramDic.Add("@Name", user.Name);
+        paramDic.Add("@Email", user.Email);
+        paramDic.Add("@Password", user.Password);
+        paramDic.Add("@Active", user.Active);
 
-    //    cmd = CreateCommandWithStoredProcedureGeneral("spUpdateUser_MD_TB2", con, paramDic);
+        cmd = CreateCommandWithStoredProcedureGeneral("spUpdateUser_MD_TB2", con, paramDic);
 
-    //    try
-    //    {
-    //        int numEffected = cmd.ExecuteNonQuery();
-    //        return numEffected;
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        throw ex;
-    //    }
-    //    finally
-    //    {
-    //        if (con != null)
-    //        {
-    //            con.Close();
-    //        }
-    //    }
-    //}
+        try
+        {
+            int numEffected = cmd.ExecuteNonQuery();
+            return numEffected;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+            {
+                con.Close();
+            }
+        }
+    }
 
     ////ADDS A Game to a specific User's Collection
     ////-- Tags are inserted when the game is inserted into GamesTable.
@@ -354,5 +357,64 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
     //    }
     //}
 
+
+
+    //RETURNS A LIST<Country> of a specific User's (his game Collection)
+    public List<Country> GetUserCountries(int userId)
+    {
+        SqlConnection con;
+        SqlCommand cmd;
+        List<Country> countries = new List<Country>();
+
+        try
+        {
+            con = connect("myProjDB");
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        paramDic.Add("@UserId", userId);
+
+        cmd = CreateCommandWithStoredProcedureGeneral("spGetUserCountries_MD_TB2", con, paramDic);
+
+        try
+        {
+            SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+            while (dataReader.Read())
+            {
+                Country c = new Country();
+
+                c.Id = Convert.ToInt32(dataReader["dbCountryId"]);
+                c.Cca3 = dataReader["CCA3"].ToString();
+                c.Name = dataReader["Name"].ToString();
+                c.OfficialName = dataReader["OfficialName"].ToString();
+                c.Capital = dataReader["Capital"].ToString();
+                c.Region = dataReader["Region"].ToString();
+                c.SubRegion = dataReader["SubRegion"].ToString();
+                c.Population = Convert.ToInt64(dataReader["Population"]);
+                c.Area = Convert.ToDouble(dataReader["Area"]);
+                c.FlagUrl = dataReader["FlagUrl"].ToString();
+
+                countries.Add(c);
+            }
+
+            return countries;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            if (con != null)
+            {
+                con.Close();
+            }
+        }
+    }
 
 }

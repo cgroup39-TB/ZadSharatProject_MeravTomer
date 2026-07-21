@@ -11,8 +11,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpClient<CountriesAPIService>(client =>
 {
-    client.BaseAddress = new Uri("https://api.restcountries.com/countries/v5/");
-    client.DefaultRequestHeaders.Add("Authorization", "Bearer YOUR_API_KEY");
+    var apiSettings = builder.Configuration.GetSection("CountriesAPI");
+    client.BaseAddress = new Uri((apiSettings["BaseUrl"]);
+   
 });
 
 var app = builder.Build();
