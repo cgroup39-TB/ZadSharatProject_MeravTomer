@@ -137,7 +137,7 @@ namespace CountriesProject_MeravTomer.BL
         {
 
             DBCountryServices dbs = new DBCountryServices();
-            return dbs.UpdateGame(countryId, updatedCountry);
+            return dbs.UpdateCountry(countryId, updatedCountry);
         }
 
         public int Delete(int countryId) //Beni said if i change database so better to create new object and use the class method else i can use static methods

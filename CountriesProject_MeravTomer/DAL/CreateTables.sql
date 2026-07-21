@@ -2,15 +2,13 @@
     dbCountryId INT IDENTITY(1,1) PRIMARY KEY,
     CCA3 NVARCHAR(4) NOT NULL UNIQUE,
     [Name] NVARCHAR(50) NOT NULL,
-    OfficialName NVARCHAR(500),
-   -- Capital NVARCHAR(500),--איך שומרים רשימה??
+    Capital NVARCHAR(50),
     Region NVARCHAR(50),
-    SubRegion NVARCHAR(20),
+    SubRegion NVARCHAR(50),
     [Population] BIGINT,
     Area FLOAT,
-    Latitude FLOAT,
-    Longitude FLOAT,
-    FlagUrl NVARCHAR(500)
+    FlagUrl NVARCHAR(500), 
+    Borders NVARCHAR(500)
 );
 
 CREATE TABLE LanguagesTable_MD_TB2 (
@@ -93,7 +91,7 @@ CREATE TABLE VisitsTable_MD_TB2 (
 );
 
 CREATE TABLE TagGameTable_MD_TB2 (
-    GameId INT NOT NULL,
+    CountryId INT NOT NULL,
     TagName VARCHAR(100) NOT NULL,
     PRIMARY KEY (GameId, TagName),
     FOREIGN KEY (GameId) REFERENCES GamesTable_MD_TB2(dbGameId) ON DELETE CASCADE

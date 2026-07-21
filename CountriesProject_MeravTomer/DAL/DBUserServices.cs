@@ -1,10 +1,9 @@
 ﻿using System;
-using ServerSideCountriesProject_MeravTomer.DAL;
+using CountriesProject_MeravTomer.BL;
 using System.Data;
 using System.Data.SqlClient;
-using CountriesProject_MeravTomer.BL;
 
-namespace  CountriesProject_MeravTomer.BL
+namespace ServerSideCountriesProject_MeravTomer.DAL
 {
     public class DBUserServices
     {
@@ -416,5 +415,80 @@ namespace  CountriesProject_MeravTomer.BL
             }
         }
     }
+
+
+
+
+
+
+    ////Returns recommended games for a specific user according to his games tags
+    //public List<Game> GetRecommendedCountries(int userId)
+    //{
+    //    SqlConnection con;
+    //    SqlCommand cmd;
+    //    List<Game> games = new List<Game>();
+
+    //    try
+    //    {
+    //        con = connect("myProjDB");
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw ex;
+    //    }
+
+    //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
+    //    paramDic.Add("@UserId", userId);
+
+    //    cmd = CreateCommandWithStoredProcedureGeneral("spGetRecommendedGames_MD_TB2", con, paramDic);
+
+    //    try
+    //    {
+    //        SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+    //        while (dataReader.Read())
+    //        {
+    //            Game g = new Game();
+
+    //            g.Id = Convert.ToInt32(dataReader["dbGameId"]);
+    //            g.SteamAppId = Convert.ToInt32(dataReader["SteamAppId"]);
+    //            g.Name = dataReader["Name"].ToString();
+    //            g.SteamUrl = dataReader["SteamUrl"].ToString();
+    //            g.CapsuleImage = dataReader["CapsuleImage"].ToString();
+    //            g.ReleaseDate = dataReader["ReleaseDate"].ToString();
+    //            g.ReviewSummary = dataReader["ReviewSummary"].ToString();
+    //            g.Price = Convert.ToInt32(dataReader["Price"]);
+    //            g.Windows = Convert.ToBoolean(dataReader["Windows"]);
+    //            g.Mac = Convert.ToBoolean(dataReader["Mac"]);
+    //            g.Linux = Convert.ToBoolean(dataReader["Linux"]);
+
+    //            games.Add(g);
+    //        }
+
+    //        dataReader.Close();
+
+    //        // אחרי שסיימנו לקרוא וסגרנו reader ראשי - מביאים Tags
+    //        for (int i = 0; i < games.Count; i++)
+    //        {
+    //            games[i].Tags = GetTagsByGameId(games[i].Id);
+    //        }
+
+    //        return games;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw ex;
+    //    }
+    //    finally
+    //    {
+    //        if (con != null)
+    //        {
+    //            con.Close();
+    //        }
+    //    }
+    //}
+
+
+
 
 }
