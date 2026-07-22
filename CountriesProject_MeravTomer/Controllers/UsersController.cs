@@ -66,8 +66,19 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
 
         // POST api/<UsersController>
         [HttpPost]
-        public void Post([FromBody] string value)
+
+     //   public void Post([FromBody] User updateUser)
+        public IActionResult UpdateUser([FromBody] User updateUser)
         {
+            User user = new User();
+            int result=user.UpdateProfile(updateUser);
+            if (result == 0) {
+
+                NotFound("User not found");
+            }
+
+            return Ok(new { message = "User updated successfully" });
+
         }
 
         // PUT api/<UsersController>/5

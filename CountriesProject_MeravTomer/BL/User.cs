@@ -81,10 +81,17 @@
         //public void SetPassword(int userId, string currentPassword, string newPassword)
         //{ }
 
+<<<<<<< Updated upstream
         //// User Profile
         //public User ReadById(int userId) { }
         //public User ReadByName(string name) { }
         //public void UpdateProfile(User user) { }
+=======
+        // User Profile
+        public User (int userId) { }
+        public User ReadByName(string name) { }
+        public int UpdateProfile(User user) { }
+>>>>>>> Stashed changes
 
         //// User Preferences
         //public List<Language> ReadUserLanguages(int userId) { }
