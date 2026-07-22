@@ -1,4 +1,6 @@
 ﻿using ServerSideCountriesProject_MeravTomer.BL;
+using System.ComponentModel;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace ServerSideCountriesProject_MeravTomer.DAL
@@ -51,9 +53,47 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
-        public List<UserVisitedCountry> ReadVisitsByUser(int userId)
+        public List<UserVisitedCountry> ReadAllVisits()
         {
             List<BL.UserVisitedCountry> visits = new List<BL.UserVisitedCountry>();
+            SqlConnection con;
+            SqlCommand cmd;
+          
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllVisits", con, null);
+
+            try
+            {
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (dataReader.Read())
+                {
+                    int userId =dataReader["UserId"].conv
+                    int countryId = reader.GetInt32(reader.GetOrdinal("CountryId"));
+                    int rating = reader.GetInt32(reader.GetOrdinal("Rating"));
+                    string reviewText = reader.GetString(reader.GetOrdinal("ReviewText"));
+                    bool isShared = reader.GetBoolean(reader.GetOrdinal("IsShared"));
+
+                    UserVisitedCountry visit = new UserVisitedCountry(userId, countryId, rating, reviewText, isShared);
+                    visits.Add(visit);
+                }
+            }
+            }
+
+            return visits;
+        }
+
+        public List<UserVisitedCountry> ReadVisitsByUser(int userId)
+        {
+            List<UserVisitedCountry> visits = new List<UserVisitedCountry>();
 
             using (SqlConnection con = connect("CountriesDB"))
             {
@@ -71,7 +111,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                         string reviewText = reader.GetString(reader.GetOrdinal("ReviewText"));
                         bool isShared = reader.GetBoolean(reader.GetOrdinal("IsShared"));
 
-                        BL.UserVisitedCountry visit = new BL.UserVisitedCountry(userId, countryId, rating, reviewText, isShared);
+                        UserVisitedCountry visit = new UserVisitedCountry(userId, countryId, rating, reviewText, isShared);
                         visits.Add(visit);
                     }
                 }
@@ -80,7 +120,35 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             return visits;
         }
 
+        public List<UserVisitedCountry> ReadVisitsByCountry(int countryId)
+        {
+            List<UserVisitedCountry> visits = new List<UserVisitedCountry>();
+            using (SqlConnection con = connect("CountriesDB"))
+            {
+                Dictionary<string, object> paramDic = new Dictionary<string, object>();
+                paramDic.Add("@UserId", userId);
 
+                SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("spReadVisitsByUser", con, paramDic);
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int userId = reader.GetInt32(reader.GetOrdinal("userId"));
+                        int rating = reader.GetInt32(reader.GetOrdinal("Rating"));
+                        string reviewText = reader.GetString(reader.GetOrdinal("ReviewText"));
+                        bool isShared = reader.GetBoolean(reader.GetOrdinal("IsShared"));
+
+                        UserVisitedCountry visit = new UserVisitedCountry(userId, countryId, rating, reviewText, isShared);
+                        visits.Add(visit);
+                    }
+                }
+            }
+
+            return visits;
+        }
+
+        }
 
         public bool UpdateVisit(UserVisitedCountry visit)
         {
@@ -162,6 +230,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
             return null; // Return null if no visit is found
         }
+
 
        
 

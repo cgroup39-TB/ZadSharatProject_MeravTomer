@@ -53,7 +53,11 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             DBUserVisitCountryServices db = new DBUserVisitCountryServices();
             return db.ReadVisitsByUser(userId);
         }
+<<<<<<< Updated upstream
       
+=======
+       
+>>>>>>> Stashed changes
         public static List<UserVisitedCountry> ReadAll()
         {
             DBUserVisitCountryServices db = new DBUserVisitCountryServices();
