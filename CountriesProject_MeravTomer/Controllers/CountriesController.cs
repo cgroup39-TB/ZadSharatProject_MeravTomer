@@ -112,50 +112,6 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
             return Ok(new { message = "Country was deleted successfully" });
         }
 
-        // GET: api/<CountriesController> -gets all the tags that are existing 
-        [HttpGet("getAllTags")]
-        public IActionResult GetAllTags()
-        {
-            try
-            {
-                Country game = new Country();
-                return Ok(game.GetAllExistingTags());
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        // GET: api/<GamesController> -gets all the games that are having one of the tags in the string
-        [HttpGet("getByTags")]
-        public IActionResult GetByTags(string tags)
-        {
-            try
-            {
-                Country game = new Country();
-                return Ok(game.GetGamesByTags(tags));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-
-
-
-        ////POST api/<GamesController>/
-        //[HttpPost("oneTimeLoadData")]
-        //public IActionResult OneTimeLoadData([FromBody] List<Game> games)
-        //{
-        //    try
-        //    {
-        //        return Ok(Country.OneTimeLoadData(games));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
+        
     }
 }

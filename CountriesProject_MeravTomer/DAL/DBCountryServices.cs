@@ -96,7 +96,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.CCA3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
+                 //   c.Region = dataReader["Region"].ToString();
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
@@ -334,9 +334,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             Dictionary<string, object> paramDic = new Dictionary<string, object>();
             paramDic.Add("@CCA3", country.CCA3);
             paramDic.Add("@Name", country.Name);
-            paramDic.Add("@OfficialName", country.OfficialName);
             paramDic.Add("@Capital", country.Capital);
-            paramDic.Add("@Region", country.Region);
+         //   paramDic.Add("@Region", country.RegionId); //HOW IT INSERTS ID 
             paramDic.Add("@SubRegion", country.SubRegion);
             paramDic.Add("@Population", country.Population);
             paramDic.Add("@Area", country.Area);
@@ -389,9 +388,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@Id", countryId);
             paramDic.Add("@CCA3", country.CCA3);
             paramDic.Add("@Name", country.Name);
-            paramDic.Add("@OfficialName", country.OfficialName);
             paramDic.Add("@Capital", country.Capital);
-            paramDic.Add("@Region", country.Region);
+            //paramDic.Add("@Region", country.Region);
             paramDic.Add("SubRegion", country.SubRegion);
             paramDic.Add("@Population", country.Population);
             paramDic.Add("@Area", country.Area);
@@ -938,7 +936,6 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
                     c.CCA3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
-                    c.OfficialName = dataReader["OfficialName"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
                     c.Region = dataReader["Region"].ToString();
                     c.SubRegion = dataReader["SubRegion"].ToString();

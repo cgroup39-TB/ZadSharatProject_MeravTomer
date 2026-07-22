@@ -8,7 +8,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         private string cca3; //COUNTRY CODE ISO 3166-1 ALPHA-3
         private string name;
         private string capital;
-        private int region;
+        private string region;
         private string subRegion;
         private int population;
         private double area;

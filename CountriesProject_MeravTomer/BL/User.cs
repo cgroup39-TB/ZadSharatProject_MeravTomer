@@ -34,9 +34,9 @@
         public string Name { get => name; set => name = value; }
         public string Email { get => email; set => email = value; }
         public string Password { get => password; set => password = value; }
-        public bool IsActive { get => isActive; set => isActive = value; }
-        public bool IsAdmin { get => isAdmin; set => isAdmin = value; }
-        public bool CanShare { get => canShare; set => canShare = value; }
+        public bool IsActive { get => isActive; private set => isActive = value; }
+        public bool IsAdmin { get => isAdmin; private set => isAdmin = value; }
+        public bool CanShare { get => canShare; private set => canShare = value; }
 
 
 
@@ -50,16 +50,26 @@
 
             user.CanShare = valueShare;
         }
-        public void SetIsActive(User user)
+        public void SetIsActive(User user, bool valueActive)
         {
-            if (this.IsAdmin)
+            if (!this.IsAdmin)
             {
-                IsActive = user.IsActive;
+                throw new UnauthorizedAccessException(
+                    "Only admin users can change the IsActive property.");
             }
-            else
+
+            user.IsActive = valueActive; //Use of the private property set (outside we can only use the user method SetIsActive)
+        }
+
+        public void MakeAdmin(User user, bool valueAdmin)
+        {
+            if (!this.IsAdmin)
             {
-                throw new UnauthorizedAccessException("Only admin users can change the IsActive property.");
+                throw new UnauthorizedAccessException(
+                    "Only admin users can make other users Admins.");
             }
+
+            user.IsAdmin = valueAdmin; //Use of the private property set (outside we can only use the user method SetIsActive)
         }
 
     }
