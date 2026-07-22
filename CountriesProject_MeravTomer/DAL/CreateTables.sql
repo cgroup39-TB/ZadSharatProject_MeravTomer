@@ -1,5 +1,5 @@
 ﻿CREATE TABLE CountriesTable_MD_TB2 (
-    dbCountryId INT IDENTITY(1,1) PRIMARY KEY,
+    CountryId INT IDENTITY(1,1) PRIMARY KEY,
     CCA3 NVARCHAR(4) NOT NULL UNIQUE,
     [Name] NVARCHAR(50) NOT NULL,
     Capital NVARCHAR(50),
@@ -13,9 +13,9 @@
 
 CREATE TABLE LanguagesTable_MD_TB2 (
 
-    dbLanguageId INT IDENTITY(1,1) PRIMARY KEY,
+    LanguageId INT IDENTITY(1,1) PRIMARY KEY,
     [Name] NVARCHAR(20),
-    Code NVARCHAR(50) NOT NULL,
+   
    
 );
 
@@ -90,9 +90,6 @@ CREATE TABLE VisitsTable_MD_TB2 (
     CONSTRAINT FK_Visits_Countries FOREIGN KEY (CountryId) REFERENCES Countries(CountryId)
 );
 
-CREATE TABLE TagGameTable_MD_TB2 (
-    CountryId INT NOT NULL,
-    TagName VARCHAR(100) NOT NULL,
-    PRIMARY KEY (GameId, TagName),
-    FOREIGN KEY (GameId) REFERENCES GamesTable_MD_TB2(dbGameId) ON DELETE CASCADE
-);
+
+
+

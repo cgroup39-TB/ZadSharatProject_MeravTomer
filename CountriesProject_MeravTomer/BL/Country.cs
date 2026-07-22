@@ -1,11 +1,11 @@
-﻿using CountriesProject_MeravTomer.DAL;
+﻿using ServerSideCountriesProject_MeravTomer.DAL;
 
-namespace CountriesProject_MeravTomer.BL
+namespace ServerSideCountriesProject_MeravTomer.BL
 {
     public class Country
     {
         private int id;
-        private string cca3;
+        private string cca3; //COUNTRY CODE ISO 3166-1 ALPHA-3
         private string name;
         private string officialName;
         private string capital;

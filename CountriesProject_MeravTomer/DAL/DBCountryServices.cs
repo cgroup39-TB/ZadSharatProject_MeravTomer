@@ -5,11 +5,11 @@ using System.Web;
 using System.Data.SqlClient;
 using System.Data;
 using System.Text;
-using CountriesProject_MeravTomer.BL;
+using ServerSideCountriesProject_MeravTomer.BL;
 using System.Diagnostics.Metrics;
 
 
-namespace CountriesProject_MeravTomer.DAL// ServerSideCountriesProject_MeravTomer.DAL
+namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject_MeravTomer.DAL
 {
     public class DBCountryServices
     {
