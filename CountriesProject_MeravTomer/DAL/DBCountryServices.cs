@@ -96,7 +96,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
+                    c.Region.RegionId = Convert.ToInt32(dataReader["RegionId"]); //and what about the name?
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
@@ -159,7 +159,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                         c.Cca3 = dataReader["CCA3"].ToString();
                         c.Name = dataReader["Name"].ToString();
                         c.Capital = dataReader["Capital"].ToString();
-                   //     c.Region = dataReader["Region"].ToString();
+                        c.Region.RegionId = Convert.ToInt32(dataReader["RegionId"]); //SAME - name
                         c.SubRegion = dataReader["SubRegion"].ToString();
                         c.Population = Convert.ToInt64(dataReader["Population"]);
                         c.Area = Convert.ToDouble(dataReader["Area"]);
@@ -209,7 +209,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@Name", countryName);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadCountryByName_MD_TB2",
+                "spReadCountryByName",
                 con,
                 paramDic);
 
@@ -224,7 +224,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                 //   c.Region = dataReader["Region"].ToString();
+                    c.Region.RegionId = Convert.ToInt32(dataReader["RegionId"]);
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
@@ -257,7 +257,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // This method Reads all countries of a specific region
         //--------------------------------------------------------------------------------------------------
-        public List<Country> ReadCountriesByRegion(string countryRegion)
+        public List<Country> ReadCountriesByRegion(Region region)
         {
             SqlConnection con;
             SqlCommand cmd;
@@ -273,9 +273,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             }
 
             Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Region", countryRegion);
+            paramDic.Add("@RegionId", region.RegionId); //Id or RegionName?
 
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadCountriesByRegion_MD_TB2", con, paramDic);
+            cmd = CreateCommandWithStoredProcedureGeneral("spReadCountriesByRegion", con, paramDic);
 
             try
             {
@@ -289,7 +289,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                //    c.Region = dataReader["Region"].ToString();
+                    c.Region.RegionId = Convert.ToInt32(dataReader["RegionId"]);
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
@@ -335,12 +335,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@CCA3", country.Cca3);
             paramDic.Add("@Name", country.Name);
             paramDic.Add("@Capital", country.Capital);
-         //   paramDic.Add("@Region", country.RegionId); //HOW IT INSERTS ID 
+            paramDic.Add("@RegionId", country.Region.RegionId); //HOW IT INSERTS ID 
             paramDic.Add("@SubRegion", country.SubRegion);
             paramDic.Add("@Population", country.Population);
             paramDic.Add("@Area", country.Area);
-            //paramDic.Add("@Latitude", country.Latitude);
-            //paramDic.Add("@Longitude", country.Longitude);
             paramDic.Add("@FlagUrl", country.FlagUrl);
             paramDic.Add("@Borders", string.Join(",", country.Borders));
 
@@ -389,7 +387,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@CCA3", country.Cca3);
             paramDic.Add("@Name", country.Name);
             paramDic.Add("@Capital", country.Capital);
-            //paramDic.Add("@Region", country.Region);
+            paramDic.Add("@RegionId", country.Region.RegionId);
             paramDic.Add("SubRegion", country.SubRegion);
             paramDic.Add("@Population", country.Population);
             paramDic.Add("@Area", country.Area);
@@ -398,7 +396,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
 
 
 
-            cmd = CreateCommandWithStoredProcedureGeneral("spUpdateCountry_MD_TB2", con, paramDic);
+            cmd = CreateCommandWithStoredProcedureGeneral("spUpdateCountry", con, paramDic);
 
             try
             {
@@ -446,7 +444,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
 
             paramDic.Add("@CountryId", countryId);
 
-            cmd = CreateCommandWithStoredProcedureGeneral("spDeleteCountry_MD_TB2", con, paramDic);
+            cmd = CreateCommandWithStoredProcedureGeneral("spDeleteCountry", con, paramDic);
 
             try
             {
@@ -483,7 +481,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                 throw ex;
             }
 
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllLanguages_MD_TB2", con, null);
+            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllLanguages", con, null);
 
             try
             {
@@ -528,8 +526,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             }
 
             Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Code", language.LanguageId);
-            paramDic.Add("@Name", language.LanguageName);
+            paramDic.Add("@LanguageId", language.LanguageId);
+            paramDic.Add("@LanguageName", language.LanguageName);
           
 
             cmd = CreateCommandWithStoredProcedureGeneral("spInsertLanguage_MD_TB2", con, paramDic);
@@ -728,14 +726,12 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                 //   c.Region = dataReader["Region"].ToString();
+                    c.Region.RegionId =Convert.ToInt32(dataReader["RegionId"]);
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
                     c.FlagUrl = dataReader["FlagUrl"].ToString();
-                    c.Borders = new List<string>(dataReader["Borders"].ToString()
-                                                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                        .ToList());
+                    c.Borders = new List<string>(dataReader["Borders"].ToString().Split(',',StringSplitOptions.RemoveEmptyEntries).ToList());
                     countries.Add(c);
                 }
 
@@ -880,7 +876,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
 
                 while (dataReader.Read())
                 {
-                    int id = Convert.ToInt32(dataReader["CurrencyId"].ToString());
+                    int id = Convert.ToInt32(dataReader["CurrencyId"].ToString());  
                     string code = dataReader["CurrencyCode"].ToString();
                     string name = dataReader["CurrencyName"].ToString();
                     string symbol = dataReader["CurrencySymbol"].ToString();
@@ -902,8 +898,6 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                 }
             }
         }
-
-
 
 
         public List<Country> ReadCountriesByCurrency(string currency)
@@ -938,7 +932,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
+                    c.Region.RegionId = Convert.ToInt32(dataReader["RegionId"]);
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);

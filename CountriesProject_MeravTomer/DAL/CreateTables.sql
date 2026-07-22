@@ -31,7 +31,7 @@ CREATE TABLE Currencies (
 
 CREATE TABLE Languages(
     LanguageId INT IDENTITY(1,1) PRIMARY KEY,
-    LanguageName NVARCHAR(100) NOT NULL UNIQUE
+    LanguageName NVARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE Users(

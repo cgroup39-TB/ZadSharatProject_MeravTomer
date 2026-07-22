@@ -8,7 +8,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         private string cca3; //COUNTRY CODE ISO 3166-1 ALPHA-3
         private string name;
         private string capital;
-        private string region;
+        private Region region;
         private string subRegion;
         private long population;
         private double area;
@@ -21,7 +21,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         public string Cca3 { get => cca3; set => cca3 = value; }
         public string Name { get => name; set => name = value; }
         public string Capital { get => capital; set => capital = value; }
-        public string Region { get => region; set => region = value; }
+        public Region Region { get => region; set => region = value; }
         public string SubRegion { get => subRegion; set => subRegion = value; }
         public long Population { get => population; set => population = value; }
         public double Area { get => area; set => area = value; }
@@ -35,14 +35,14 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public Country(int id, string cca3, string name, string capital, string region, string subregion, long population, double area,
+        public Country(int id, string cca3, string name, string capital, Region region, string subregion, long population, double area,
                        string flagUrl, List<Language> countryLangArr, List<Currency> countryCurrenciesArr, List<string> borders)
         {
             CountryId = id;
             Cca3 = cca3;
             Name = name;
             Capital = capital;
-            Region = region;
+            Region =new Region(region);
             SubRegion = subregion;
             Population = population;
             Area = area;
@@ -67,10 +67,6 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             //  string 
 
             return this; // מחזיר את האובייקט הנוכחי לאחר ההוספה}
-
-
-
-
         }
 
         public List<Country> ReadAllCountries()

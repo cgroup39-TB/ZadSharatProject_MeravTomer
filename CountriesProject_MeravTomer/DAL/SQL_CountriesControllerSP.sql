@@ -1,35 +1,57 @@
-﻿CREATE PROCEDURE spInsertCountry_MD_TB2
-    @CCA3 NVARCHAR(4),
-    @Name NVARCHAR(50),
-    @Capital NVARCHAR(50),
-    @Region NVARCHAR(50),
-    @SubRegion NVARCHAR(50),
-    @Population BIGINT,
-    @Area FLOAT,
-    @FlagUrl NVARCHAR(500),
-    @Borders NVARCHAR(500)
+﻿CREATE PROCEDURE spReadAllCountries_MD_TB2
 AS
 BEGIN
     --SET NOCOUNT ON;
 
-    INSERT INTO CountriesTable_MD_TB2
+    SELECT *
+    FROM Countries;
+END
+GO
+
+CREATE PROCEDURE spInsertCountry_MD_TB2
+    @CCA3 NVARCHAR(3),
+    @Name NVARCHAR(50),
+    @Capital NVARCHAR(50),
+    @RegionName NVARCHAR(50),
+    @SubRegion NVARCHAR(50),
+    @Population BIGINT,
+    @Area DECIMAL(18,2),
+    @FlagUrl NVARCHAR(500),
+    @Borders NVARCHAR(500)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @RegionId INT;
+
+    SELECT @RegionId = RegionId
+    FROM Regions
+    WHERE [Name] = @RegionName;
+
+    IF @RegionId IS NULL
+    BEGIN
+        RAISERROR('Region does not exist', 16, 1);
+        RETURN;
+    END;
+
+    INSERT INTO Countries
     (
         CCA3,
-        [Name] ,
+        [Name],
         Capital,
-        Region,
-        SubRegion ,
-        [Population],
+        RegionId,
+        SubRegion,
+        Population,
         Area,
         FlagUrl,
-        Borders 
+        Borders
     )
     VALUES
     (
         @CCA3,
         @Name,
         @Capital,
-        @Region,
+        @RegionId,
         @SubRegion,
         @Population,
         @Area,
@@ -37,50 +59,39 @@ BEGIN
         @Borders
     );
 
-    SELECT SCOPE_IDENTITY() AS NewCountryId; --returns the last id that identity insereted in the table (last game that was inserted) for now it is not neccessary but maybe later
+    SELECT CAST(SCOPE_IDENTITY() AS INT) AS NewCountryId;
 END
 GO
 
 
-CREATE PROCEDURE spReadAllCountries_MD_TB2
-AS
-BEGIN
-    --SET NOCOUNT ON;
-
-    SELECT *
-    FROM CountriesTable_MD_TB2;
-END
-GO
-
-
-CREATE PROCEDURE spReadCountryById_MD_TB2
+CREATE PROCEDURE spReadCountryById
     @Id INT
 AS
 BEGIN
     --SET NOCOUNT ON;
 
     SELECT *
-    FROM CountriesTable_MD_TB2
-    WHERE dbCountryId = @Id;
+    FROM Countries
+    WHERE CountryId = @Id;
 END
 GO
 
 
-CREATE PROCEDURE spReadCountryByName_MD_TB2
+CREATE PROCEDURE spReadCountryByName
     @Name NVARCHAR(50)
 AS
 BEGIN
     --SET NOCOUNT ON;
 
     SELECT *
-    FROM CountriesTable_MD_TB2
+    FROM Countries
     WHERE [Name]= @Name; 
 END
 GO
 
 
 
-CREATE PROCEDURE spReadCountriesByRegion_MD_TB2
+CREATE PROCEDURE spReadCountriesByRegion  ---ID how can i search by id its by name 
     @Region NVARCHAR(50)
 AS
 BEGIN
@@ -94,7 +105,7 @@ GO
 
 
 
-CREATE PROCEDURE spUpdateCountry_MD_TB2
+CREATE PROCEDURE spUpdateCountry  --- same how can i update id by name?
 
     @Id INT,
     @CCA3 NVARCHAR(4),
@@ -110,7 +121,7 @@ AS
 BEGIN
     --SET NOCOUNT ON;
 
-    UPDATE CountriesTable_MD_TB2
+    UPDATE Countries
     SET
         CCA3 =  @CCA3,
         [Name] = @Name,
@@ -122,45 +133,19 @@ BEGIN
         FlagUrl = @FlagUrl,
         Borders = @Borders
         
-    WHERE dbCountryId = @Id;
+    WHERE CountryId = @Id;
 END
 GO
       
 
-CREATE PROCEDURE spDeleteCountry_MD_TB2
+CREATE PROCEDURE spDeleteCountry
     @Id INT
 AS
 BEGIN
     --SET NOCOUNT ON;
 
-    DELETE FROM CountriesTable_MD_TB2
-    WHERE dbCountryId = @Id;
+    DELETE FROM Countries
+    WHERE CountryId = @Id;
 END
 GO
 
-
-
---CREATE PROCEDURE spGetGamesByTags_MD_TB2
---    @Tags NVARCHAR(MAX)
---AS
---BEGIN
---    SELECT DISTINCT G.*
---    FROM GamesTable_MD_TB2 AS G
---    INNER JOIN TagGameTable_MD_TB2 AS T
---        ON G.dbGameId = T.GameId
---    INNER JOIN STRING_SPLIT(@Tags, ',') AS S
---        ON LTRIM(RTRIM(T.TagName)) = LTRIM(RTRIM(S.value))
---    WHERE LTRIM(RTRIM(S.value)) <> ''
---END
---GO
-
-
---CREATE PROCEDURE spGetTagsByGameId_MD_TB2
---    @GameId INT
---AS
---BEGIN
---    SELECT TagName
---    FROM TagGameTable_MD_TB2
---    WHERE GameId = @GameId;
---END
---GO
