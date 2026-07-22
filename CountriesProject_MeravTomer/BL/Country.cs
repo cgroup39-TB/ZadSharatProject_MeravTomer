@@ -46,7 +46,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             Cca3 = cca3;
             Name = name;
             OfficialName = officialName;
-            Capital = capital ;
+            Capital = capital;
             Region = region;
             SubRegion = subregion;
             Population = population;
@@ -54,7 +54,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             FlagUrl = flagUrl;
             Languages = new List<Language>();
             Currencies = new List<Currency>();
-            Borders = new List<string>() ;
+            Borders = new List<string>();
         }
 
 
@@ -171,7 +171,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         public Language() { }
     }
 
-   
+
     public class Currency
     {
         private string code;
@@ -192,7 +192,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         public Currency() { }
 
-        
+
     }
 
 
