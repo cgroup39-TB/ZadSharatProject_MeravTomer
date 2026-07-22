@@ -82,24 +82,24 @@
         { }
 
         // User Profile
-        public User GetById(int userId) { }
-        public User GetByName(string name) { }
+        public User ReadById(int userId) { }
+        public User ReadByName(string name) { }
         public void UpdateProfile(User user) { }
 
         // User Preferences
-        public List<Language> GetUserLanguages(int userId) { }
+        public List<Language> ReadUserLanguages(int userId) { }
         public void UpdateUserLanguages(int userId, List<int> languageIds) { }
 
-        public List<Region> GetPreferredRegions(int userId) { }
+        public List<Region> ReadPreferredRegions(int userId) { }
         public void UpdatePreferredRegions(int userId, List<int> regionIds) { }
 
         // User Status (Admin)
         public void SetUserActive(int actingUserId, int targetUserId, bool isActive);
         public void SetCanShare(int actingUserId, int targetUserId, bool canShare);
         public void SetAdmin(int actingUserId, int targetUserId, bool isAdmin);
-        public List<User> GetAllUsers() { } 
-        public List<User> GetStatistics() { } 
+        public List<User> ReadAllUsers() { } 
+        public List<User> ReadStatistics() { } 
     }
 
 }
-}
+
