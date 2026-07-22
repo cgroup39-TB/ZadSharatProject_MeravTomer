@@ -17,14 +17,14 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         public IEnumerable<Country> Get()
         {
             Country country = new Country();
-            return country.Read();
+            return country.ReadAllCountries();
         }
         //GET1 BY CountryID A country FROM DATABASE
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
             Country country = new Country();
-            Country result = country.ReadById(id);
+            Country result = country.ReadCountryById(id);
 
             if (result == null)
             {
@@ -40,7 +40,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         {
             Country country = new Country();
 
-            List <Country> result = country.ReadByRegion(region);
+            List <Country> result = country.ReadCountryByRegion(region);
 
             if (result == null)
             {
@@ -56,7 +56,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         public IEnumerable<Country> GetByName(string countryName)
         {
             Country country = new Country();
-            return (IEnumerable<Country>)country.ReadByName(countryName);
+            return (IEnumerable<Country>)country.ReadCountryByName(countryName);
         }
 
         //// GET3.2  api/<CountriesController> #Query String Version2? what is the difference between those 2?-- this is RouteParameter Way meaning its part of the api URL
@@ -114,32 +114,9 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
 
         // GET: api/<CountriesController> -gets all the tags that are existing 
         [HttpGet("getAllTags")]
-        public IActionResult GetAllTags()
-        {
-            try
-            {
-                Country game = new Country();
-                return Ok(game.GetAllExistingTags());
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        // GET: api/<GamesController> -gets all the games that are having one of the tags in the string
-        [HttpGet("getByTags")]
-        public IActionResult GetByTags(string tags)
-        {
-            try
-            {
-                Country game = new Country();
-                return Ok(game.GetGamesByTags(tags));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+     
+        
+     }
 
 
 
