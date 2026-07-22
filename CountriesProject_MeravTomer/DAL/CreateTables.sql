@@ -1,98 +1,106 @@
-﻿CREATE TABLE CountriesTable_MD_TB2 (
-    dbCountryId INT IDENTITY(1,1) PRIMARY KEY,
-    CCA3 NVARCHAR(4) NOT NULL UNIQUE,
-    [Name] NVARCHAR(50) NOT NULL,
-    Capital NVARCHAR(50),
-    Region NVARCHAR(50),
-    SubRegion NVARCHAR(50),
-    [Population] BIGINT,
-    Area FLOAT,
-    FlagUrl NVARCHAR(500), 
-    Borders NVARCHAR(500)
-);
+﻿
+CREATE TABLE Currencies (
 
-CREATE TABLE LanguagesTable_MD_TB2 (
-
-    dbLanguageId INT IDENTITY(1,1) PRIMARY KEY,
+    CurrencyId INT IDENTITY(1,1) PRIMARY KEY,
     [Name] NVARCHAR(20),
-    Code NVARCHAR(50) NOT NULL,
+    Symbol NVARCHAR(20)
    
 );
 
-CREATE TABLE CountryLanguagesTable_MD_TB2 (
-
-    CountryId INT NOT NULL,
-    LanguageId INT NOT NULL,
-   
-    PRIMARY KEY (CountryId, LanguageId),
-    FOREIGN KEY (CountryId) REFERENCES CountriesTable_MD_TB2(dbCountryId) ON DELETE CASCADE,
-    FOREIGN KEY (LanguageId) REFERENCES LanguagesTable_MD_TB2(dbLanguageId) ON DELETE CASCADE
-);
-
-
-CREATE TABLE CurrenciesTable_MD_TB2 (
-
-    dbCurrencyId INT IDENTITY(1,1) PRIMARY KEY,
-    Code INT NOT NULL,
-    [Name] NVARCHAR(20),
-    Symbol NVARCHAR(20),
-   
-);
-
-CREATE TABLE CountryCurrenciesTable_MD_TB2 (
+CREATE TABLE CountryCurrencies (
     
     CountryId INT NOT NULL,
     CurrencyId INT NOT NULL,
 
     PRIMARY KEY (CountryId, CurrencyId ),
-    FOREIGN KEY (CountryId) REFERENCES  CountriesTable_MD_TB2(dbCountryId) ON DELETE CASCADE,
-    FOREIGN KEY (CurrencyId) REFERENCES CurrenciesTable_MD_TB2(dbCurrencyId) ON DELETE CASCADE
+    FOREIGN KEY (CountryId) REFERENCES  Countries(CountryId) ON DELETE CASCADE,
+    FOREIGN KEY (CurrencyId) REFERENCES Currencies(CurrencyId) ON DELETE CASCADE
    
 );
 
-
-CREATE TABLE BordersTable_MD_TB2 (
-
-
-    CountryId INT NOT NULL,
-    NeighborCountryId INT NOT NULL,
-
-    PRIMARY KEY (CountryId, NeighborCountryId ),
-    FOREIGN KEY (CountryId) REFERENCES  CountriesTable_MD_TB2(dbCountryId) ON DELETE CASCADE,
-    FOREIGN KEY (NeighborCountryId) REFERENCES CurrenciesTable_MD_TB2(dbCurrencyId) ON DELETE CASCADE
-   
-);
-
-
-
-CREATE TABLE UsersTable_MD_TB2(
-    dbUserId INT IDENTITY(1,1) PRIMARY KEY,
-    [Name] NVARCHAR(100) NOT NULL,
-    Email NVARCHAR(150) NOT NULL UNIQUE,
+CREATE TABLE Users(
+    UserId INT IDENTITY(1,1) PRIMARY KEY,
+    [Name] NVARCHAR(30) NOT NULL,
+    Email NVARCHAR(50) NOT NULL UNIQUE,
     [Password] NVARCHAR(255) NOT NULL,
-    Active BIT NOT NULL DEFAULT 1,
-    IsAdmin BIT NOT NULL DEFAULT 0
+    IsAdmin BIT NOT NULL DEFAULT 0,
+    IsActive BIT NOT NULL DEFAULT 1,
+    CanShare BIT NOT NULL DEFAULT 1
+    
 );
 
---Users visit Countries--
-CREATE TABLE VisitsTable_MD_TB2 (
+CREATE TABLE Regions(
+    RegionId INT IDENTITY(1,1) PRIMARY KEY,
+    RegionName NVARCHAR(100) NOT NULL UNIQUE
+);
 
-    VisitId INT IDENTITY(1,1) PRIMARY KEY,
+CREATE TABLE Languages(
+    LanguageId INT IDENTITY(1,1) PRIMARY KEY,
+    LanguageName NVARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE UserLanguages(
+    UserLanguageId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    LanguageId INT NOT NULL,
+    ProficiencyLevel NVARCHAR(50) NOT NULL,
+
+    CONSTRAINT FK_UserLanguages_Users
+        FOREIGN KEY (UserId)
+        REFERENCES Users(UserId),
+
+    CONSTRAINT FK_UserLanguages_Languages
+        FOREIGN KEY (LanguageId)
+        REFERENCES Languages(LanguageId),
+
+    CONSTRAINT UQ_UserLanguages
+        UNIQUE (UserId, LanguageId)
+);
+
+CREATE TABLE UserRegions(
+    UserRegionId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    RegionId INT NOT NULL,
+
+    CONSTRAINT FK_UserRegions_Users
+        FOREIGN KEY (UserId)
+        REFERENCES Users(UserId),
+
+    CONSTRAINT FK_UserRegions_Regions
+        FOREIGN KEY (RegionId)
+        REFERENCES Regions(RegionId),
+
+    CONSTRAINT UQ_UserRegions
+        UNIQUE (UserId, RegionId)
+);
+
+CREATE TABLE UserVisitedCountries(
     UserId INT NOT NULL,
     CountryId INT NOT NULL,
-    VisitDate DATE NOT NULL,
-    ReturnDate DATE,
-    Rating TINYINT CHECK (Rating BETWEEN 1 AND 5),
-    Notes NVARCHAR(1000),
-    IsFavorite BIT DEFAULT 0,
+    Rating INT NULL,
+    ReviewText NVARCHAR(1000) NULL,
+    IsAdmin BIT NOT NULL DEFAULT 0
 
-    CONSTRAINT FK_Visits_Users FOREIGN KEY (UserId) REFERENCES Users(UserId),
-    CONSTRAINT FK_Visits_Countries FOREIGN KEY (CountryId) REFERENCES Countries(CountryId)
+    PRIMARY KEY(UserId, CountryId),
+
+    FOREIGN KEY(UserId)
+        REFERENCES Users(UserId),
+
+    FOREIGN KEY(CountryId)
+        REFERENCES Countries(CountryId),
+
+    CHECK (Rating IS NULL OR Rating BETWEEN 1 AND 5)
 );
 
-CREATE TABLE TagGameTable_MD_TB2 (
+CREATE TABLE UserWantedCountries(
+    UserId INT NOT NULL,
     CountryId INT NOT NULL,
-    TagName VARCHAR(100) NOT NULL,
-    PRIMARY KEY (GameId, TagName),
-    FOREIGN KEY (GameId) REFERENCES GamesTable_MD_TB2(dbGameId) ON DELETE CASCADE
+
+    PRIMARY KEY(UserId, CountryId),
+
+    FOREIGN KEY(UserId)
+        REFERENCES Users(UserId),
+
+    FOREIGN KEY(CountryId)
+        REFERENCES Countries(CountryId)
 );
