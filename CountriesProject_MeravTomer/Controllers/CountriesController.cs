@@ -40,7 +40,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         {
             Country country = new Country();
 
-            List <Country> result = country.ReadCountryByRegion(region);
+            List <Country> result = country.ReadCountriesByRegion(region);
 
             if (result == null)
             {
@@ -102,7 +102,6 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         public IActionResult Delete(int id)
         {
             Country country = new Country();
-            int result = country.Delete(id);
 
             if (result == 0)
             {
