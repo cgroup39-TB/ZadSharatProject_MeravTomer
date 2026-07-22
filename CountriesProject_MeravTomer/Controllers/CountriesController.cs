@@ -11,7 +11,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
     public class CountriesController : Controller
     {
 
-        // GET: CountriesController
+        // GET: api/< CountriesController> get all countries
 
         [HttpGet]
         public IEnumerable<Country> Get()
@@ -19,7 +19,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
             Country country = new Country();
             return country.Read();
         }
-        //GET1 BY dbGameID A GAME SO EDIT IN CLIEND SIDE
+        //GET1 BY CountryID A country FROM DATABASE
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
@@ -34,8 +34,8 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
             return Ok(result);
         }
 
-        //GET2 BY steamAppId A GAME FROM DATABASE
-        [HttpGet("getBySteamAppId/{steamAppId}")]
+        //GET2 BY region A GAME FROM DATABASE
+        [HttpGet("getByRegion/{region}")]
         public IActionResult GetByRegion(string region)
         {
             Country country = new Country();
@@ -51,7 +51,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
-        // GET3: api/<GamesController> #Query String Version1?-- this is QueryString the parameter comes through the headline of the website URL
+        // GET3: api/<CountriesController> #Query String Version1?-- this is QueryString the parameter comes through the headline of the website URL
         [HttpGet("getByName")]
         public IEnumerable<Country> GetByName(string countryName)
         {
@@ -59,30 +59,32 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
             return (IEnumerable<Country>)country.ReadByName(countryName);
         }
 
-        // GET3.2  api/<GamesController> #Query String Version2? what is the difference between those 2?-- this is RouteParameter Way meaning its part of the api URL
-        [HttpGet("getByNameR/{gameName}")]
-        public IEnumerable<Country> GetByNameR(string gameName)
-        {
-            Country game = new Country();
-            return game.ReadByContainName(gameName);
-        }
+        //// GET3.2  api/<CountriesController> #Query String Version2? what is the difference between those 2?-- this is RouteParameter Way meaning its part of the api URL
+        //[HttpGet("getByNameR/{countryName}")]
+        //public IEnumerable<Country> GetByNameR(string gameName)
+        //{
+        //    Country game = new Country();
+        //    return game.ReadByContainName(gameName);
+        //}
+
+
 
         [HttpPost]
-        public IActionResult Post([FromBody] Country game)
+        public IActionResult Post([FromBody] Country country)
         {
-            Country insertedGame = game.Insert();
+            Country insertedCountry = country.Insert();
 
-            if (insertedGame == null)
+            if (insertedCountry == null)
             {
                 return BadRequest("Game was not inserted");
             }
 
-            return Ok(insertedGame);
+            return Ok(insertedCountry);
         }
 
-        // PUT api/<GamesController>/5
+        // PUT api/<CountriesController>/5
         [HttpPut("{id}")]
-        public IActionResult UpdateGame(int id, [FromBody] Country updatedCountry)
+        public IActionResult UpdateCountry(int id, [FromBody] Country updatedCountry)
         {
             Country country = new Country();
             int result = country.UpdateCountry(id, updatedCountry);
@@ -95,22 +97,22 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
             return Ok(new { message = "Country updated successfully" });
         }
 
-        // DELETE api/<GamesController>/5
+        // DELETE api/<CountriesController>/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            Country game = new Country();
-            int result = game.Delete(id);
+            Country country = new Country();
+            int result = country.Delete(id);
 
             if (result == 0)
             {
-                return NotFound(new { message = "Game was not found" });
+                return NotFound(new { message = "Country was not found" });
             }
 
-            return Ok(new { message = "Game was deleted successfully" });
+            return Ok(new { message = "Country was deleted successfully" });
         }
 
-        // GET: api/<GamesController> -gets all the tags that are existing 
+        // GET: api/<CountriesController> -gets all the tags that are existing 
         [HttpGet("getAllTags")]
         public IActionResult GetAllTags()
         {
@@ -140,20 +142,6 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
-
-        private readonly CountriesAPIService _countriesService;
-
-        public CountriesController(CountriesAPIService countriesService) // <-- כאן ה-DI מזריק
-        {
-            _countriesService = countriesService;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var countries = await _countriesService.GetCountriesAsync();
-            return Ok(countries);
-        }
 
 
         ////POST api/<GamesController>/
