@@ -67,6 +67,11 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             //  string 
 
             return this; // מחזיר את האובייקט הנוכחי לאחר ההוספה}
+<<<<<<< Updated upstream
+=======
+
+
+>>>>>>> Stashed changes
         }
 
         public List<Country> ReadAllCountries()
@@ -76,7 +81,6 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             return dbs.ReadAllCountries();
 
         }
-
 
 
         public Country ReadCountryById(int countryId)
