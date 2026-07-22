@@ -82,6 +82,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         paramDic.Add("@IsAdmin", user.IsAdmin);
         paramDic.Add("@CanShare", user.CanShare);
 
+
+
+
             cmd = CreateCommandWithStoredProcedureGeneral("spInsertUser_MD_TB2", con, paramDic);
 
         try
