@@ -93,7 +93,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
 
                     Country c = new Country();
                     c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
+                    c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
                     c.Region = dataReader["Region"].ToString();
@@ -156,7 +156,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     {
                         Country c = new Country();
                         c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                        c.CCA3 = dataReader["CCA3"].ToString();
+                        c.Cca3 = dataReader["CCA3"].ToString();
                         c.Name = dataReader["Name"].ToString();
                         c.Capital = dataReader["Capital"].ToString();
                    //     c.Region = dataReader["Region"].ToString();
@@ -221,7 +221,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                 {
                     Country c = new Country();
                     c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
+                    c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
                  //   c.Region = dataReader["Region"].ToString();
@@ -286,7 +286,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     Country c = new Country();
 
                     c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
+                    c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
                 //    c.Region = dataReader["Region"].ToString();
@@ -332,7 +332,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             }
 
             Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@CCA3", country.CCA3);
+            paramDic.Add("@CCA3", country.Cca3);
             paramDic.Add("@Name", country.Name);
             paramDic.Add("@Capital", country.Capital);
          //   paramDic.Add("@Region", country.RegionId); //HOW IT INSERTS ID 
@@ -386,7 +386,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             Dictionary<string, object> paramDic = new Dictionary<string, object>();
 
             paramDic.Add("@Id", countryId);
-            paramDic.Add("@CCA3", country.CCA3);
+            paramDic.Add("@CCA3", country.Cca3);
             paramDic.Add("@Name", country.Name);
             paramDic.Add("@Capital", country.Capital);
             //paramDic.Add("@Region", country.Region);
@@ -492,8 +492,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                 while (dataReader.Read())
                 {
                     Language l = new Language();
-                    l.Code = dataReader["Code"].ToString();
-                    l.Name = dataReader["Name"].ToString();
+                    l.LanguageId = Convert.ToInt32(dataReader["LanguageId"]);
+                    l.LanguageName = dataReader["LanguageName"].ToString();
 
                     lenguages.Add(l);
                 }
@@ -528,8 +528,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             }
 
             Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Code", language.Code);
-            paramDic.Add("@Name", language.Name);
+            paramDic.Add("@Code", language.LanguageId);
+            paramDic.Add("@Name", language.LanguageName);
           
 
             cmd = CreateCommandWithStoredProcedureGeneral("spInsertLanguage_MD_TB2", con, paramDic);
@@ -578,7 +578,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                 while (dataReader.Read())
                 {
                     Currency c = new Currency();
-                    c.Code = dataReader["Code"].ToString();
+                    c.CurrencyCode = dataReader["CurrencyCode"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Symbol = dataReader["Symbol"].ToString();
 
@@ -616,7 +616,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             }
 
             Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Code", currency.Code);
+            paramDic.Add("@Code", currency.CurrencyCode);
             paramDic.Add("@Name", currency.Name);
             paramDic.Add("@Symbol", currency.Symbol);
 
@@ -672,7 +672,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
 
                 while (dataReader.Read())
                 {
-                    string code = dataReader["LanguageCode"].ToString();
+                    int code = Convert.ToInt32(dataReader["LanguageId"]);
                     string name = dataReader["LanguageName"].ToString();
                     languages.Add(new Language(code, name));
                  
@@ -725,7 +725,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     Country c = new Country();
 
                     c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
+                    c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
                  //   c.Region = dataReader["Region"].ToString();
@@ -785,8 +785,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                 {
                     Dictionary<string, object> paramDic = new Dictionary<string, object>();
                     paramDic.Add("@CountryId", countryId);
-                    paramDic.Add("@LanguageCode", language.Code);
-                    paramDic.Add("@LanguageName", language.Name);
+                    paramDic.Add("@LanguageCode", language.LanguageId);
+                    paramDic.Add("@LanguageName", language.LanguageName);
 
                     SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryLanguages_Insert", con, paramDic);
                     cmd.ExecuteNonQuery();
@@ -934,7 +934,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     Country c = new Country();
 
                     c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
+                    c.Cca3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
                     c.Region = dataReader["Region"].ToString();
@@ -990,7 +990,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                 {
                     Dictionary<string, object> paramDic = new Dictionary<string, object>();
                     paramDic.Add("@CountryId", countryId);
-                    paramDic.Add("@CurrencyCode", currency.Code);
+                    paramDic.Add("@CurrencyCode", currency.CurrencyCode);
                     paramDic.Add("@CurrencyName", currency.Name);
                     paramDic.Add("@CurrencySymbol", currency.Symbol);
 

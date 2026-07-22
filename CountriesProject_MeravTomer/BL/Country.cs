@@ -10,27 +10,25 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         private string capital;
         private string region;
         private string subRegion;
-        private int population;
+        private long population;
         private double area;
         private string flagUrl;
         private List<Language> languages;
         private List<Currency> currencies;
         private List<string> borders;
 
-
         public int CountryId { get => countryId; set => countryId = value; }
-        public string CCA3 { get; set; }
-        public string Name { get; set; }
-        public string Capital { get; set; }
-        public string Region { get; set; }
-        public string SubRegion { get; set; }
-        public long Population { get; set; }
-        public double Area { get; set; }
-        public string FlagUrl { get; set; }
-        public List<Language> Languages { get; set; }
-        public List<Currency> Currencies { get; set; }
-        public List<string> Borders { get; set; }
-
+        public string Cca3 { get => cca3; set => cca3 = value; }
+        public string Name { get => name; set => name = value; }
+        public string Capital { get => capital; set => capital = value; }
+        public string Region { get => region; set => region = value; }
+        public string SubRegion { get => subRegion; set => subRegion = value; }
+        public long Population { get => population; set => population = value; }
+        public double Area { get => area; set => area = value; }
+        public string FlagUrl { get => flagUrl; set => flagUrl = value; }
+        public List<Language> Languages { get => languages; set => languages = value; }
+        public List<Currency> Currencies { get => currencies; set => currencies = value; }
+        public List<string> Borders { get => borders; set => borders = value; }
 
         public Country()
         {
@@ -38,10 +36,10 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         }
 
         public Country(int id, string cca3, string name, string capital, string region, string subregion, long population, double area,
-                       string flagUrl, List<Language> languages, List<Currency> currencies, List<string> borders)
+                       string flagUrl, List<Language> countryLangArr, List<Currency> countryCurrenciesArr, List<string> borders)
         {
             CountryId = id;
-            CCA3 = cca3;
+            Cca3 = cca3;
             Name = name;
             Capital = capital;
             Region = region;
@@ -50,9 +48,9 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             Area = area;
             FlagUrl = flagUrl;
             Languages = new List<Language>();
-            languages.ForEach(lang => Languages.Add(new Language(lang.Code, lang.Name)));
+            countryLangArr.ForEach(lang => Languages.Add(new Language(lang.LanguageId, lang.LanguageName)));
             Currencies = new List<Currency>();
-            currencies.ForEach(curr => Currencies.Add(new Currency(curr.Code, curr.Name, curr.Symbol)));
+            countryCurrenciesArr.ForEach(curr => Currencies.Add(new Currency(curr.CurrencyId,curr.CurrencyCode, curr.Name, curr.Symbol)));
             Borders = new List<string>();
             borders.ForEach(border => Borders.Add(border));
 
@@ -109,18 +107,15 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public List<Country> ReadCountryByLanguage(string languageName)
-        {
+        //public List<Country> ReadCountryByLanguage(string languageName)
+        //{
 
-            DBCountryServices dbs = new DBCountryServices();
+        //}
+        //public List<Country> ReadCountryByCurrency(string currency)
+        //{
 
-        }
-        public List<Country> ReadCountryByCurrency(string currency)
-        {
+        //}
 
-            DBCountryServices dbs = new DBCountryServices();
-
-        }
         //מידע לסינון ומיון
         //public Country ReadByPopulation()
         //{
