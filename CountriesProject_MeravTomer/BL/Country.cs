@@ -75,7 +75,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public List<Country> Read()
+        public List<Country> ReadAllCountries()
         {
 
             DBCountryServices dbs = new DBCountryServices();
@@ -85,7 +85,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
 
 
-        public Country ReadById(int countryId)
+        public Country ReadCountryById(int countryId)
         {
 
             DBCountryServices dbs = new DBCountryServices();
@@ -93,7 +93,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public Country ReadByName(string countryName)
+        public Country ReadCountryByName(string countryName)
         {
 
             DBCountryServices dbs = new DBCountryServices();
@@ -101,7 +101,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public List<Country> ReadByRegion(string countryRegion)
+        public List<Country> ReadCountriesByRegion(string countryRegion)
         {
 
             DBCountryServices dbs = new DBCountryServices();
@@ -109,13 +109,13 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public List<Country> ReadByLanguage(string languageName)
+        public List<Country> ReadCountryByLanguage(string languageName)
         {
 
             DBCountryServices dbs = new DBCountryServices();
 
         }
-        public List<Country> ReadByCurrency(string currency)
+        public List<Country> ReadCountryByCurrency(string currency)
         {
 
             DBCountryServices dbs = new DBCountryServices();
@@ -143,7 +143,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             return dbs.UpdateCountry(countryId, updatedCountry);
         }
 
-        public int Delete(int countryId) //Beni said if i change database so better to create new object and use the class method else i can use static methods
+        public int DeleteCountry(int countryId) //Beni said if i change database so better to create new object and use the class method else i can use static methods
         {
             DBCountryServices dbs = new DBCountryServices();
             return dbs.DeleteCountry(countryId);
