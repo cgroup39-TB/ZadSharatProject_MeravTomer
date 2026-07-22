@@ -91,7 +91,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
 
             if (result == 0)
             {
-                return NotFound();
+                return NotFound();  
             }
 
             return Ok(new { message = "Country updated successfully" });
