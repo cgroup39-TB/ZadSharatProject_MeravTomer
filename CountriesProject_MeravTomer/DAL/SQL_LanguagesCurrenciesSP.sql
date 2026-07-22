@@ -1,102 +1,127 @@
-﻿CREATE PROCEDURE spInsertLanguage_MD_TB2
-    @Code NVARCHAR(100),
-    @Name NVARCHAR(50)
+-- Languages --
+
+CREATE PROCEDURE sp_Language_GetAll
 AS
 BEGIN
-    --SET NOCOUNT ON;
-
-    INSERT INTO LanguagesTable_MD_TB2
-    (
-        Code,
-        [Name] 
-      
-    )
-    VALUES
-    (
-        @Code,
-        @Name
-    );
-
-    SELECT SCOPE_IDENTITY() AS NewLanguageId; --returns the last id that identity insereted in the table (last game that was inserted) for now it is not neccessary but maybe later
+    SELECT LanguageId, LanguageName
+    FROM Languages;
 END
 GO
 
-
-
-CREATE PROCEDURE spReadAllLanguages_MD_TB2
+CREATE PROCEDURE sp_Language_GetByName
+    @LanguageName NVARCHAR(100)
 AS
 BEGIN
-    --SET NOCOUNT ON;
-
-    SELECT *
-    FROM LanguagesTable_MD_TB2;
+    SELECT LanguageId, LanguageName
+    FROM Languages
+    WHERE LanguageName = @LanguageName;
 END
-GO 
+GO
 
+CREATE PROCEDURE sp_Language_Insert
+    @LanguageName NVARCHAR(100)
+AS
+BEGIN
+    INSERT INTO Languages (LanguageName)
+    VALUES (@LanguageName);
 
+    SELECT SCOPE_IDENTITY() AS NewLanguageId;
+END
+GO
 
-CREATE PROCEDURE spInsertCurrency_MD_TB2
-    @Code NVARCHAR(100),
+-- Currencies --
+
+CREATE PROCEDURE sp_Currency_GetAll
+AS
+BEGIN
+    SELECT CurrencyId, CurrencyCode, [Name], Symbol
+    FROM Currencies;
+END
+GO
+
+CREATE PROCEDURE sp_Currency_GetByCode
+    @CurrencyCode NVARCHAR(3)
+AS
+BEGIN
+    SELECT CurrencyId, CurrencyCode, [Name], Symbol
+    FROM Currencies
+    WHERE CurrencyCode = @CurrencyCode;
+END
+GO
+
+CREATE PROCEDURE sp_Currency_Insert
+    @CurrencyCode NVARCHAR(3),
     @Name NVARCHAR(50),
-    @Symbol  NVARCHAR(50)
-
+    @Symbol NVARCHAR(20)
 AS
 BEGIN
-    --SET NOCOUNT ON;
+    INSERT INTO Currencies (CurrencyCode, [Name], Symbol)
+    VALUES (@CurrencyCode, @Name, @Symbol);
 
-    INSERT INTO LanguagesTable_MD_TB2
-    (
-        Code,
-        [Name],
-        Symbol
-      
-    )
-    VALUES
-    (
-        @Code,
-        @Name,
-        @Symbol
-    );
-
-    SELECT SCOPE_IDENTITY() AS NewCurrencyId; --returns the last id that identity insereted in the table (last game that was inserted) for now it is not neccessary but maybe later
+    SELECT SCOPE_IDENTITY() AS NewCurrencyId;
 END
 GO
 
+-- Country <-> Language links --
 
 CREATE PROCEDURE sp_CountryLanguages_GetByCountryId
     @CountryId INT
 AS
 BEGIN
-    SELECT TagName
-    FROM TagGameTable_MD_TB2
+    SELECT L.LanguageId, L.LanguageName
+    FROM CountryLanguages AS CL
+    INNER JOIN Languages AS L ON CL.LanguageId = L.LanguageId
+    WHERE CL.CountryId = @CountryId;
+END
+GO
+
+CREATE PROCEDURE sp_CountryLanguages_Insert
+    @CountryId INT,
+    @LanguageId INT
+AS
+BEGIN
+    INSERT INTO CountryLanguages (CountryId, LanguageId)
+    VALUES (@CountryId, @LanguageId);
+END
+GO
+
+CREATE PROCEDURE sp_CountryLanguages_DeleteByCountryId
+    @CountryId INT
+AS
+BEGIN
+    DELETE FROM CountryLanguages
     WHERE CountryId = @CountryId;
 END
 GO
 
+-- Country <-> Currency links --
 
-
-CREATE PROCEDURE spAddGameToUserCollection_MD_TB2
-    @UserId INT,
-    @GameId INT
+CREATE PROCEDURE sp_CountryCurrencies_GetByCountryId
+    @CountryId INT
 AS
 BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM UsersGamesTable_MD_TB2
-        WHERE UserId = @UserId
-        AND GameId = @GameId
-    )
-    BEGIN
-        INSERT INTO UsersGamesTable_MD_TB2
-        (
-            UserId,
-            GameId
-        )
-        VALUES
-        (
-            @UserId,
-            @GameId
-        );
-    END
+    SELECT CUR.CurrencyId, CUR.CurrencyCode, CUR.[Name], CUR.Symbol
+    FROM CountryCurrencies AS CC
+    INNER JOIN Currencies AS CUR ON CC.CurrencyId = CUR.CurrencyId
+    WHERE CC.CountryId = @CountryId;
+END
+GO
+
+CREATE PROCEDURE sp_CountryCurrencies_Insert
+    @CountryId INT,
+    @CurrencyId INT
+AS
+BEGIN
+    INSERT INTO CountryCurrencies (CountryId, CurrencyId)
+    VALUES (@CountryId, @CurrencyId);
+END
+GO
+
+CREATE PROCEDURE sp_CountryCurrencies_DeleteByCountryId
+    @CountryId INT
+AS
+BEGIN
+    DELETE FROM CountryCurrencies
+    WHERE CountryId = @CountryId;
 END
 GO

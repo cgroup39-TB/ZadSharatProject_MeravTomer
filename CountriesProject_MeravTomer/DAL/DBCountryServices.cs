@@ -1,1064 +1,411 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Data.SqlClient;
 using System.Data;
-using System.Text;
-using ServerSideCountriesProject_MeravTomer.BL;
-using System.Diagnostics.Metrics;
+using System.Data.SqlClient;
+using ServerSideCountriesProject_MeravTomer.Models;
 
-
-namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject_MeravTomer.DAL
+namespace ServerSideCountriesProject_MeravTomer.DAL
 {
     public class DBCountryServices
     {
-
-        public DBCountryServices()
+        public SqlConnection Connect(string connectionStringName)
         {
-        }
-
-        //--------------------------------------------------------------------------------------------------
-        // This method creates a connection to the database according to the connectionString name in the web.config 
-        //--------------------------------------------------------------------------------------------------
-        public SqlConnection connect(String conString)
-        {
-
-            // read the connection string from the configuration file
             IConfigurationRoot configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json").Build();
-            string cStr = configuration.GetConnectionString(conString);
-            SqlConnection connectionToDb = new SqlConnection(cStr);
-            connectionToDb.Open();
-            return connectionToDb;
+                .AddJsonFile("appsettings.json").Build();
+            string connectionString = configuration.GetConnectionString(connectionStringName);
+            SqlConnection connection = new SqlConnection(connectionString);
+            connection.Open();
+            return connection;
         }
 
-        //---------------------------------------------------------------------------------
-        // Create the SqlCommand
-        //---------------------------------------------------------------------------------
-        private SqlCommand CreateCommandWithStoredProcedureGeneral(String spName, SqlConnection con, Dictionary<string, object> paramDic)
+        private SqlCommand CreateStoredProcedureCommand(string spName, SqlConnection con, Dictionary<string, object> parameters)
         {
+            SqlCommand cmd = new SqlCommand(spName, con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandTimeout = 10;
 
-            SqlCommand cmd = new SqlCommand(); // create the command object
-
-            cmd.Connection = con;              // assign the connection to the command object
-
-            cmd.CommandText = spName;      // can be Select, Insert, Update, Delete 
-
-            cmd.CommandTimeout = 10;           // Time to wait for the execution' The default is 30 seconds
-
-            cmd.CommandType = System.Data.CommandType.StoredProcedure; // the type of the command, can also be text
-
-            if (paramDic != null)
-                foreach (KeyValuePair<string, object> param in paramDic)
+            if (parameters != null)
+            {
+                foreach (KeyValuePair<string, object> param in parameters)
                 {
                     cmd.Parameters.AddWithValue(param.Key, param.Value);
-
                 }
-
+            }
 
             return cmd;
         }
 
-
-
-        //--------------------------------------------------------------------------------------------------
-        // Returning a list of all countries in the CountriesTable
-        //--------------------------------------------------------------------------------------------------
-
-        public List<Country> ReadAllCountries()
+        private static List<string> ParseBorders(object bordersValue)
         {
-            SqlConnection con;
-            SqlCommand cmd;
+            if (bordersValue == null || bordersValue is DBNull)
+                return new List<string>();
+
+            return bordersValue.ToString()
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
+        }
+
+        private static Country MapCountry(SqlDataReader reader)
+        {
+            return new Country
+            {
+                CountryId = Convert.ToInt32(reader["CountryId"]),
+                CCA3 = reader["CCA3"].ToString(),
+                Name = reader["Name"].ToString(),
+                Capital = reader["Capital"] as string,
+                RegionId = reader["RegionId"] is DBNull ? 0 : Convert.ToInt32(reader["RegionId"]),
+                RegionName = reader["RegionName"] as string,
+                SubRegion = reader["SubRegion"] as string,
+                Population = reader["Population"] is DBNull ? 0 : Convert.ToInt64(reader["Population"]),
+                Area = reader["Area"] is DBNull ? 0 : Convert.ToDouble(reader["Area"]),
+                FlagUrl = reader["FlagUrl"] as string,
+                Borders = ParseBorders(reader["Borders"])
+            };
+        }
+
+        private static Currency MapCurrency(SqlDataReader reader)
+        {
+            return new Currency(
+                Convert.ToInt32(reader["CurrencyId"]),
+                reader["CurrencyCode"].ToString(),
+                reader["Name"].ToString(),
+                reader["Symbol"] as string);
+        }
+
+        private List<Country> GetCountriesFromReader(SqlCommand cmd)
+        {
             List<Country> countries = new List<Country>();
+            using SqlDataReader reader = cmd.ExecuteReader();
 
-            try
+            while (reader.Read())
             {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                countries.Add(MapCountry(reader));
             }
 
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllCountries_MD_TB2", con, null);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-           
-
-                    Country c = new Country();
-                    c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
-                    c.Name = dataReader["Name"].ToString();
-                    c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
-                    c.SubRegion = dataReader["SubRegion"].ToString();
-                    c.Population = Convert.ToInt64(dataReader["Population"]);
-                    c.Area = Convert.ToDouble(dataReader["Area"]);
-                    c.FlagUrl = dataReader["FlagUrl"].ToString();
-                    c.Borders = new List<string>(dataReader["Borders"].ToString()
-                                                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                        .ToList());
-
-                    countries.Add(c);
-                }
-
-                return countries;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            return countries;
         }
 
-
-       
-     
-        //--------------------------------------------------------------------------------------------------
-        // This method reading a specific country by its countryId from the dataBase
-        //--------------------------------------------------------------------------------------------------
-         public Country ReadCountryById(int id) { 
-
-                SqlConnection con;
-                SqlCommand cmd;
-
-                try
-                {
-                    con = connect("myProjDB");
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-
-                Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                paramDic.Add("@Id", id);
-
-                cmd = CreateCommandWithStoredProcedureGeneral("spReadCountryById_MD_TB2", con, paramDic);
-
-                try
-                {
-                    SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                    if (dataReader.Read())
-                    {
-                        Country c = new Country();
-                        c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                        c.CCA3 = dataReader["CCA3"].ToString();
-                        c.Name = dataReader["Name"].ToString();
-                        c.Capital = dataReader["Capital"].ToString();
-                        c.Region = dataReader["Region"].ToString();
-                        c.SubRegion = dataReader["SubRegion"].ToString();
-                        c.Population = Convert.ToInt64(dataReader["Population"]);
-                        c.Area = Convert.ToDouble(dataReader["Area"]);
-                        c.FlagUrl = dataReader["FlagUrl"].ToString();
-                        c.Borders = new List<string>(dataReader["Borders"].ToString()
-                                                       .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                       .ToList());
-
-                    return c;
-                    }
-
-                    return null;
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-                finally
-                {
-                    if (con != null)
-                    {
-                        con.Close();
-                    }
-                }
-            }
-
-
-        //--------------------------------------------------------------------------------------------------
-        // This method reading a specific country by its name from the dataBase
-        //--------------------------------------------------------------------------------------------------
-        public Country ReadCountryByName(string countryName)
-
-        {
-            SqlConnection con;
-            SqlCommand cmd;
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Name", countryName);
-
-            cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadCountryByName_MD_TB2",
-                con,
-                paramDic);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader();
-
-                if (dataReader.Read())
-                {
-                    Country c = new Country();
-                    c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
-                    c.Name = dataReader["Name"].ToString();
-                    c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
-                    c.SubRegion = dataReader["SubRegion"].ToString();
-                    c.Population = Convert.ToInt64(dataReader["Population"]);
-                    c.Area = Convert.ToDouble(dataReader["Area"]);
-                    c.FlagUrl = dataReader["FlagUrl"].ToString();
-                    c.Borders = new List<string>(dataReader["Borders"].ToString()
-                                                      .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                      .ToList());
-
-
-                    dataReader.Close();
-
-
-
-                    return c;
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                con.Close();
-            }
-        }
-
-
-        //--------------------------------------------------------------------------------------------------
-        // This method Reads all countries of a specific region
-        //--------------------------------------------------------------------------------------------------
-        public List<Country> ReadCountriesByRegion(string countryRegion)
-        {
-            SqlConnection con;
-            SqlCommand cmd;
-            List<Country> countries = new List<Country>();
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Region", countryRegion);
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadCountriesByRegion_MD_TB2", con, paramDic);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-                    Country c = new Country();
-
-                    c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
-                    c.Name = dataReader["Name"].ToString();
-                    c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
-                    c.SubRegion = dataReader["SubRegion"].ToString();
-                    c.Population = Convert.ToInt64(dataReader["Population"]);
-                    c.Area = Convert.ToDouble(dataReader["Area"]);
-                    c.FlagUrl = dataReader["FlagUrl"].ToString();
-                    c.Borders = new List<string>(dataReader["Borders"].ToString()
-                                                      .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                      .ToList());
-
-                    countries.Add(c);
-                }
-
-                return countries;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
-        }
-
+        // -- Countries --
 
         public int InsertCountry(Country country)
         {
-            SqlConnection con;
-            SqlCommand cmd;
+            using SqlConnection con = Connect("myProjDB");
 
-            try
+            Dictionary<string, object> parameters = new Dictionary<string, object>
             {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+                { "@CCA3", country.CCA3 },
+                { "@Name", country.Name },
+                { "@Capital", (object)country.Capital ?? DBNull.Value },
+                { "@RegionId", country.RegionId },
+                { "@SubRegion", (object)country.SubRegion ?? DBNull.Value },
+                { "@Population", country.Population },
+                { "@Area", country.Area },
+                { "@FlagUrl", (object)country.FlagUrl ?? DBNull.Value },
+                { "@Borders", string.Join(",", country.Borders) }
+            };
 
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@CCA3", country.CCA3);
-            paramDic.Add("@Name", country.Name);
-            paramDic.Add("@OfficialName", country.OfficialName);
-            paramDic.Add("@Capital", country.Capital);
-            paramDic.Add("@Region", country.Region);
-            paramDic.Add("@SubRegion", country.SubRegion);
-            paramDic.Add("@Population", country.Population);
-            paramDic.Add("@Area", country.Area);
-            //paramDic.Add("@Latitude", country.Latitude);
-            //paramDic.Add("@Longitude", country.Longitude);
-            paramDic.Add("@FlagUrl", country.FlagUrl);
-            paramDic.Add("@Borders", string.Join(",", country.Borders));
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spInsertCountry_MD_TB2", con, paramDic);
-
-            try
-            {
-                object result = cmd.ExecuteScalar();
-                return Convert.ToInt32(result);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_Insert", con, parameters);
+            return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
-
-
-        ////--------------------------------------------------------------------------------------------------
-        //// Updates a country in the countryTable (updating len curr and  will do seperately)
-        ////--------------------------------------------------------------------------------------------------
-        public int UpdateCountry(int countryId, Country country)
+        public List<Country> GetAllCountries()
         {
-            SqlConnection con;
-            SqlCommand cmd;
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-
-            paramDic.Add("@Id", countryId);
-            paramDic.Add("@CCA3", country.CCA3);
-            paramDic.Add("@Name", country.Name);
-            paramDic.Add("@OfficialName", country.OfficialName);
-            paramDic.Add("@Capital", country.Capital);
-            paramDic.Add("@Region", country.Region);
-            paramDic.Add("SubRegion", country.SubRegion);
-            paramDic.Add("@Population", country.Population);
-            paramDic.Add("@Area", country.Area);
-            paramDic.Add("@FlagUrl", country.FlagUrl);
-            paramDic.Add("@Borders", string.Join(",", country.Borders));
-
-
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spUpdateCountry_MD_TB2", con, paramDic);
-
-            try
-            {
-                int numEffected = cmd.ExecuteNonQuery();
-                if (numEffected > 0)
-                {
-                    //DeleteTagsByGameId(gameId);
-                    //InsertManyTagsToGame(gameId, game.Tags);
-                }
-
-                return numEffected;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
-
+            using SqlConnection con = Connect("myProjDB");
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_GetAll", con, null);
+            return GetCountriesFromReader(cmd);
         }
 
-        //--------------------------------------------------------------------------------------------------
-        // This method DELETES a game with a specific Id(Not SteamAppID)
-        //--------------------------------------------------------------------------------------------------
+        public Country GetCountryById(int countryId)
+        {
+            Country country;
+
+            using (SqlConnection con = Connect("myProjDB"))
+            {
+                Dictionary<string, object> parameters = new Dictionary<string, object> { { "@CountryId", countryId } };
+                using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_GetById", con, parameters);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (!reader.Read())
+                    return null;
+
+                country = MapCountry(reader);
+            }
+
+            country.Languages = GetLanguagesByCountryId(countryId);
+            country.Currencies = GetCurrenciesByCountryId(countryId);
+            return country;
+        }
+
+        public Country GetCountryByName(string name)
+        {
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@Name", name } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_GetByName", con, parameters);
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            return reader.Read() ? MapCountry(reader) : null;
+        }
+
+        public List<Country> SearchCountriesByName(string namePart)
+        {
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@NamePart", namePart } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_SearchByName", con, parameters);
+            return GetCountriesFromReader(cmd);
+        }
+
+        public List<Country> GetCountriesByRegion(string regionName)
+        {
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@RegionName", regionName } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_GetByRegion", con, parameters);
+            return GetCountriesFromReader(cmd);
+        }
+
+        public List<Country> GetCountriesByLanguage(string languageName)
+        {
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@LanguageName", languageName } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_GetByLanguage", con, parameters);
+            return GetCountriesFromReader(cmd);
+        }
+
+        public List<Country> GetCountriesByCurrency(string currencyCode)
+        {
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@CurrencyCode", currencyCode } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_GetByCurrency", con, parameters);
+            return GetCountriesFromReader(cmd);
+        }
+
+        public int UpdateCountry(Country country)
+        {
+            using SqlConnection con = Connect("myProjDB");
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+            {
+                { "@CountryId", country.CountryId },
+                { "@CCA3", country.CCA3 },
+                { "@Name", country.Name },
+                { "@Capital", (object)country.Capital ?? DBNull.Value },
+                { "@RegionId", country.RegionId },
+                { "@SubRegion", (object)country.SubRegion ?? DBNull.Value },
+                { "@Population", country.Population },
+                { "@Area", country.Area },
+                { "@FlagUrl", (object)country.FlagUrl ?? DBNull.Value },
+                { "@Borders", string.Join(",", country.Borders) }
+            };
+
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_Update", con, parameters);
+            return cmd.ExecuteNonQuery();
+        }
+
         public int DeleteCountry(int countryId)
         {
-            SqlConnection con;
-            SqlCommand cmd;
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-
-            paramDic.Add("@CountryId", countryId);
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spDeleteCountry_MD_TB2", con, paramDic);
-
-            try
-            {
-                DeleteLanguageByCountryIdWhenDeletingCountry(countryId);
-                DeleteCurrencyByCountryIdWhenDeletingCountry(countryId);
-                int numEffected = cmd.ExecuteNonQuery();
-                return numEffected;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@CountryId", countryId } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Country_Delete", con, parameters);
+            return cmd.ExecuteNonQuery();
         }
 
-        public List<Language> ReadAllLanguages()
+        // -- Regions --
+        // Only atomic reads/writes here - resolving a region NAME to an ID (and creating it
+        // the first time it's seen) takes more than one step, so that coordination belongs
+        // in CountryBL, not here.
+
+        public Region GetRegionByName(string regionName)
         {
-            SqlConnection con;
-            SqlCommand cmd;
-            List<Language> lenguages = new List<Language>();
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@RegionName", regionName } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Region_GetByName", con, parameters);
+            using SqlDataReader reader = cmd.ExecuteReader();
 
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllLanguages_MD_TB2", con, null);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-                    Language l = new Language();
-                    l.Code = dataReader["Code"].ToString();
-                    l.Name = dataReader["Name"].ToString();
-
-                    lenguages.Add(l);
-                }
-
-                return lenguages;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            return reader.Read()
+                ? new Region(Convert.ToInt32(reader["RegionId"]), reader["RegionName"].ToString())
+                : null;
         }
 
-        public int InsertLanguage(Language language)
+        public int InsertRegion(string regionName)
         {
-            SqlConnection con;
-            SqlCommand cmd;
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Code", language.Code);
-            paramDic.Add("@Name", language.Name);
-          
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spInsertLanguage_MD_TB2", con, paramDic);
-
-            try
-            {
-                object result = cmd.ExecuteScalar();
-                return Convert.ToInt32(result);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
-
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@RegionName", regionName } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Region_Insert", con, parameters);
+            return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
+        public List<Region> GetAllRegions()
+        {
+            List<Region> regions = new List<Region>();
 
-        public List<Currency> ReadAllCurrencies() {
+            using SqlConnection con = Connect("myProjDB");
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Region_GetAll", con, null);
+            using SqlDataReader reader = cmd.ExecuteReader();
 
-            SqlConnection con;
-            SqlCommand cmd;
+            while (reader.Read())
+            {
+                regions.Add(new Region(Convert.ToInt32(reader["RegionId"]), reader["RegionName"].ToString()));
+            }
+
+            return regions;
+        }
+
+        // -- Languages --
+
+        public List<Language> GetAllLanguages()
+        {
+            List<Language> languages = new List<Language>();
+
+            using SqlConnection con = Connect("myProjDB");
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Language_GetAll", con, null);
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                languages.Add(new Language(Convert.ToInt32(reader["LanguageId"]), reader["LanguageName"].ToString()));
+            }
+
+            return languages;
+        }
+
+        public Language GetLanguageByName(string languageName)
+        {
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@LanguageName", languageName } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Language_GetByName", con, parameters);
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            return reader.Read()
+                ? new Language(Convert.ToInt32(reader["LanguageId"]), reader["LanguageName"].ToString())
+                : null;
+        }
+
+        public int InsertLanguage(string languageName)
+        {
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@LanguageName", languageName } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Language_Insert", con, parameters);
+            return Convert.ToInt32(cmd.ExecuteScalar());
+        }
+
+        // -- Currencies --
+
+        public List<Currency> GetAllCurrencies()
+        {
             List<Currency> currencies = new List<Currency>();
 
-            try
+            using SqlConnection con = Connect("myProjDB");
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Currency_GetAll", con, null);
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
             {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                currencies.Add(MapCurrency(reader));
             }
 
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllCurrencies_MD_TB2", con, null);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-                    Currency c = new Currency();
-                    c.Code = dataReader["Code"].ToString();
-                    c.Name = dataReader["Name"].ToString();
-                    c.Symbol = dataReader["Symbol"].ToString();
-
-                    currencies.Add(c);
-                }
-
-                return currencies;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            return currencies;
         }
 
+        public Currency GetCurrencyByCode(string currencyCode)
+        {
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@CurrencyCode", currencyCode } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Currency_GetByCode", con, parameters);
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            return reader.Read() ? MapCurrency(reader) : null;
+        }
 
         public int InsertCurrency(Currency currency)
         {
-            SqlConnection con;
-            SqlCommand cmd;
+            using SqlConnection con = Connect("myProjDB");
 
-            try
+            Dictionary<string, object> parameters = new Dictionary<string, object>
             {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+                { "@CurrencyCode", currency.CurrencyCode },
+                { "@Name", currency.Name },
+                { "@Symbol", currency.Symbol }
+            };
 
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Code", currency.Code);
-            paramDic.Add("@Name", currency.Name);
-            paramDic.Add("@Symbol", currency.Symbol);
-
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spInsertCurrency_MD_TB2", con, paramDic);
-
-            try
-            {
-                object result = cmd.ExecuteScalar();
-                return Convert.ToInt32(result);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_Currency_Insert", con, parameters);
+            return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
-        
+        // -- Country <-> Language / Currency links --
 
-        //--------------------------------------------------------------------------------------------------
-        // This method reading languages of a specific country by its countryId from the dataBase
-        //--------------------------------------------------------------------------------------------------
-        public List<Language> ReadLanguagesByCountryId(int countryId)
+        public List<Language> GetLanguagesByCountryId(int countryId)
         {
-            SqlConnection con;
-            SqlCommand cmd;
             List<Language> languages = new List<Language>();
 
-            try
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@CountryId", countryId } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_CountryLanguages_GetByCountryId", con, parameters);
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
             {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                languages.Add(new Language(Convert.ToInt32(reader["LanguageId"]), reader["LanguageName"].ToString()));
             }
 
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@CountryId", countryId);
-
-            cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryLanguages_GetByCountryId", con, paramDic);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-                    string code = dataReader["LanguageCode"].ToString();
-                    string name = dataReader["LanguageName"].ToString();
-                    languages.Add(new Language(code, name));
-                 
-                }
-
-                return languages;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            return languages;
         }
 
-       
-
-       
-         public List<Country> ReadCountriesByLanguage(string language)
-         {
-            SqlConnection con;
-            SqlCommand cmd;
-            List<Country> countries = new List<Country>();
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Language", language); 
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadCountriesByLanguage_MD_TB2", con, paramDic);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-                    Country c = new Country();
-
-                    c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
-                    c.Name = dataReader["Name"].ToString();
-                    c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
-                    c.SubRegion = dataReader["SubRegion"].ToString();
-                    c.Population = Convert.ToInt64(dataReader["Population"]);
-                    c.Area = Convert.ToDouble(dataReader["Area"]);
-                    c.FlagUrl = dataReader["FlagUrl"].ToString();
-                    c.Borders = new List<string>(dataReader["Borders"].ToString()
-                                                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                        .ToList());
-                    countries.Add(c);
-                }
-
-                return countries;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
-        }
-
-
-
-
-        //--------------------------------------------------------------------------------------------------
-        // This method inserts a country to the CountryTable(GamesTable_MD_TB2) 
-        //--------------------------------------------------------------------------------------------------
-      
-        public void InsertCountryLanguages(int countryId, List<Language> languages)
+        public int InsertCountryLanguage(int countryId, int languageId)
         {
-            if (languages == null || languages.Count == 0)
-            {
-                return;
-            }
+            using SqlConnection con = Connect("myProjDB");
 
-            SqlConnection con;
+            Dictionary<string, object> parameters = new Dictionary<string, object>
+            {
+                { "@CountryId", countryId },
+                { "@LanguageId", languageId }
+            };
 
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            try
-            {
-                foreach (Language language in languages)
-                {
-                    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                    paramDic.Add("@CountryId", countryId);
-                    paramDic.Add("@LanguageCode", language.Code);
-                    paramDic.Add("@LanguageName", language.Name);
-
-                    SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryLanguages_Insert", con, paramDic);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_CountryLanguages_Insert", con, parameters);
+            return cmd.ExecuteNonQuery();
         }
 
-
-        ////--------------------------------------------------------------------------------------------------
-        //// delete a county-language relation by the countryId when deleting a country
-        ////--------------------------------------------------------------------------------------------------
-        public int DeleteLanguageByCountryIdWhenDeletingCountry(int countryId)
+        public int DeleteCountryLanguages(int countryId)
         {
-
-            SqlConnection con;
-            SqlCommand cmd;
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-
-            paramDic.Add("@CountryId", countryId);
-
-            cmd = CreateCommandWithStoredProcedureGeneral(
-                "spDeleteLanguageByCountryId_MD_TB2",
-                con,
-                paramDic);
-
-            try
-            {
-                int numEffected = cmd.ExecuteNonQuery();
-                return numEffected;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@CountryId", countryId } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_CountryLanguages_DeleteByCountryId", con, parameters);
+            return cmd.ExecuteNonQuery();
         }
 
-        //--------------------------------------------------------------------------------------------------
-        // This method reading currencies of a specific country by its countryId from the dataBase
-        //--------------------------------------------------------------------------------------------------
-        public List<Currency> ReadCurrenciesByCountryId(int countryId)
+        public List<Currency> GetCurrenciesByCountryId(int countryId)
         {
-            SqlConnection con;
-            SqlCommand cmd;
             List<Currency> currencies = new List<Currency>();
 
-            try
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@CountryId", countryId } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_CountryCurrencies_GetByCountryId", con, parameters);
+            using SqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
             {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                currencies.Add(MapCurrency(reader));
             }
 
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@CountryId", countryId);
-
-            cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryCurrencies_GetByCountryId", con, paramDic);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-                    string code = dataReader["CurrencyCode"].ToString();
-                    string name = dataReader["CurrencyName"].ToString();
-                    string symbol = dataReader["CurrencySymbol"].ToString();
-
-                    currencies.Add(new Currency(code, name, symbol));
-                }
-
-                return currencies;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            return currencies;
         }
 
-
-
-
-        public List<Country> ReadCountriesByCurrency(string currency)
+        public int InsertCountryCurrency(int countryId, int currencyId)
         {
-            SqlConnection con;
-            SqlCommand cmd;
-            List<Country> countries = new List<Country>();
+            using SqlConnection con = Connect("myProjDB");
 
-            try
+            Dictionary<string, object> parameters = new Dictionary<string, object>
             {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+                { "@CountryId", countryId },
+                { "@CurrencyId", currencyId }
+            };
 
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-            paramDic.Add("@Currency", currency); 
-
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadCountriesBycurrency_MD_TB2", con, paramDic);
-
-            try
-            {
-                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
-
-                while (dataReader.Read())
-                {
-                    Country c = new Country();
-
-                    c.CountryId = Convert.ToInt32(dataReader["dbCountryId"]);
-                    c.CCA3 = dataReader["CCA3"].ToString();
-                    c.Name = dataReader["Name"].ToString();
-                    c.OfficialName = dataReader["OfficialName"].ToString();
-                    c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
-                    c.SubRegion = dataReader["SubRegion"].ToString();
-                    c.Population = Convert.ToInt64(dataReader["Population"]);
-                    c.Area = Convert.ToDouble(dataReader["Area"]);
-                    c.FlagUrl = dataReader["FlagUrl"].ToString();
-                    c.Borders = new List<string>(dataReader["Borders"].ToString()
-                                                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                                        .ToList());
-
-                    countries.Add(c);
-                }
-
-                return countries;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_CountryCurrencies_Insert", con, parameters);
+            return cmd.ExecuteNonQuery();
         }
 
-
-
-        public void InsertCountryCurrencies(int countryId, List<Currency> currencies)
+        public int DeleteCountryCurrencies(int countryId)
         {
-            if (currencies == null || currencies.Count == 0)
-            {
-                return;
-            }
-
-            SqlConnection con;
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            try
-            {
-                foreach (Currency currency in currencies)
-                {
-                    Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                    paramDic.Add("@CountryId", countryId);
-                    paramDic.Add("@CurrencyCode", currency.Code);
-                    paramDic.Add("@CurrencyName", currency.Name);
-                    paramDic.Add("@CurrencySymbol", currency.Symbol);
-
-                    SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("sp_CountryCurrencies_Insert", con, paramDic);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
-        }
-
-
-        ////--------------------------------------------------------------------------------------------------
-        //// delete a county-currency relation by the countryId when deleting a country
-        ////--------------------------------------------------------------------------------------------------
-        public int DeleteCurrencyByCountryIdWhenDeletingCountry(int countryId)
-        {
-
-            SqlConnection con;
-            SqlCommand cmd;
-
-            try
-            {
-                con = connect("myProjDB");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            Dictionary<string, object> paramDic = new Dictionary<string, object>();
-
-            paramDic.Add("@CountryId", countryId);
-
-            cmd = CreateCommandWithStoredProcedureGeneral(
-                "spDeleteCurrencyByCountryId_MD_TB2",
-                con,
-                paramDic);
-
-            try
-            {
-                int numEffected = cmd.ExecuteNonQuery();
-                return numEffected;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                {
-                    con.Close();
-                }
-            }
+            using SqlConnection con = Connect("myProjDB");
+            Dictionary<string, object> parameters = new Dictionary<string, object> { { "@CountryId", countryId } };
+            using SqlCommand cmd = CreateStoredProcedureCommand("sp_CountryCurrencies_DeleteByCountryId", con, parameters);
+            return cmd.ExecuteNonQuery();
         }
     }
 }
-
