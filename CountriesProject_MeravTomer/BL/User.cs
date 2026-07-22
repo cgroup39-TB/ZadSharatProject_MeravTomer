@@ -6,7 +6,7 @@
 
     public class User
     {
-        private int id;
+        private int userId;
         private string name;
         private string email;
         private string password;
@@ -19,21 +19,18 @@
 
         }
 
-        public User(int id, string name, string email, string password, bool active)
+        public User(int userId, string name, string email, string password)
         {
-            Id = id;
+            UserId = userId;
             Name = name;
             Email = email;
             Password = password;
-            IsActive = active;
+            IsActive = true;
             IsAdmin = false;
             CanShare = true;
-
-
-
         }
 
-        public int Id { get => id; set => id = value; }
+        public int UserId { get => userId; set => userId = value; }
         public string Name { get => name; set => name = value; }
         public string Email { get => email; set => email = value; }
         public string Password { get => password; set => password = value; }
@@ -43,38 +40,16 @@
 
 
 
-
-        public void SetActive(bool active)
+        public void SetCanShare(User user, bool valueShare)
         {
-            IsActive = active;
+            if (!this.IsAdmin)
+            {
+                throw new UnauthorizedAccessException(
+                    "Only admin users can change the CanShare property.");
+            }
+
+            user.CanShare = valueShare;
         }
-
-        public void SetAdmin(bool admin)
-        {
-            if (this.IsAdmin)
-            {
-                IsAdmin = admin;
-            }
-            else
-            {
-                throw new UnauthorizedAccessException("Only admin users can change the IsAdmin property.");
-            }
-        }
-
-        public void SetCanShare(User user)
-        {
-            if (this.IsAdmin)
-            {
-                CanShare = user.CanShare;
-            }
-            else
-            {
-                throw new UnauthorizedAccessException("Only admin users can change the CanShare property.");
-            }
-
-        }
-
-
         public void SetIsActive(User user)
         {
             if (this.IsAdmin)
