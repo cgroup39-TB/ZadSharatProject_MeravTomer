@@ -53,14 +53,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             DBUserVisitCountryServices db = new DBUserVisitCountryServices();
             return db.ReadVisitsByUser(userId);
         }
-        public void Delete()
-        {
-        }
-
-        public void Update()
-        {
-        }
-
+      
         public static List<UserVisitedCountry> ReadAll()
         {
             DBUserVisitCountryServices db = new DBUserVisitCountryServices();

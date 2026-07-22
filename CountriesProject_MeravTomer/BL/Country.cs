@@ -67,11 +67,6 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             //  string 
 
             return this; // מחזיר את האובייקט הנוכחי לאחר ההוספה}
-<<<<<<< Updated upstream
-=======
-
-
->>>>>>> Stashed changes
         }
 
         public List<Country> ReadAllCountries()
@@ -99,7 +94,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public List<Country> ReadCountriesByRegion(string countryRegion)
+        public List<Country> ReadCountriesByRegion(Region countryRegion)
         {
 
             DBCountryServices dbs = new DBCountryServices();
