@@ -1,42 +1,37 @@
-CREATE TABLE Currencies (
 
-    CurrencyId INT IDENTITY(1,1) PRIMARY KEY,
-    [Name] NVARCHAR(20),
-    Symbol NVARCHAR(20)
+CREATE TABLE Regions(
+    RegionId INT IDENTITY(1,1) PRIMARY KEY,
+    RegionName NVARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE CountriesTable_MD_TB2 (
+CREATE TABLE Countries (
     CountryId INT IDENTITY(1,1) PRIMARY KEY,
-    CCA3 NVARCHAR(4) NOT NULL UNIQUE,
+    CCA3 NVARCHAR(3) NOT NULL UNIQUE,
     [Name] NVARCHAR(50) NOT NULL,
     Capital NVARCHAR(50),
-    Region NVARCHAR(50),
+    RegionId INT,
     SubRegion NVARCHAR(50),
     [Population] BIGINT,
     Area FLOAT,
     FlagUrl NVARCHAR(500), 
-    Borders NVARCHAR(500)
+    Borders NVARCHAR(500),
+
+    CONSTRAINT FK_Countries_Regions
+        FOREIGN KEY (RegionId)
+        REFERENCES Regions(RegionId)
 );
 
-CREATE TABLE LanguagesTable_MD_TB2 (
+CREATE TABLE Currencies (
 
+    CurrencyId INT IDENTITY(1,1) PRIMARY KEY,
+    CurrencyCode NVARCHAR(3) NOT NULL UNIQUE, --- example: ILS , EUR ,USD
+    [Name] NVARCHAR(50), --- Full name of the coin
+    Symbol NVARCHAR(20)
+);
+
+CREATE TABLE Languages(
     LanguageId INT IDENTITY(1,1) PRIMARY KEY,
-    [Name] NVARCHAR(20)
-
-);
-
-   
-);
-
-CREATE TABLE CountryCurrencies (
-    
-    CountryId INT NOT NULL,
-    CurrencyId INT NOT NULL,
-
-    PRIMARY KEY (CountryId, CurrencyId ),
-    FOREIGN KEY (CountryId) REFERENCES  Countries(CountryId) ON DELETE CASCADE,
-    FOREIGN KEY (CurrencyId) REFERENCES Currencies(CurrencyId) ON DELETE CASCADE
-   
+    LanguageName NVARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE Users(
@@ -50,14 +45,29 @@ CREATE TABLE Users(
     
 );
 
-CREATE TABLE Regions(
-    RegionId INT IDENTITY(1,1) PRIMARY KEY,
-    RegionName NVARCHAR(100) NOT NULL UNIQUE
+CREATE TABLE CountryCurrencies (
+    
+    CountryId INT NOT NULL,
+    CurrencyId INT NOT NULL,
+
+    PRIMARY KEY (CountryId, CurrencyId ),
+    FOREIGN KEY (CountryId) REFERENCES  Countries(CountryId) ON DELETE CASCADE,
+    FOREIGN KEY (CurrencyId) REFERENCES Currencies(CurrencyId) ON DELETE CASCADE
+   
 );
 
-CREATE TABLE Languages(
-    LanguageId INT IDENTITY(1,1) PRIMARY KEY,
-    LanguageName NVARCHAR(100) NOT NULL UNIQUE
+CREATE TABLE CountryLanguages(
+    CountryId INT NOT NULL,
+    LanguageId INT NOT NULL,
+
+    PRIMARY KEY (CountryId, LanguageId),
+
+    FOREIGN KEY (CountryId)
+        REFERENCES Countries(CountryId)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (LanguageId)
+        REFERENCES Languages(LanguageId)
 );
 
 CREATE TABLE UserLanguages(
@@ -68,28 +78,28 @@ CREATE TABLE UserLanguages(
 
     CONSTRAINT FK_UserLanguages_Users
         FOREIGN KEY (UserId)
-        REFERENCES Users(UserId),
+        REFERENCES Users(UserId) ON DELETE CASCADE,
 
     CONSTRAINT FK_UserLanguages_Languages
         FOREIGN KEY (LanguageId)
-        REFERENCES Languages(LanguageId),
+        REFERENCES Languages(LanguageId) ON DELETE CASCADE,
 
     CONSTRAINT UQ_UserLanguages
         UNIQUE (UserId, LanguageId)
 );
 
-CREATE TABLE UserRegions(
+CREATE TABLE UserRegions( ---User Preffered Regions
     UserRegionId INT IDENTITY(1,1) PRIMARY KEY,
     UserId INT NOT NULL,
     RegionId INT NOT NULL,
 
     CONSTRAINT FK_UserRegions_Users
         FOREIGN KEY (UserId)
-        REFERENCES Users(UserId),
+        REFERENCES Users(UserId) ON DELETE CASCADE,
 
     CONSTRAINT FK_UserRegions_Regions
         FOREIGN KEY (RegionId)
-        REFERENCES Regions(RegionId),
+        REFERENCES Regions(RegionId) ON DELETE CASCADE,
 
     CONSTRAINT UQ_UserRegions
         UNIQUE (UserId, RegionId)
@@ -100,15 +110,15 @@ CREATE TABLE UserVisitedCountries(
     CountryId INT NOT NULL,
     Rating INT NULL,
     ReviewText NVARCHAR(1000) NULL,
-    IsAdmin BIT NOT NULL DEFAULT 0
+    IsShared BIT NOT NULL DEFAULT 0,
 
     PRIMARY KEY(UserId, CountryId),
 
     FOREIGN KEY(UserId)
-        REFERENCES Users(UserId),
+        REFERENCES Users(UserId) ON DELETE CASCADE,
 
     FOREIGN KEY(CountryId)
-        REFERENCES Countries(CountryId),
+        REFERENCES Countries(CountryId) ON DELETE CASCADE,
 
     CHECK (Rating IS NULL OR Rating BETWEEN 1 AND 5)
 );
@@ -120,9 +130,9 @@ CREATE TABLE UserWantedCountries(
     PRIMARY KEY(UserId, CountryId),
 
     FOREIGN KEY(UserId)
-        REFERENCES Users(UserId),
+        REFERENCES Users(UserId) ON DELETE CASCADE,
 
     FOREIGN KEY(CountryId)
-        REFERENCES Countries(CountryId)
+        REFERENCES Countries(CountryId) ON DELETE CASCADE
 );
 
