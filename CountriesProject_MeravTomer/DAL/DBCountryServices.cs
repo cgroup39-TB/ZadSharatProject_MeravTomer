@@ -96,7 +96,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.CCA3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                 //   c.Region = dataReader["Region"].ToString();
+                    c.Region = dataReader["Region"].ToString();
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
@@ -159,7 +159,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                         c.CCA3 = dataReader["CCA3"].ToString();
                         c.Name = dataReader["Name"].ToString();
                         c.Capital = dataReader["Capital"].ToString();
-                        c.Region = dataReader["Region"].ToString();
+                   //     c.Region = dataReader["Region"].ToString();
                         c.SubRegion = dataReader["SubRegion"].ToString();
                         c.Population = Convert.ToInt64(dataReader["Population"]);
                         c.Area = Convert.ToDouble(dataReader["Area"]);
@@ -224,7 +224,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.CCA3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
+                 //   c.Region = dataReader["Region"].ToString();
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
@@ -289,7 +289,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.CCA3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
+                //    c.Region = dataReader["Region"].ToString();
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
@@ -728,7 +728,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.CCA3 = dataReader["CCA3"].ToString();
                     c.Name = dataReader["Name"].ToString();
                     c.Capital = dataReader["Capital"].ToString();
-                    c.Region = dataReader["Region"].ToString();
+                 //   c.Region = dataReader["Region"].ToString();
                     c.SubRegion = dataReader["SubRegion"].ToString();
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
