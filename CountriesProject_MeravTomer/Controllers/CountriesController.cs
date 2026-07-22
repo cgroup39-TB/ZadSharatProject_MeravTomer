@@ -112,27 +112,5 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
             return Ok(new { message = "Country was deleted successfully" });
         }
 
-        // GET: api/<CountriesController> -gets all the tags that are existing 
-        [HttpGet("getAllTags")]
-     
-        
-     }
-
-
-
-
-        ////POST api/<GamesController>/
-        //[HttpPost("oneTimeLoadData")]
-        //public IActionResult OneTimeLoadData([FromBody] List<Game> games)
-        //{
-        //    try
-        //    {
-        //        return Ok(Country.OneTimeLoadData(games));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
     }
 }
