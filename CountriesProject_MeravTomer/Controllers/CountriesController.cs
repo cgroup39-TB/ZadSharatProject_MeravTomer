@@ -102,6 +102,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         public IActionResult Delete(int id)
         {
             Country country = new Country();
+            int result = country.DeleteCountry(id);
 
             if (result == 0)
             {
