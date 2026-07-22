@@ -1,9 +1,9 @@
-﻿using CountriesProject_MeravTomer.BL;
+﻿using ServerSideCountriesProject_MeravTomer.BL;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ServerSideCountriesProject_MeravTomer.DAL;
 
-namespace CountriesProject_MeravTomer.Controllers
+namespace ServerSideCountriesProject_MeravTomer.Controllers
 {
 
     [Route("api/[controller]")]
@@ -40,7 +40,7 @@ namespace CountriesProject_MeravTomer.Controllers
         {
             Country country = new Country();
 
-            Country result = country.ReadByRegion(region);
+            List <Country> result = country.ReadByRegion(region);
 
             if (result == null)
             {

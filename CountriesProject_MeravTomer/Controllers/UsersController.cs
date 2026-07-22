@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CountriesProject_MeravTomer.Controllers
+namespace ServerSideCountriesProject_MeravTomer.Controllers
 {
     public class UsersController : Controller
     {

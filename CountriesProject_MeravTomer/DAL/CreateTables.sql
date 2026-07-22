@@ -1,9 +1,30 @@
-﻿
 CREATE TABLE Currencies (
 
     CurrencyId INT IDENTITY(1,1) PRIMARY KEY,
     [Name] NVARCHAR(20),
     Symbol NVARCHAR(20)
+);
+
+CREATE TABLE CountriesTable_MD_TB2 (
+    CountryId INT IDENTITY(1,1) PRIMARY KEY,
+    CCA3 NVARCHAR(4) NOT NULL UNIQUE,
+    [Name] NVARCHAR(50) NOT NULL,
+    Capital NVARCHAR(50),
+    Region NVARCHAR(50),
+    SubRegion NVARCHAR(50),
+    [Population] BIGINT,
+    Area FLOAT,
+    FlagUrl NVARCHAR(500), 
+    Borders NVARCHAR(500)
+);
+
+CREATE TABLE LanguagesTable_MD_TB2 (
+
+    LanguageId INT IDENTITY(1,1) PRIMARY KEY,
+    [Name] NVARCHAR(20)
+
+);
+
    
 );
 
@@ -104,3 +125,4 @@ CREATE TABLE UserWantedCountries(
     FOREIGN KEY(CountryId)
         REFERENCES Countries(CountryId)
 );
+

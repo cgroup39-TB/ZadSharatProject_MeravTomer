@@ -9,13 +9,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHttpClient<CountriesAPIService>(client =>
-{
-    var apiSettings = builder.Configuration.GetSection("CountriesAPI");
-    client.BaseAddress = new Uri((apiSettings["BaseUrl"]);
-   
-});
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

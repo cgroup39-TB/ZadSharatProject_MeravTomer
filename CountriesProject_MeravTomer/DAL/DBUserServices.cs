@@ -1,14 +1,21 @@
 ﻿using System;
-using CountriesProject_MeravTomer.BL;
+using ServerSideCountriesProject_MeravTomer.BL;
 using System.Data;
 using System.Data.SqlClient;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Text;
+using System.Diagnostics.Metrics;
+
+
 
 namespace ServerSideCountriesProject_MeravTomer.DAL
 {
     public class DBUserServices
     {
         public DBUserServices() { }
-    }
+    
 
     //--------------------------------------------------------------------------------------------------
     // This method creates a connection to the database according to the connectionString name in the web.config
@@ -71,9 +78,11 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         paramDic.Add("@Name", user.Name);
         paramDic.Add("@Email", user.Email);
         paramDic.Add("@Password", user.Password);
-        paramDic.Add("@Active", user.Active);
+        paramDic.Add("@Active", user.IsActive);
+        paramDic.Add("@IsAdmin", user.IsAdmin);
+        paramDic.Add("@CanShare", user.CanShare);
 
-        cmd = CreateCommandWithStoredProcedureGeneral("spInsertUser_MD_TB2", con, paramDic);
+            cmd = CreateCommandWithStoredProcedureGeneral("spInsertUser_MD_TB2", con, paramDic);
 
         try
         {
@@ -119,11 +128,13 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             {
                 User u = new User();
 
-                u.Id = Convert.ToInt32(dataReader["dbUserId"]);
+                u.Id = Convert.ToInt32(dataReader["UserId"]);
                 u.Name = dataReader["Name"].ToString();
                 u.Email = dataReader["Email"].ToString();
                 u.Password = dataReader["Password"].ToString();
-                u.Active = Convert.ToBoolean(dataReader["Active"]);
+                u.IsActive = Convert.ToBoolean(dataReader["Active"]);
+                u.IsAdmin = Convert.ToBoolean(dataReader["IsAdmin"]);
+                u.CanShare = Convert.ToBoolean(dataReader["CanShare"]);
 
                 users.Add(u);
             }
@@ -359,62 +370,62 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
 
     //RETURNS A LIST<Country> of a specific User's (his game Collection)
-    public List<Country> GetUserCountries(int userId)
-    {
-        SqlConnection con;
-        SqlCommand cmd;
-        List<Country> countries = new List<Country>();
+    //public List<Country> GetUserCountries(int userId)
+    //{
+    //    SqlConnection con;
+    //    SqlCommand cmd;
+    //    List<Country> countries = new List<Country>();
 
-        try
-        {
-            con = connect("myProjDB");
-        }
-        catch (Exception ex)
-        {
-            throw ex;
-        }
+    //    try
+    //    {
+    //        con = connect("myProjDB");
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw ex;
+    //    }
 
-        Dictionary<string, object> paramDic = new Dictionary<string, object>();
-        paramDic.Add("@UserId", userId);
+    //    Dictionary<string, object> paramDic = new Dictionary<string, object>();
+    //    paramDic.Add("@UserId", userId);
 
-        cmd = CreateCommandWithStoredProcedureGeneral("spGetUserCountries_MD_TB2", con, paramDic);
+    //    cmd = CreateCommandWithStoredProcedureGeneral("spGetUserCountries_MD_TB2", con, paramDic);
 
-        try
-        {
-            SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+    //    try
+    //    {
+    //        SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 
-            while (dataReader.Read())
-            {
-                Country c = new Country();
+    //        while (dataReader.Read())
+    //        {
+    //            Country c = new Country();
 
-                c.Id = Convert.ToInt32(dataReader["dbCountryId"]);
-                c.Cca3 = dataReader["CCA3"].ToString();
-                c.Name = dataReader["Name"].ToString();
-                c.OfficialName = dataReader["OfficialName"].ToString();
-                c.Capital = dataReader["Capital"].ToString();
-                c.Region = dataReader["Region"].ToString();
-                c.SubRegion = dataReader["SubRegion"].ToString();
-                c.Population = Convert.ToInt64(dataReader["Population"]);
-                c.Area = Convert.ToDouble(dataReader["Area"]);
-                c.FlagUrl = dataReader["FlagUrl"].ToString();
+    //            c.Id = Convert.ToInt32(dataReader["dbCountryId"]);
+    //            c.Cca3 = dataReader["CCA3"].ToString();
+    //            c.Name = dataReader["Name"].ToString();
+    //            c.OfficialName = dataReader["OfficialName"].ToString();
+    //            c.Capital = dataReader["Capital"].ToString();
+    //            c.Region = dataReader["Region"].ToString();
+    //            c.SubRegion = dataReader["SubRegion"].ToString();
+    //            c.Population = Convert.ToInt64(dataReader["Population"]);
+    //            c.Area = Convert.ToDouble(dataReader["Area"]);
+    //            c.FlagUrl = dataReader["FlagUrl"].ToString();
 
-                countries.Add(c);
-            }
+    //            countries.Add(c);
+    //        }
 
-            return countries;
-        }
-        catch (Exception ex)
-        {
-            throw ex;
-        }
-        finally
-        {
-            if (con != null)
-            {
-                con.Close();
-            }
-        }
-    }
+    //        return countries;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw ex;
+    //    }
+    //    finally
+    //    {
+    //        if (con != null)
+    //        {
+    //            con.Close();
+    //        }
+    //    }
+    //}
 
 
 
