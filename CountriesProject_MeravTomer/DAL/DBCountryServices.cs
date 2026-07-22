@@ -880,11 +880,12 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
 
                 while (dataReader.Read())
                 {
+                    int id = Convert.ToInt32(dataReader["CurrencyId"].ToString());
                     string code = dataReader["CurrencyCode"].ToString();
                     string name = dataReader["CurrencyName"].ToString();
                     string symbol = dataReader["CurrencySymbol"].ToString();
 
-                    currencies.Add(new Currency(code, name, symbol));
+                    currencies.Add(new Currency(id,code, name, symbol));
                 }
 
                 return currencies;

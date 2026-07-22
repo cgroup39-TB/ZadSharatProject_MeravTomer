@@ -3,16 +3,16 @@
     public class Language
     {
         private int languageId;
-        private string name;
+        private string languageName;
 
 
         public int LanguageId { get; set; }
-        public string Name { get; set; }
+        public string LanguageName { get; set; }
 
         public Language(int id, string name)
         {
             LanguageId = id;
-            Name = name;
+            LanguageName = name;
         }
 
         public Language() { }

@@ -73,32 +73,32 @@
         }
 
         // Authentication
-        public User Register(User user)
-        {
-        }
-        public User Login(string email, string password)
-        { }
-        public void SetPassword(int userId, string currentPassword, string newPassword)
-        { }
+        //public User Register(User user)
+        //{
+        //}
+        //public User Login(string email, string password)
+        //{ }
+        //public void SetPassword(int userId, string currentPassword, string newPassword)
+        //{ }
 
-        // User Profile
-        public User ReadById(int userId) { }
-        public User ReadByName(string name) { }
-        public void UpdateProfile(User user) { }
+        //// User Profile
+        //public User ReadById(int userId) { }
+        //public User ReadByName(string name) { }
+        //public void UpdateProfile(User user) { }
 
-        // User Preferences
-        public List<Language> ReadUserLanguages(int userId) { }
-        public void UpdateUserLanguages(int userId, List<int> languageIds) { }
+        //// User Preferences
+        //public List<Language> ReadUserLanguages(int userId) { }
+        //public void UpdateUserLanguages(int userId, List<int> languageIds) { }
 
-        public List<Region> ReadPreferredRegions(int userId) { }
-        public void UpdatePreferredRegions(int userId, List<int> regionIds) { }
+        //public List<Region> ReadPreferredRegions(int userId) { }
+        //public void UpdatePreferredRegions(int userId, List<int> regionIds) { }
 
-        // User Status (Admin)
-        public void SetUserActive(int actingUserId, int targetUserId, bool isActive);
-        public void SetCanShare(int actingUserId, int targetUserId, bool canShare);
-        public void SetAdmin(int actingUserId, int targetUserId, bool isAdmin);
-        public List<User> ReadAllUsers() { } 
-        public List<User> ReadStatistics() { } 
+        //// User Status (Admin)
+        //public void SetUserActive(int actingUserId, int targetUserId, bool isActive);
+        //public void SetCanShare(int actingUserId, int targetUserId, bool canShare);
+        //public void SetAdmin(int actingUserId, int targetUserId, bool isAdmin);
+        //public List<User> ReadAllUsers() { }
+        //public List<User> ReadStatistics() { }
     }
 
 }
