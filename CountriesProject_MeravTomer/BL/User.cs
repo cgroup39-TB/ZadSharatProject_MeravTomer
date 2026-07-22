@@ -6,7 +6,7 @@
 
     public class User
     {
-        private int id;
+        private int userId;
         private string name;
         private string email;
         private string password;

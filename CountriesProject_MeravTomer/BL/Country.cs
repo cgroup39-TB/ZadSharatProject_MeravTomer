@@ -19,12 +19,11 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         private List<string> borders;
 
 
-        public int Id { get => id; set => id = value; }
-        public string Cca3 { get; set; }
+        public int CountryId { get => countryId; set => countryId = value; }
+        public string CCA3 { get; set; }
         public string Name { get; set; }
-        public string OfficialName { get; set; }
         public string Capital { get; set; }
-        public string Region { get; set; }
+        public int RegionId { get; set; }
         public string SubRegion { get; set; }
         public long Population { get; set; }
         public double Area { get; set; }
@@ -39,22 +38,25 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public Country(int id, string cca3, string name, string officialName, string capital, string region, string subregion, long population, double area,
+        public Country(int id, string cca3, string name, string capital, int regionId, string subregion, long population, double area,
                        string flagUrl, List<Language> languages, List<Currency> currencies, List<string> borders)
         {
-            Id = id;
-            Cca3 = cca3;
+            CountryId = id;
+            CCA3 = cca3;
             Name = name;
-            OfficialName = officialName;
             Capital = capital;
-            Region = region;
+            RegionId = regionId;
             SubRegion = subregion;
             Population = population;
             Area = area;
             FlagUrl = flagUrl;
             Languages = new List<Language>();
+            languages.ForEach(lang => Languages.Add(new Language(lang.Code, lang.Name)));
             Currencies = new List<Currency>();
+            currencies.ForEach(curr => Currencies.Add(new Currency(curr.Code, curr.Name, curr.Symbol)));
             Borders = new List<string>();
+            borders.ForEach(border => Borders.Add(border));
+
         }
 
 
@@ -74,7 +76,8 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public List<Country> Read() {
+        public List<Country> Read()
+        {
 
             DBCountryServices dbs = new DBCountryServices();
             return dbs.ReadAllCountries();
@@ -107,7 +110,8 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         }
 
-        public List<Country> ReadByLanguage(string languageName) {
+        public List<Country> ReadByLanguage(string languageName)
+        {
 
             DBCountryServices dbs = new DBCountryServices();
 
@@ -153,49 +157,5 @@ namespace ServerSideCountriesProject_MeravTomer.BL
     }
 
 
-
-
-    public class Language
-    {
-        private string code;
-        private string name;
-        public string Code { get; set; }
-        public string Name { get; set; }
-
-        public Language(string code, string name)
-        {
-            Code = code;
-            Name = name;
-        }
-
-        public Language() { }
-    }
-
-
-    public class Currency
-    {
-        private string code;
-        private string name;
-        private string symbol;
-
-        public string Code { get; set; }
-        public string Name { get; set; }
-        public string Symbol { get; set; }  // לפעמים אין symbol
-
-
-        public Currency(string code, string name, string symbol)
-        {
-            Code = code;
-            Name = name;
-            Symbol = symbol;
-        }
-
-        public Currency() { }
-
-
-    }
-
-
-
-
 }
+
