@@ -15,7 +15,7 @@
         private bool canShare;
         private List<Region> prefferedRegions;
         private List<UserVisitedCountry> visitedCountries;
-        private List<UserLanguages> prefferedLanguages;//
+        private List<UserLanguages> prefferedLanguages;
 
         public User()
         {

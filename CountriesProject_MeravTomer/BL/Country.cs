@@ -5,7 +5,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
     public class Country
     {
         private int countryId;
-        private string cca3; //COUNTRY CODE ISO 3166-1 ALPHA-3
+        private string cca3; //COUNTRY CODE: USA
         private string name;
         private string capital;
         private List<string> borders;
@@ -28,8 +28,8 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         public long Population { get => population; set => population = value; }
         public double Area { get => area; set => area = value; }
         public string FlagUrl { get => flagUrl; set => flagUrl = value; }
-        public List<Language> Languages { get => languages; set => languages = value; }
-        public List<Currency> Currencies { get => currencies; set => currencies = value; }
+        public List<Language> Languages { get => countrySpokenLanguages; set => countrySpokenLanguages = value; }
+        public List<Currency> Currencies { get => coinsInCountry; set => coinsInCountry = value; }
         public List<string> Borders { get => borders; set => borders = value; }
 
         public Country()
