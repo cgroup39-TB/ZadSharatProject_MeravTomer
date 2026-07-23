@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Reflection.PortableExecutable;
 
 namespace ServerSideCountriesProject_MeravTomer.DAL
 {
@@ -55,7 +56,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
         public List<UserVisitedCountry> ReadAllVisits()
         {
-            List<BL.UserVisitedCountry> visits = new List<BL.UserVisitedCountry>();
+            List<UserVisitedCountry> visits = new List<BL.UserVisitedCountry>();
             SqlConnection con;
             SqlCommand cmd;
           
@@ -76,160 +77,301 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
                 while (dataReader.Read())
                 {
-                    int userId =dataReader["UserId"].conv
-                    int countryId = reader.GetInt32(reader.GetOrdinal("CountryId"));
-                    int rating = reader.GetInt32(reader.GetOrdinal("Rating"));
-                    string reviewText = reader.GetString(reader.GetOrdinal("ReviewText"));
-                    bool isShared = reader.GetBoolean(reader.GetOrdinal("IsShared"));
+                    UserVisitedCountry visit = new UserVisitedCountry();
 
-                    UserVisitedCountry visit = new UserVisitedCountry(userId, countryId, rating, reviewText, isShared);
+                    visit.UserId = Convert.ToInt32(dataReader["UserId"]);
+                    visit.CountryId = Convert.ToInt32(dataReader["CountryId"]);
+                    visit.Rating = Convert.ToInt32(dataReader["Rating"]);
+                    visit.ReviewText = dataReader["Rating"].ToString();
+                    visit.IsShared = Convert.ToBoolean(dataReader["IsShared"]);
+
+                  
                     visits.Add(visit);
                 }
+
+                return visits;
+
             }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
             }
 
-            return visits;
-        }
+          }
+
+
+        
 
         public List<UserVisitedCountry> ReadVisitsByUser(int userId)
         {
             List<UserVisitedCountry> visits = new List<UserVisitedCountry>();
+            SqlConnection con;
+            SqlCommand cmd;
 
-            using (SqlConnection con = connect("CountriesDB"))
+            try
             {
-                Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                paramDic.Add("@UserId", userId);
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
-                SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("spReadVisitsByUser", con, paramDic);
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@UserId", userId);
 
-                using (SqlDataReader reader = cmd.ExecuteReader())
+
+            cmd = CreateCommandWithStoredProcedureGeneral("spReadVisitsByUser", con, paramDic);
+
+
+
+            try
+            {
+
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (dataReader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        int countryId = reader.GetInt32(reader.GetOrdinal("CountryId"));
-                        int rating = reader.GetInt32(reader.GetOrdinal("Rating"));
-                        string reviewText = reader.GetString(reader.GetOrdinal("ReviewText"));
-                        bool isShared = reader.GetBoolean(reader.GetOrdinal("IsShared"));
 
-                        UserVisitedCountry visit = new UserVisitedCountry(userId, countryId, rating, reviewText, isShared);
-                        visits.Add(visit);
-                    }
+                    UserVisitedCountry visit = new UserVisitedCountry();
+
+                    visit.UserId = Convert.ToInt32(dataReader["UserId"]);
+                    visit.CountryId = Convert.ToInt32(dataReader["CountryId"]);
+                    visit.Rating = Convert.ToInt32(dataReader["Rating"]);
+                    visit.ReviewText = dataReader["Rating"].ToString();
+                    visit.IsShared = Convert.ToBoolean(dataReader["IsShared"]);
+
+                    visits.Add(visit);                
+                 }
+
+                return visits;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
                 }
             }
 
-            return visits;
         }
 
         public List<UserVisitedCountry> ReadVisitsByCountry(int countryId)
         {
             List<UserVisitedCountry> visits = new List<UserVisitedCountry>();
-            using (SqlConnection con = connect("CountriesDB"))
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
             {
-                Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                paramDic.Add("@UserId", userId);
-
-                SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("spReadVisitsByUser", con, paramDic);
-
-                using (SqlDataReader reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        int userId = reader.GetInt32(reader.GetOrdinal("userId"));
-                        int rating = reader.GetInt32(reader.GetOrdinal("Rating"));
-                        string reviewText = reader.GetString(reader.GetOrdinal("ReviewText"));
-                        bool isShared = reader.GetBoolean(reader.GetOrdinal("IsShared"));
-
-                        UserVisitedCountry visit = new UserVisitedCountry(userId, countryId, rating, reviewText, isShared);
-                        visits.Add(visit);
-                    }
-                }
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
 
-            return visits;
-        }
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@CountryId", countryId);
 
-        }
+            cmd = CreateCommandWithStoredProcedureGeneral("spReadVisitsByCountry", con, paramDic);
 
-        public bool UpdateVisit(UserVisitedCountry visit)
-        {
-            using (SqlConnection con = connect("CountriesDB"))
+            try {
+
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+
+                while (dataReader.Read())
+                {
+                    UserVisitedCountry visit = new UserVisitedCountry();
+
+                    visit.UserId = Convert.ToInt32(dataReader["UserId"]);
+                    visit.CountryId = Convert.ToInt32(dataReader["CountryId"]);
+                    visit.Rating = Convert.ToInt32(dataReader["Rating"]);
+                    visit.ReviewText = dataReader["Rating"].ToString();
+                    visit.IsShared = Convert.ToBoolean(dataReader["IsShared"]);
+                    visits.Add(visit);
+                }
+
+                return visits;
+            }
+            catch (Exception ex)
             {
-                Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                paramDic.Add("@UserId", visit.UserId);
-                paramDic.Add("@CountryId", visit.CountryId);
-                paramDic.Add("@Rating", visit.Rating);
-                paramDic.Add("@ReviewText", visit.ReviewText);
-                paramDic.Add("@IsShared", visit.IsShared);
+                throw ex;
+            }
+            finally
+            {
+                    con.Close();
+            }
 
-                SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("spUpdateVisit", con, paramDic);
+        }
 
-                int rowsAffected = cmd.ExecuteNonQuery();
-                return rowsAffected > 0;
+        public int UpdateVisit(UserVisitedCountry visit)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@UserId", visit.UserId);
+            paramDic.Add("@CountryId", visit.CountryId);
+            paramDic.Add("@Rating", visit.Rating);
+            paramDic.Add("@ReviewText", visit.ReviewText);
+            paramDic.Add("@IsShared", visit.IsShared);
+
+            cmd = CreateCommandWithStoredProcedureGeneral("spUpdateVisit", con, paramDic);
+            try
+            {
+                int numEffected = cmd.ExecuteNonQuery();
+                if (numEffected > 0)
+                {
+                    return numEffected;
+                }
+                else {
+                    throw new Exception("No rows were updated."); }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
             }
         }
 
 
         public bool DeleteVisit(int userId, int countryId)
         {
-            using (SqlConnection con = connect("CountriesDB"))
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
             {
-                Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                paramDic.Add("@UserId", userId);
-                paramDic.Add("@CountryId", countryId);
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
 
-                SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("spDeleteVisit", con, paramDic);
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@UserId", userId);
+            paramDic.Add("@CountryId", countryId);
 
+            cmd = CreateCommandWithStoredProcedureGeneral("spDeleteVisit", con, paramDic);
+
+            try
+            {
                 int rowsAffected = cmd.ExecuteNonQuery();
                 return rowsAffected > 0;
             }
-        }
-
-
-        public bool InsertVisit(UserVisitedCountry visit)
-        {
-            using (SqlConnection con = connect("CountriesDB"))
+            catch (Exception ex)
             {
-                Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                paramDic.Add("@UserId", visit.UserId);
-                paramDic.Add("@CountryId", visit.CountryId);
-                paramDic.Add("@Rating", visit.Rating);
-                paramDic.Add("@ReviewText", visit.ReviewText);
-                paramDic.Add("@IsShared", visit.IsShared);
-
-                SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("spInsertVisit", con, paramDic);
-
-                int rowsAffected = cmd.ExecuteNonQuery();
-                return rowsAffected > 0;
+                throw ex;
             }
-        }
-
-
-
-        public UserVisitedCountry ReadVisit(int userId, int countryId)
-        {
-            using (SqlConnection con = connect("CountriesDB"))
+            finally
             {
-                Dictionary<string, object> paramDic = new Dictionary<string, object>();
-                paramDic.Add("@UserId", userId);
-                paramDic.Add("@CountryId", countryId);
-
-                SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("spReadVisit", con, paramDic);
-
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                if (con != null)
                 {
-                    if (reader.Read())
-                    {
-                        int rating = reader.GetInt32(reader.GetOrdinal("Rating"));
-                        string reviewText = reader.GetString(reader.GetOrdinal("ReviewText"));
-                        bool isShared = reader.GetBoolean(reader.GetOrdinal("IsShared"));
-
-                        return new UserVisitedCountry(userId, countryId, rating, reviewText, isShared);
-                    }
+                    con.Close();
                 }
             }
-
-            return null; // Return null if no visit is found
         }
+
+
+        public int InsertVisit(UserVisitedCountry visit)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@UserId", visit.UserId);
+            paramDic.Add("@CountryId", visit.CountryId);
+            paramDic.Add("@Rating", visit.Rating);
+            paramDic.Add("@ReviewText", visit.ReviewText);
+            paramDic.Add("@IsShared", visit.IsShared);
+
+            cmd = CreateCommandWithStoredProcedureGeneral("spInsertVisit", con, paramDic);
+
+
+            try
+            {
+                object result = cmd.ExecuteScalar();
+                return Convert.ToInt32(result);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
+
+
+
+        //public UserVisitedCountry ReadVisit(int userId, int countryId)
+        //{
+        //    using (SqlConnection con = connect("myProjDB"))
+        //    {
+        //        Dictionary<string, object> paramDic = new Dictionary<string, object>();
+        //        paramDic.Add("@UserId", userId);
+        //        paramDic.Add("@CountryId", countryId);
+
+        //        SqlCommand cmd = CreateCommandWithStoredProcedureGeneral("spReadVisit", con, paramDic);
+
+        //        using (SqlDataReader reader = cmd.ExecuteReader())
+        //        {
+        //            if (reader.Read())
+        //            {
+        //                int rating = reader.GetInt32(reader.GetOrdinal("Rating"));
+        //                string reviewText = reader.GetString(reader.GetOrdinal("ReviewText"));
+        //                bool isShared = reader.GetBoolean(reader.GetOrdinal("IsShared"));
+
+        //                return new UserVisitedCountry(userId, countryId, rating, reviewText, isShared);
+        //            }
+        //        }
+        //    }
+
+        //    return null; // Return null if no visit is found
+        //}
 
 
        
