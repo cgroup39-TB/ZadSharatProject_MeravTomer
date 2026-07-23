@@ -1,4 +1,9 @@
-﻿CREATE PROCEDURE spReadAllCountries_MD_TB2
+﻿-- =============================================
+-- Author:      <Tomer,Merav>
+-- Create date: <23.7.2026>
+-- Description: <Read ALL Existing Countries>
+-- =============================================
+CREATE PROCEDURE spReadAllCountries_3MD_TB
 AS
 BEGIN
     --SET NOCOUNT ON;
@@ -8,7 +13,12 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE spInsertCountry_MD_TB2
+-- =============================================
+-- Author:      <Tomer,Merav>
+-- Create date: <23.7.2026>
+-- Description: <Insert a new Country>
+-- =============================================
+CREATE PROCEDURE spInsertCountry_3MD_TB
     @CCA3 NVARCHAR(3),
     @Name NVARCHAR(50),
     @Capital NVARCHAR(50),
@@ -63,7 +73,11 @@ BEGIN
 END
 GO
 
-
+-- =============================================
+-- Author:      <Tomer,Merav>
+-- Create date: <23.7.2026>
+-- Description: <Read a Country by its CountryId>
+-- =============================================
 CREATE PROCEDURE spReadCountryById
     @Id INT
 AS
@@ -90,7 +104,11 @@ END
 GO
 
 
-
+-- =============================================
+-- Author:      <Tomer,Merav>
+-- Create date: <23.7.2026>
+-- Description: <Read all countries by a specifiic Region>
+-- =============================================
 CREATE PROCEDURE spReadCountriesByRegion  ---ID how can i search by id its by name 
     @Region NVARCHAR(50)
 AS
@@ -105,7 +123,12 @@ GO
 
 
 
-CREATE PROCEDURE spUpdateCountry  --- same how can i update id by name?
+-- =============================================
+-- Author:      <Tomer,Merav>
+-- Create date: <23.7.2026>
+-- Description: <Update a specific country details>
+-- =============================================
+CREATE PROCEDURE spUpdateCountry
 
     @Id INT,
     @CCA3 NVARCHAR(4),
@@ -137,7 +160,11 @@ BEGIN
 END
 GO
       
-
+-- =============================================
+-- Author:      <Tomer,Merav>
+-- Create date: <23.7.2026>
+-- Description: <Delete a specific Country>
+-- =============================================
 CREATE PROCEDURE spDeleteCountry
     @Id INT
 AS

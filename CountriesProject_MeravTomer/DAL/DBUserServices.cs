@@ -189,7 +189,62 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                     u.Name = dataReader["Name"].ToString();
                     u.Email = dataReader["Email"].ToString();
                     u.Password = dataReader["Password"].ToString();
-                    u.IsActive = Convert.ToBoolean(dataReader["Active"]);
+                    u.IsActive = Convert.ToBoolean(dataReader["IsActive"]);
+                    u.IsAdmin = Convert.ToBoolean(dataReader["IsAdmin"]);
+                    u.CanShare = Convert.ToBoolean(dataReader["CanShare"]);
+
+                    return u;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
+
+        public User ReadUserByName(string name)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            Dictionary<string, object> paramDic = new Dictionary<string, object>();
+            paramDic.Add("@Name", name);
+
+            cmd = CreateCommandWithStoredProcedureGeneral("spReadUserByName", con, paramDic);//CREATE SP
+
+            try
+            {
+                SqlDataReader dataReader = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                if (dataReader.Read())
+                {
+                    User u = new User();
+
+                    u.UserId = Convert.ToInt32(dataReader["UserId"]);
+                    u.Name = dataReader["Name"].ToString();
+                    u.Email = dataReader["Email"].ToString();
+                    u.Password = dataReader["Password"].ToString();
+                    u.IsActive = Convert.ToBoolean(dataReader["IsActive"]);
+                    u.IsAdmin = Convert.ToBoolean(dataReader["IsAdmin"]);
+                    u.CanShare = Convert.ToBoolean(dataReader["CanShare"]);
 
                     return u;
                 }

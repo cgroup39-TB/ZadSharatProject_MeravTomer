@@ -13,6 +13,8 @@
         private bool isActive;
         private bool isAdmin;
         private bool canShare;
+        private List<Language> preferredLanguages;
+        private List<Region> prefferedRegions;
 
         public User()
         {
@@ -72,37 +74,35 @@
             user.IsAdmin = valueAdmin; //Use of the private property set (outside we can only use the user method SetIsActive)
         }
 
-        // Authentication
-        //public User Register(User user)
-        //{
-        //}
-        //public User Login(string email, string password)
-        //{ }
-        //public void SetPassword(int userId, string currentPassword, string newPassword)
-        //{ }
+        //Authentication
+        public User Register(User user)//SQL-InsertUser
+        {
 
-        //// User Profile
-        //public User ReadById(int userId) { }
-        //public User ReadByName(string name) { }
-        //public void UpdateProfile(User user) { }
-        // User Profile
-        public User (int userId) { }
-        //public User ReadByName(string name) { }
-        //public int UpdateProfile(User user) { }
+        }
+        public User Login(string email, string password)//SQL-ReadByEmail
+        { }
+        public void SetPassword(int userId, string currentPassword, string newPassword)//SQL-Update User
+        { }
+        
+        //User Profile
+        public User(int userId) { }
+        public User ReadById(int userId) { }//?
+        public User ReadByName(string name) { }//ReadByName
+        public int UpdateProfile(User user) { }// SQL-Update user
 
-        //// User Preferences
-        //public List<Language> ReadUserLanguages(int userId) { }
-        //public void UpdateUserLanguages(int userId, List<int> languageIds) { }
+        // User Preferences
+        public List<Language> ReadUserLanguages(int userId) { } //Need Create SP -ReadUserLang
+        public void UpdateUserLanguages(int userId, List<int> languageIds) { } //Need Create SP -UpdateUserLang
 
-        //public List<Region> ReadPreferredRegions(int userId) { }
-        //public void UpdatePreferredRegions(int userId, List<int> regionIds) { }
+        public List<Region> ReadPreferredRegions(int userId) { }//Need Create SP -ReadUserRegions
+        public void UpdatePreferredRegions(int userId, List<int> regionIds) { }//Need Create SP -UpdateUserRegions
 
-        //// User Status (Admin)
-        //public void SetUserActive(int actingUserId, int targetUserId, bool isActive);
-        //public void SetCanShare(int actingUserId, int targetUserId, bool canShare);
-        //public void SetAdmin(int actingUserId, int targetUserId, bool isAdmin);
-        //public List<User> ReadAllUsers() { }
-        //public List<User> ReadStatistics() { }
+        // User Status (Admin)
+        public void SetUserActive(int actingUserId, int targetUserId, bool isActive);//SQL-Update User
+        public void SetCanShare(int actingUserId, int targetUserId, bool canShare);//SQL-Update User
+        public void SetAdmin(int actingUserId, int targetUserId, bool isAdmin);//SQL-Update User
+        public List<User> ReadAllUsers() { }//SQL-ReadAllUsers
+        public List<User> ReadStatistics() { }//Need Create -ReadStatistics
     }
 
 }
