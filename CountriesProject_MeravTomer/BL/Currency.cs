@@ -7,7 +7,7 @@
         private string currencyCode;
         private string name;
         private string symbol;
-
+        private List<Country> countriesAcceptsCoin;//NEW
 
         public int CurrencyId { get; set; }
         public string CurrencyCode { get; set; }

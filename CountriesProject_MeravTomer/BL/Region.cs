@@ -4,7 +4,8 @@
     {
         private int regionId;
         private string regionName;
-
+        private List<Country> countriesInRegion;//NEW
+        //private List<User> userChoseRegion;//Mekdes said not neccesary
         public Region(int regionId, string regionName)
         {
             RegionId = regionId;

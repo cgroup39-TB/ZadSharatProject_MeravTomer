@@ -13,8 +13,9 @@
         private bool isActive;
         private bool isAdmin;
         private bool canShare;
-        private List<Language> preferredLanguages;
         private List<Region> prefferedRegions;
+        private List<UserVisitedCountry> visitedCountries;
+        private List<UserLanguages> prefferedLanguages;//
 
         public User()
         {

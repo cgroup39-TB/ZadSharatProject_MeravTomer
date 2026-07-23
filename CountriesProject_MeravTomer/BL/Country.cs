@@ -8,14 +8,16 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         private string cca3; //COUNTRY CODE ISO 3166-1 ALPHA-3
         private string name;
         private string capital;
-        private Region region;
+        private List<string> borders;
         private string subRegion;
         private long population;
         private double area;
         private string flagUrl;
-        private List<Language> languages;
-        private List<Currency> currencies;
-        private List<string> borders;
+        private Region region;
+        private List<Language> countrySpokenLanguages;
+        private List<Currency> coinsInCountry;
+        private List<UserVisitedCountry> userVisitedHere;
+
 
         public int CountryId { get => countryId; set => countryId = value; }
         public string Cca3 { get => cca3; set => cca3 = value; }
