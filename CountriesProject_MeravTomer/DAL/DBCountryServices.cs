@@ -6,6 +6,8 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Text;
 using ServerSideCountriesProject_MeravTomer.BL;
+using ServerSideCountriesProject_MeravTomer.DAL;
+
 using System.Diagnostics.Metrics;
 
 
@@ -101,9 +103,12 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
                     c.FlagUrl = dataReader["FlagUrl"].ToString();
+                    c.Languages = new List<Language>(ReadLanguagesByCountryId(c.CountryId));
+                    c.Currencies = new List<Currency>(ReadCurrenciesByCountryId(c.CountryId));
                     c.Borders = new List<string>(dataReader["Borders"].ToString()
                                                         .Split(',', StringSplitOptions.RemoveEmptyEntries)
                                                         .ToList());
+                    c.UserVisitedHere = new List<UserVisitedCountry>(ReadVisitsByCountry(c.CountryId)); // Initialize the list to avoid null reference exceptions
 
                     countries.Add(c);
                 }
@@ -164,6 +169,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                         c.Population = Convert.ToInt64(dataReader["Population"]);
                         c.Area = Convert.ToDouble(dataReader["Area"]);
                         c.FlagUrl = dataReader["FlagUrl"].ToString();
+                        c.Languages = new List<Language>(ReadLanguagesByCountryId(c.CountryId));
+                        c.Currencies = new List<Currency>(ReadCurrenciesByCountryId(c.CountryId));
                         c.Borders = new List<string>(dataReader["Borders"].ToString()
                                                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
                                                        .ToList());
@@ -229,6 +236,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
                     c.FlagUrl = dataReader["FlagUrl"].ToString();
+                    c.Languages = new List<Language>(ReadLanguagesByCountryId(c.CountryId));
+                    c.Currencies = new List<Currency>(ReadCurrenciesByCountryId(c.CountryId));
                     c.Borders = new List<string>(dataReader["Borders"].ToString()
                                                       .Split(',', StringSplitOptions.RemoveEmptyEntries)
                                                       .ToList());
@@ -294,6 +303,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
                     c.Population = Convert.ToInt64(dataReader["Population"]);
                     c.Area = Convert.ToDouble(dataReader["Area"]);
                     c.FlagUrl = dataReader["FlagUrl"].ToString();
+                    c.Languages = new List<Language>(ReadLanguagesByCountryId(c.CountryId));
+                    c.Currencies = new List<Currency>(ReadCurrenciesByCountryId(c.CountryId));
                     c.Borders = new List<string>(dataReader["Borders"].ToString()
                                                       .Split(',', StringSplitOptions.RemoveEmptyEntries)
                                                       .ToList());

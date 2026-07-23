@@ -31,6 +31,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         public List<Language> Languages { get => countrySpokenLanguages; set => countrySpokenLanguages = value; }
         public List<Currency> Currencies { get => coinsInCountry; set => coinsInCountry = value; }
         public List<string> Borders { get => borders; set => borders = value; }
+        public List<UserVisitedCountry> UserVisitedHere { get => userVisitedHere; set => userVisitedHere = value; }
 
         public Country()
         {
