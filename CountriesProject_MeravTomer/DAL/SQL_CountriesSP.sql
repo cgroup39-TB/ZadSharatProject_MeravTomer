@@ -1,12 +1,9 @@
-﻿-- ============================================================
--- COUNTRIES
--- ============================================================
-
-
--- ------------------------------------------------------------
--- READ ALL COUNTRIES
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadAllCountries_MD_TB2
+﻿-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read All Countries>
+-- =============================================
+CREATE PROCEDURE spReadAllCountries_3MD_TB
 AS
 BEGIN
 
@@ -30,10 +27,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ COUNTRY BY ID
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadCountryById_MD_TB2
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Country By Id>
+-- =============================================
+CREATE PROCEDURE spReadCountryById_3MD_TB
     @Id INT
 AS
 BEGIN
@@ -59,10 +58,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ COUNTRY BY NAME
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadCountryByName
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Country By Name>
+-- =============================================
+CREATE PROCEDURE spReadCountryByName_3MD_TB
     @Name NVARCHAR(50)
 AS
 BEGIN
@@ -88,10 +89,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ COUNTRIES BY REGION
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadCountriesByRegion
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Countries By Region>
+-- =============================================
+CREATE PROCEDURE spReadCountriesByRegion_3MD_TB
     @RegionId INT
 AS
 BEGIN
@@ -117,10 +120,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- INSERT COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE spInsertCountry_MD_TB2
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Insert Country>
+-- =============================================
+CREATE PROCEDURE spInsertCountry_3MD_TB
     @CCA3 NVARCHAR(3),
     @Name NVARCHAR(50),
     @Capital NVARCHAR(50),
@@ -164,10 +169,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- UPDATE COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE spUpdateCountry
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Update Country>
+-- =============================================
+CREATE PROCEDURE spUpdateCountry_3MD_TB
     @Id INT,
     @CCA3 NVARCHAR(3),
     @Name NVARCHAR(50),
@@ -198,10 +205,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- DELETE COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE spDeleteCountry
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Delete Country>
+-- =============================================
+CREATE PROCEDURE spDeleteCountry_3MD_TB
     @CountryId INT
 AS
 BEGIN
@@ -213,238 +222,12 @@ END
 GO
 
 
-
--- ============================================================
--- LANGUAGES
--- ============================================================
-
-
--- ------------------------------------------------------------
--- READ ALL LANGUAGES
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadAllLanguages
-AS
-BEGIN
-
-    SELECT
-        LanguageId,
-        LanguageName
-    FROM Languages;
-
-END
-GO
-
-
--- ------------------------------------------------------------
--- INSERT LANGUAGE
--- LanguageId is IDENTITY - therefore it is NOT inserted manually
--- ------------------------------------------------------------
-CREATE PROCEDURE spInsertLanguage_MD_TB2
-    @LanguageName NVARCHAR(50)
-AS
-BEGIN
-
-    INSERT INTO Languages
-    (
-        LanguageName
-    )
-    VALUES
-    (
-        @LanguageName
-    );
-
-    SELECT CAST(SCOPE_IDENTITY() AS INT);
-
-END
-GO
-
-
-
--- ============================================================
--- COUNTRY - LANGUAGES
--- ============================================================
-
-
--- ------------------------------------------------------------
--- READ LANGUAGES BY COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE sp_CountryLanguages_GetByCountryId
-    @CountryId INT
-AS
-BEGIN
-
-    SELECT
-        l.LanguageId,
-        l.LanguageName
-    FROM CountryLanguages cl
-    INNER JOIN Languages l
-        ON cl.LanguageId = l.LanguageId
-    WHERE cl.CountryId = @CountryId;
-
-END
-GO
-
-
--- ------------------------------------------------------------
--- INSERT COUNTRY-LANGUAGE RELATION
--- ------------------------------------------------------------
-CREATE PROCEDURE sp_CountryLanguages_Insert
-    @CountryId INT,
-    @LanguageId INT
-AS
-BEGIN
-
-    INSERT INTO CountryLanguages
-    (
-        CountryId,
-        LanguageId
-    )
-    VALUES
-    (
-        @CountryId,
-        @LanguageId
-    );
-
-END
-GO
-
-
--- ------------------------------------------------------------
--- DELETE LANGUAGE RELATIONS OF COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE spDeleteLanguageByCountryId_MD_TB2
-    @CountryId INT
-AS
-BEGIN
-
-    DELETE FROM CountryLanguages
-    WHERE CountryId = @CountryId;
-
-END
-GO
-
-
-
--- ============================================================
--- CURRENCIES
--- ============================================================
-
-
--- ------------------------------------------------------------
--- READ ALL CURRENCIES
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadAllCurrencies_MD_TB2
-AS
-BEGIN
-
-    SELECT
-        CurrencyId,
-        CurrencyCode,
-        [Name],
-        Symbol
-    FROM Currencies;
-
-END
-GO
-
-
--- ------------------------------------------------------------
--- INSERT CURRENCY
--- ------------------------------------------------------------
-CREATE PROCEDURE spInsertCurrency_MD_TB2
-    @Code NVARCHAR(3),
-    @Name NVARCHAR(50),
-    @Symbol NVARCHAR(20)
-AS
-BEGIN
-
-    INSERT INTO Currencies
-    (
-        CurrencyCode,
-        [Name],
-        Symbol
-    )
-    VALUES
-    (
-        @Code,
-        @Name,
-        @Symbol
-    );
-
-    SELECT CAST(SCOPE_IDENTITY() AS INT);
-
-END
-GO
-
-
-
--- ============================================================
--- COUNTRY - CURRENCIES
--- ============================================================
-
-
--- ------------------------------------------------------------
--- READ CURRENCIES BY COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE sp_CountryCurrencies_GetByCountryId
-    @CountryId INT
-AS
-BEGIN
-
-    SELECT
-        c.CurrencyId,
-        c.CurrencyCode,
-        c.[Name] AS CurrencyName,
-        c.Symbol AS CurrencySymbol
-    FROM CountryCurrencies cc
-    INNER JOIN Currencies c
-        ON cc.CurrencyId = c.CurrencyId
-    WHERE cc.CountryId = @CountryId;
-
-END
-GO
-
-
--- ------------------------------------------------------------
--- INSERT COUNTRY-CURRENCY RELATION
--- ------------------------------------------------------------
-CREATE PROCEDURE sp_CountryCurrencies_Insert
-    @CountryId INT,
-    @CurrencyId INT
-AS
-BEGIN
-
-    INSERT INTO CountryCurrencies
-    (
-        CountryId,
-        CurrencyId
-    )
-    VALUES
-    (
-        @CountryId,
-        @CurrencyId
-    );
-
-END
-GO
-
-
--- ------------------------------------------------------------
--- DELETE CURRENCY RELATIONS OF COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE spDeleteCurrencyByCountryId_MD_TB2
-    @CountryId INT
-AS
-BEGIN
-
-    DELETE FROM CountryCurrencies
-    WHERE CountryId = @CountryId;
-
-END
-GO
-
-
-CREATE PROCEDURE spReadSortedCountries
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Sorted Countries By Name Or Population>
+-- =============================================
+CREATE PROCEDURE spReadSortedCountries_3MD_TB
     @SortBy NVARCHAR(20),
     @Ascending BIT
 AS
@@ -462,9 +245,7 @@ BEGIN
         c.Area,
         c.FlagUrl,
         c.Borders
-
     FROM Countries c
-
     LEFT JOIN Regions r
         ON c.RegionId = r.RegionId
 
@@ -493,6 +274,138 @@ BEGIN
              AND @Ascending = 0
             THEN c.Population
         END DESC;
+
+END
+GO
+
+
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Languages By Country Id>
+-- =============================================
+CREATE PROCEDURE sp_CountryLanguages_GetByCountryId_3MD_TB
+    @CountryId INT
+AS
+BEGIN
+
+    SELECT
+        l.LanguageId,
+        l.LanguageName
+    FROM CountryLanguages cl
+    INNER JOIN Languages l
+        ON cl.LanguageId = l.LanguageId
+    WHERE cl.CountryId = @CountryId;
+
+END
+GO
+
+
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Insert Country Language Relation>
+-- =============================================
+CREATE PROCEDURE sp_CountryLanguages_Insert_3MD_TB
+    @CountryId INT,
+    @LanguageId INT
+AS
+BEGIN
+
+    INSERT INTO CountryLanguages
+    (
+        CountryId,
+        LanguageId
+    )
+    VALUES
+    (
+        @CountryId,
+        @LanguageId
+    );
+
+END
+GO
+
+
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Delete Country Language Relations>
+-- =============================================
+CREATE PROCEDURE spDeleteLanguageByCountryId_3MD_TB
+    @CountryId INT
+AS
+BEGIN
+
+    DELETE FROM CountryLanguages
+    WHERE CountryId = @CountryId;
+
+END
+GO
+
+
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Currencies By Country Id>
+-- =============================================
+CREATE PROCEDURE sp_CountryCurrencies_GetByCountryId_3MD_TB
+    @CountryId INT
+AS
+BEGIN
+
+    SELECT
+        c.CurrencyId,
+        c.CurrencyCode,
+        c.[Name] AS CurrencyName,
+        c.Symbol AS CurrencySymbol
+    FROM CountryCurrencies cc
+    INNER JOIN Currencies c
+        ON cc.CurrencyId = c.CurrencyId
+    WHERE cc.CountryId = @CountryId;
+
+END
+GO
+
+
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Insert Country Currency Relation>
+-- =============================================
+CREATE PROCEDURE sp_CountryCurrencies_Insert_3MD_TB
+    @CountryId INT,
+    @CurrencyId INT
+AS
+BEGIN
+
+    INSERT INTO CountryCurrencies
+    (
+        CountryId,
+        CurrencyId
+    )
+    VALUES
+    (
+        @CountryId,
+        @CurrencyId
+    );
+
+END
+GO
+
+
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Delete Country Currency Relations>
+-- =============================================
+CREATE PROCEDURE spDeleteCurrencyByCountryId_3MD_TB
+    @CountryId INT
+AS
+BEGIN
+
+    DELETE FROM CountryCurrencies
+    WHERE CountryId = @CountryId;
 
 END
 GO

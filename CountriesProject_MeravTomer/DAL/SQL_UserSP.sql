@@ -1,12 +1,9 @@
-﻿-- ============================================================
--- USERS
--- ============================================================
-
-
--- ------------------------------------------------------------
--- INSERT USER
--- ------------------------------------------------------------
-CREATE PROCEDURE spInsertUser
+﻿-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Insert User>
+-- =============================================
+CREATE PROCEDURE spInsertUser_3MD_TB
     @Name NVARCHAR(100),
     @Email NVARCHAR(150),
     @Password NVARCHAR(255),
@@ -39,10 +36,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ ALL USERS
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadAllUsers
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read All Users>
+-- =============================================
+CREATE PROCEDURE spReadAllUsers_3MD_TB
 AS
 BEGIN
 
@@ -60,10 +59,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ USER BY ID
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadUserById
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read User By Id>
+-- =============================================
+CREATE PROCEDURE spReadUserById_3MD_TB
     @UserId INT
 AS
 BEGIN
@@ -83,10 +84,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ USER BY EMAIL
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadUserByEmail
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read User By Email>
+-- =============================================
+CREATE PROCEDURE spReadUserByEmail_3MD_TB
     @Email NVARCHAR(150)
 AS
 BEGIN
@@ -106,10 +109,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ USER BY NAME
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadUserByName
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read User By Name>
+-- =============================================
+CREATE PROCEDURE spReadUserByName_3MD_TB
     @Name NVARCHAR(100)
 AS
 BEGIN
@@ -129,11 +134,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- UPDATE USER
--- One UPDATE used by several BL methods
--- ------------------------------------------------------------
-CREATE PROCEDURE spUpdateUser
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Update User>
+-- =============================================
+CREATE PROCEDURE spUpdateUser_3MD_TB
     @UserId INT,
     @Name NVARCHAR(100),
     @Email NVARCHAR(150),
@@ -158,16 +164,12 @@ END
 GO
 
 
-
--- ============================================================
--- USER REGIONS
--- ============================================================
-
-
--- ------------------------------------------------------------
--- READ USER REGIONS
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadUserRegions
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read User Preferred Regions>
+-- =============================================
+CREATE PROCEDURE spReadUserRegions_3MD_TB
     @UserId INT
 AS
 BEGIN
@@ -184,10 +186,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- INSERT USER REGION
--- ------------------------------------------------------------
-CREATE PROCEDURE spInsertUserRegion
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Insert User Preferred Region>
+-- =============================================
+CREATE PROCEDURE spInsertUserRegion_3MD_TB
     @UserId INT,
     @RegionId INT
 AS
@@ -208,10 +212,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- DELETE ALL USER REGIONS
--- ------------------------------------------------------------
-CREATE PROCEDURE spDeleteUserRegions
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Delete User Preferred Regions>
+-- =============================================
+CREATE PROCEDURE spDeleteUserRegions_3MD_TB
     @UserId INT
 AS
 BEGIN
@@ -223,16 +229,12 @@ END
 GO
 
 
-
--- ============================================================
--- USER LANGUAGES
--- ============================================================
-
-
--- ------------------------------------------------------------
--- READ USER LANGUAGES
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadUserLanguages
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read User Languages>
+-- =============================================
+CREATE PROCEDURE spReadUserLanguages_3MD_TB
     @UserId INT
 AS
 BEGIN
@@ -251,10 +253,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- INSERT USER LANGUAGE
--- ------------------------------------------------------------
-CREATE PROCEDURE spInsertUserLanguage
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Insert User Language>
+-- =============================================
+CREATE PROCEDURE spInsertUserLanguage_3MD_TB
     @UserId INT,
     @LanguageId INT,
     @LevelLanguage INT = NULL
@@ -278,10 +282,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- DELETE ALL USER LANGUAGES
--- ------------------------------------------------------------
-CREATE PROCEDURE spDeleteUserLanguages
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Delete User Languages>
+-- =============================================
+CREATE PROCEDURE spDeleteUserLanguages_3MD_TB
     @UserId INT
 AS
 BEGIN
@@ -293,16 +299,12 @@ END
 GO
 
 
-
--- ============================================================
--- USER WANTED COUNTRIES
--- ============================================================
-
-
--- ------------------------------------------------------------
--- READ WANTED COUNTRIES
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadUserWantedCountries
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read User Wanted Countries>
+-- =============================================
+CREATE PROCEDURE spReadUserWantedCountries_3MD_TB
     @UserId INT
 AS
 BEGIN
@@ -320,23 +322,22 @@ BEGIN
         c.FlagUrl,
         c.Borders
     FROM UserWantedCountries uwc
-
     INNER JOIN Countries c
         ON uwc.CountryId = c.CountryId
-
     LEFT JOIN Regions r
         ON c.RegionId = r.RegionId
-
     WHERE uwc.UserId = @UserId;
 
 END
 GO
 
 
--- ------------------------------------------------------------
--- ADD WANTED COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE spInsertUserWantedCountry
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Insert User Wanted Country>
+-- =============================================
+CREATE PROCEDURE spInsertUserWantedCountry_3MD_TB
     @UserId INT,
     @CountryId INT
 AS
@@ -368,10 +369,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- REMOVE WANTED COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE spDeleteUserWantedCountry
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Delete User Wanted Country>
+-- =============================================
+CREATE PROCEDURE spDeleteUserWantedCountry_3MD_TB
     @UserId INT,
     @CountryId INT
 AS
@@ -384,7 +387,13 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE spInsertUserLogin
+
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Insert Successful User Login>
+-- =============================================
+CREATE PROCEDURE spInsertUserLogin_3MD_TB
     @UserId INT
 AS
 BEGIN
@@ -404,7 +413,12 @@ END
 GO
 
 
-CREATE PROCEDURE spReadAdminStatistics
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Admin Statistics>
+-- =============================================
+CREATE PROCEDURE spReadAdminStatistics_3MD_TB
 AS
 BEGIN
 
@@ -440,4 +454,3 @@ BEGIN
 
 END
 GO
-

@@ -1,12 +1,9 @@
-﻿-- ============================================================
--- USER VISITED COUNTRIES
--- ============================================================
-
-
--- ------------------------------------------------------------
--- READ VISITS BY USER
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadVisitsByUser
+﻿-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Visits By User>
+-- =============================================
+CREATE PROCEDURE spReadVisitsByUser_3MD_TB
     @UserId INT
 AS
 BEGIN
@@ -24,10 +21,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ VISITS BY COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadVisitsByCountry
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Visits By Country>
+-- =============================================
+CREATE PROCEDURE spReadVisitsByCountry_3MD_TB
     @CountryId INT
 AS
 BEGIN
@@ -45,10 +44,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ SHARED VISITS BY COUNTRY
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadSharedVisitsByCountry
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Shared Reviews/Visits of a Country>
+-- =============================================
+CREATE PROCEDURE spReadSharedVisitsByCountry_3MD_TB
     @CountryId INT
 AS
 BEGIN
@@ -67,10 +68,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- READ SHARED VISITS BY USER
--- ------------------------------------------------------------
-CREATE PROCEDURE spReadSharedVisitsByUser
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Read Shared Reviews/Visits of a User>
+-- =============================================
+CREATE PROCEDURE spReadSharedVisitsByUser_3MD_TB
     @UserId INT
 AS
 BEGIN
@@ -89,10 +92,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- INSERT VISIT
--- ------------------------------------------------------------
-CREATE PROCEDURE spInsertVisit
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Insert User Visit>
+-- =============================================
+CREATE PROCEDURE spInsertVisit_3MD_TB
     @UserId INT,
     @CountryId INT,
     @Rating INT,
@@ -122,10 +127,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- UPDATE VISIT
--- ------------------------------------------------------------
-CREATE PROCEDURE spUpdateVisit
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Update User Visit>
+-- =============================================
+CREATE PROCEDURE spUpdateVisit_3MD_TB
     @UserId INT,
     @CountryId INT,
     @Rating INT,
@@ -146,10 +153,12 @@ END
 GO
 
 
--- ------------------------------------------------------------
--- DELETE VISIT
--- ------------------------------------------------------------
-CREATE PROCEDURE spDeleteVisit
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <23.7.26>
+-- Description:	<Delete User Visit>
+-- =============================================
+CREATE PROCEDURE spDeleteVisit_3MD_TB
     @UserId INT,
     @CountryId INT
 AS
