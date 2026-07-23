@@ -3,7 +3,7 @@
 -- Create date: <23.7.2026>
 -- Description: <Insert a new Language>
 -- =============================================
-CREATE PROCEDURE spInsertLanguage
+CREATE PROCEDURE spInsertLanguage_3MD_TB
     @LanguageName NVARCHAR(50)
 AS
 BEGIN
@@ -28,13 +28,13 @@ GO
 -- Create date: <23.7.2026>
 -- Description: <Read all languages existing>
 -- =============================================
-CREATE PROCEDURE spReadAllLanguages
+CREATE PROCEDURE spReadAllLanguages_3MD_TB
 AS
 BEGIN
     --SET NOCOUNT ON;
 
     SELECT *
-    FROM LanguagesTable;
+    FROM Languages;
 END
 GO 
 

@@ -78,7 +78,7 @@ GO
 -- Create date: <23.7.2026>
 -- Description: <Read a Country by its CountryId>
 -- =============================================
-CREATE PROCEDURE spReadCountryById
+CREATE PROCEDURE spReadCountryById_3MD_TB
     @Id INT
 AS
 BEGIN
@@ -91,7 +91,7 @@ END
 GO
 
 
-CREATE PROCEDURE spReadCountryByName
+CREATE PROCEDURE spReadCountryByName_3MD_TB
     @Name NVARCHAR(50)
 AS
 BEGIN
@@ -109,14 +109,14 @@ GO
 -- Create date: <23.7.2026>
 -- Description: <Read all countries by a specifiic Region>
 -- =============================================
-CREATE PROCEDURE spReadCountriesByRegion  ---ID how can i search by id its by name 
+CREATE PROCEDURE spReadCountriesByRegion_3MD_TB  ---ID how can i search by id its by name 
     @Region NVARCHAR(50)
 AS
 BEGIN
     --SET NOCOUNT ON;
 
     SELECT *
-    FROM CountriesTable_MD_TB2
+    FROM Countries
     WHERE Region =@Region;
 END
 GO
@@ -128,7 +128,7 @@ GO
 -- Create date: <23.7.2026>
 -- Description: <Update a specific country details>
 -- =============================================
-CREATE PROCEDURE spUpdateCountry
+CREATE PROCEDURE spUpdateCountry_3MD_TB
 
     @Id INT,
     @CCA3 NVARCHAR(4),
@@ -165,10 +165,10 @@ GO
 -- Create date: <23.7.2026>
 -- Description: <Delete a specific Country>
 -- =============================================
-CREATE PROCEDURE spDeleteCountry
+CREATE PROCEDURE spDeleteCountry_3MD_TB
     @Id INT
 AS
-BEGIN
+BEGINS
     --SET NOCOUNT ON;
 
     DELETE FROM Countries

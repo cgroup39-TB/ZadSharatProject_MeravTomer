@@ -3,7 +3,7 @@
 -- Create date: <23.7.2026>
 -- Description: <Insert a new coin(Currency)>
 -- =============================================
-CREATE PROCEDURE spInsertCurrency
+CREATE PROCEDURE spInsertCurrency_3MD_TB
     @CurrencyCode NVARCHAR(3),
     @Name NVARCHAR(50),
     @Symbol  NVARCHAR(20)
