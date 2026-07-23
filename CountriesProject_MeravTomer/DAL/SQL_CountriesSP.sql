@@ -1,48 +1,137 @@
-﻿-- =============================================
--- Author:      <Tomer,Merav>
--- Create date: <23.7.2026>
--- Description: <Read ALL Existing Countries>
--- =============================================
-CREATE PROCEDURE spReadAllCountries_3MD_TB
+﻿-- ============================================================
+-- COUNTRIES
+-- ============================================================
+
+
+-- ------------------------------------------------------------
+-- READ ALL COUNTRIES
+-- ------------------------------------------------------------
+CREATE PROCEDURE spReadAllCountries_MD_TB2
 AS
 BEGIN
-    --SET NOCOUNT ON;
 
-    SELECT *
-    FROM Countries;
+    SELECT
+        c.CountryId AS dbCountryId,
+        c.CCA3,
+        c.[Name],
+        c.Capital,
+        c.RegionId,
+        r.RegionName,
+        c.SubRegion,
+        c.Population,
+        c.Area,
+        c.FlagUrl,
+        c.Borders
+    FROM Countries c
+    LEFT JOIN Regions r
+        ON c.RegionId = r.RegionId;
+
 END
 GO
 
--- =============================================
--- Author:      <Tomer,Merav>
--- Create date: <23.7.2026>
--- Description: <Insert a new Country>
--- =============================================
-CREATE PROCEDURE spInsertCountry_3MD_TB
+
+-- ------------------------------------------------------------
+-- READ COUNTRY BY ID
+-- ------------------------------------------------------------
+CREATE PROCEDURE spReadCountryById_MD_TB2
+    @Id INT
+AS
+BEGIN
+
+    SELECT
+        c.CountryId AS dbCountryId,
+        c.CCA3,
+        c.[Name],
+        c.Capital,
+        c.RegionId,
+        r.RegionName,
+        c.SubRegion,
+        c.Population,
+        c.Area,
+        c.FlagUrl,
+        c.Borders
+    FROM Countries c
+    LEFT JOIN Regions r
+        ON c.RegionId = r.RegionId
+    WHERE c.CountryId = @Id;
+
+END
+GO
+
+
+-- ------------------------------------------------------------
+-- READ COUNTRY BY NAME
+-- ------------------------------------------------------------
+CREATE PROCEDURE spReadCountryByName
+    @Name NVARCHAR(50)
+AS
+BEGIN
+
+    SELECT
+        c.CountryId AS dbCountryId,
+        c.CCA3,
+        c.[Name],
+        c.Capital,
+        c.RegionId,
+        r.RegionName,
+        c.SubRegion,
+        c.Population,
+        c.Area,
+        c.FlagUrl,
+        c.Borders
+    FROM Countries c
+    LEFT JOIN Regions r
+        ON c.RegionId = r.RegionId
+    WHERE c.[Name] = @Name;
+
+END
+GO
+
+
+-- ------------------------------------------------------------
+-- READ COUNTRIES BY REGION
+-- ------------------------------------------------------------
+CREATE PROCEDURE spReadCountriesByRegion
+    @RegionId INT
+AS
+BEGIN
+
+    SELECT
+        c.CountryId AS dbCountryId,
+        c.CCA3,
+        c.[Name],
+        c.Capital,
+        c.RegionId,
+        r.RegionName,
+        c.SubRegion,
+        c.Population,
+        c.Area,
+        c.FlagUrl,
+        c.Borders
+    FROM Countries c
+    INNER JOIN Regions r
+        ON c.RegionId = r.RegionId
+    WHERE c.RegionId = @RegionId;
+
+END
+GO
+
+
+-- ------------------------------------------------------------
+-- INSERT COUNTRY
+-- ------------------------------------------------------------
+CREATE PROCEDURE spInsertCountry_MD_TB2
     @CCA3 NVARCHAR(3),
     @Name NVARCHAR(50),
     @Capital NVARCHAR(50),
-    @RegionName NVARCHAR(50),
+    @RegionId INT,
     @SubRegion NVARCHAR(50),
     @Population BIGINT,
-    @Area DECIMAL(18,2),
+    @Area FLOAT,
     @FlagUrl NVARCHAR(500),
     @Borders NVARCHAR(500)
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @RegionId INT;
-
-    SELECT @RegionId = RegionId
-    FROM Regions
-    WHERE [Name] = @RegionName;
-
-    IF @RegionId IS NULL
-    BEGIN
-        RAISERROR('Region does not exist', 16, 1);
-        RETURN;
-    END;
 
     INSERT INTO Countries
     (
@@ -69,72 +158,21 @@ BEGIN
         @Borders
     );
 
-    SELECT CAST(SCOPE_IDENTITY() AS INT) AS NewCountryId;
-END
-GO
+    SELECT CAST(SCOPE_IDENTITY() AS INT);
 
--- =============================================
--- Author:      <Tomer,Merav>
--- Create date: <23.7.2026>
--- Description: <Read a Country by its CountryId>
--- =============================================
-CREATE PROCEDURE spReadCountryById_3MD_TB
-    @Id INT
-AS
-BEGIN
-    --SET NOCOUNT ON;
-
-    SELECT *
-    FROM Countries
-    WHERE CountryId = @Id;
 END
 GO
 
 
-CREATE PROCEDURE spReadCountryByName_3MD_TB
-    @Name NVARCHAR(50)
-AS
-BEGIN
-    --SET NOCOUNT ON;
-
-    SELECT *
-    FROM Countries
-    WHERE [Name]= @Name; 
-END
-GO
-
-
--- =============================================
--- Author:      <Tomer,Merav>
--- Create date: <23.7.2026>
--- Description: <Read all countries by a specifiic Region>
--- =============================================
-CREATE PROCEDURE spReadCountriesByRegion_3MD_TB  ---ID how can i search by id its by name 
-    @Region NVARCHAR(50)
-AS
-BEGIN
-    --SET NOCOUNT ON;
-
-    SELECT *
-    FROM Countries
-    WHERE Region =@Region;
-END
-GO
-
-
-
--- =============================================
--- Author:      <Tomer,Merav>
--- Create date: <23.7.2026>
--- Description: <Update a specific country details>
--- =============================================
-CREATE PROCEDURE spUpdateCountry_3MD_TB
-
+-- ------------------------------------------------------------
+-- UPDATE COUNTRY
+-- ------------------------------------------------------------
+CREATE PROCEDURE spUpdateCountry
     @Id INT,
-    @CCA3 NVARCHAR(4),
+    @CCA3 NVARCHAR(3),
     @Name NVARCHAR(50),
     @Capital NVARCHAR(50),
-    @Region NVARCHAR(50),
+    @RegionId INT,
     @SubRegion NVARCHAR(50),
     @Population BIGINT,
     @Area FLOAT,
@@ -142,37 +180,319 @@ CREATE PROCEDURE spUpdateCountry_3MD_TB
     @Borders NVARCHAR(500)
 AS
 BEGIN
-    --SET NOCOUNT ON;
 
     UPDATE Countries
     SET
-        CCA3 =  @CCA3,
+        CCA3 = @CCA3,
         [Name] = @Name,
         Capital = @Capital,
-        Region = @Region,
+        RegionId = @RegionId,
         SubRegion = @SubRegion,
-        [Population] = @Population,
+        Population = @Population,
         Area = @Area,
         FlagUrl = @FlagUrl,
         Borders = @Borders
-        
     WHERE CountryId = @Id;
+
 END
 GO
-      
--- =============================================
--- Author:      <Tomer,Merav>
--- Create date: <23.7.2026>
--- Description: <Delete a specific Country>
--- =============================================
-CREATE PROCEDURE spDeleteCountry_3MD_TB
-    @Id INT
+
+
+-- ------------------------------------------------------------
+-- DELETE COUNTRY
+-- ------------------------------------------------------------
+CREATE PROCEDURE spDeleteCountry
+    @CountryId INT
 AS
-BEGINS
-    --SET NOCOUNT ON;
+BEGIN
 
     DELETE FROM Countries
-    WHERE CountryId = @Id;
+    WHERE CountryId = @CountryId;
+
 END
 GO
 
+
+
+-- ============================================================
+-- LANGUAGES
+-- ============================================================
+
+
+-- ------------------------------------------------------------
+-- READ ALL LANGUAGES
+-- ------------------------------------------------------------
+CREATE PROCEDURE spReadAllLanguages
+AS
+BEGIN
+
+    SELECT
+        LanguageId,
+        LanguageName
+    FROM Languages;
+
+END
+GO
+
+
+-- ------------------------------------------------------------
+-- INSERT LANGUAGE
+-- LanguageId is IDENTITY - therefore it is NOT inserted manually
+-- ------------------------------------------------------------
+CREATE PROCEDURE spInsertLanguage_MD_TB2
+    @LanguageName NVARCHAR(50)
+AS
+BEGIN
+
+    INSERT INTO Languages
+    (
+        LanguageName
+    )
+    VALUES
+    (
+        @LanguageName
+    );
+
+    SELECT CAST(SCOPE_IDENTITY() AS INT);
+
+END
+GO
+
+
+
+-- ============================================================
+-- COUNTRY - LANGUAGES
+-- ============================================================
+
+
+-- ------------------------------------------------------------
+-- READ LANGUAGES BY COUNTRY
+-- ------------------------------------------------------------
+CREATE PROCEDURE sp_CountryLanguages_GetByCountryId
+    @CountryId INT
+AS
+BEGIN
+
+    SELECT
+        l.LanguageId,
+        l.LanguageName
+    FROM CountryLanguages cl
+    INNER JOIN Languages l
+        ON cl.LanguageId = l.LanguageId
+    WHERE cl.CountryId = @CountryId;
+
+END
+GO
+
+
+-- ------------------------------------------------------------
+-- INSERT COUNTRY-LANGUAGE RELATION
+-- ------------------------------------------------------------
+CREATE PROCEDURE sp_CountryLanguages_Insert
+    @CountryId INT,
+    @LanguageId INT
+AS
+BEGIN
+
+    INSERT INTO CountryLanguages
+    (
+        CountryId,
+        LanguageId
+    )
+    VALUES
+    (
+        @CountryId,
+        @LanguageId
+    );
+
+END
+GO
+
+
+-- ------------------------------------------------------------
+-- DELETE LANGUAGE RELATIONS OF COUNTRY
+-- ------------------------------------------------------------
+CREATE PROCEDURE spDeleteLanguageByCountryId_MD_TB2
+    @CountryId INT
+AS
+BEGIN
+
+    DELETE FROM CountryLanguages
+    WHERE CountryId = @CountryId;
+
+END
+GO
+
+
+
+-- ============================================================
+-- CURRENCIES
+-- ============================================================
+
+
+-- ------------------------------------------------------------
+-- READ ALL CURRENCIES
+-- ------------------------------------------------------------
+CREATE PROCEDURE spReadAllCurrencies_MD_TB2
+AS
+BEGIN
+
+    SELECT
+        CurrencyId,
+        CurrencyCode,
+        [Name],
+        Symbol
+    FROM Currencies;
+
+END
+GO
+
+
+-- ------------------------------------------------------------
+-- INSERT CURRENCY
+-- ------------------------------------------------------------
+CREATE PROCEDURE spInsertCurrency_MD_TB2
+    @Code NVARCHAR(3),
+    @Name NVARCHAR(50),
+    @Symbol NVARCHAR(20)
+AS
+BEGIN
+
+    INSERT INTO Currencies
+    (
+        CurrencyCode,
+        [Name],
+        Symbol
+    )
+    VALUES
+    (
+        @Code,
+        @Name,
+        @Symbol
+    );
+
+    SELECT CAST(SCOPE_IDENTITY() AS INT);
+
+END
+GO
+
+
+
+-- ============================================================
+-- COUNTRY - CURRENCIES
+-- ============================================================
+
+
+-- ------------------------------------------------------------
+-- READ CURRENCIES BY COUNTRY
+-- ------------------------------------------------------------
+CREATE PROCEDURE sp_CountryCurrencies_GetByCountryId
+    @CountryId INT
+AS
+BEGIN
+
+    SELECT
+        c.CurrencyId,
+        c.CurrencyCode,
+        c.[Name] AS CurrencyName,
+        c.Symbol AS CurrencySymbol
+    FROM CountryCurrencies cc
+    INNER JOIN Currencies c
+        ON cc.CurrencyId = c.CurrencyId
+    WHERE cc.CountryId = @CountryId;
+
+END
+GO
+
+
+-- ------------------------------------------------------------
+-- INSERT COUNTRY-CURRENCY RELATION
+-- ------------------------------------------------------------
+CREATE PROCEDURE sp_CountryCurrencies_Insert
+    @CountryId INT,
+    @CurrencyId INT
+AS
+BEGIN
+
+    INSERT INTO CountryCurrencies
+    (
+        CountryId,
+        CurrencyId
+    )
+    VALUES
+    (
+        @CountryId,
+        @CurrencyId
+    );
+
+END
+GO
+
+
+-- ------------------------------------------------------------
+-- DELETE CURRENCY RELATIONS OF COUNTRY
+-- ------------------------------------------------------------
+CREATE PROCEDURE spDeleteCurrencyByCountryId_MD_TB2
+    @CountryId INT
+AS
+BEGIN
+
+    DELETE FROM CountryCurrencies
+    WHERE CountryId = @CountryId;
+
+END
+GO
+
+
+CREATE PROCEDURE spReadSortedCountries
+    @SortBy NVARCHAR(20),
+    @Ascending BIT
+AS
+BEGIN
+
+    SELECT
+        c.CountryId AS dbCountryId,
+        c.CCA3,
+        c.[Name],
+        c.Capital,
+        c.RegionId,
+        r.RegionName,
+        c.SubRegion,
+        c.Population,
+        c.Area,
+        c.FlagUrl,
+        c.Borders
+
+    FROM Countries c
+
+    LEFT JOIN Regions r
+        ON c.RegionId = r.RegionId
+
+    ORDER BY
+
+        CASE
+            WHEN @SortBy = 'name'
+             AND @Ascending = 1
+            THEN c.[Name]
+        END ASC,
+
+        CASE
+            WHEN @SortBy = 'name'
+             AND @Ascending = 0
+            THEN c.[Name]
+        END DESC,
+
+        CASE
+            WHEN @SortBy = 'population'
+             AND @Ascending = 1
+            THEN c.Population
+        END ASC,
+
+        CASE
+            WHEN @SortBy = 'population'
+             AND @Ascending = 0
+            THEN c.Population
+        END DESC;
+
+END
+GO

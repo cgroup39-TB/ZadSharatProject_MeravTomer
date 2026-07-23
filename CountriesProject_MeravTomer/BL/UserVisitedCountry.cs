@@ -5,83 +5,160 @@ namespace ServerSideCountriesProject_MeravTomer.BL
     public class UserVisitedCountry
     {
         private int userId;
-        private int countryId;
+        private Country country;
         private int rating;
         private string reviewText;
         private bool isShared;
 
-        public int UserId { get => userId; set => userId = value; }
-        public int CountryId { get => countryId; set => countryId = value; }
-        public int Rating { get => rating; set => rating = value; }
-        public string ReviewText { get => reviewText; set => reviewText = value; }
-        public bool IsShared { get => isShared; set => isShared = value; }
 
+        // =========================
+        // Constructors
+        // =========================
 
-        public UserVisitedCountry(int userId, int countryId, int rating, string reviewText, bool isShared)
+        public UserVisitedCountry()
+        {
+        }
+
+        public UserVisitedCountry(
+            int userId,
+            Country country,
+            int rating,
+            string reviewText,
+            bool isShared)
         {
             UserId = userId;
-            CountryId = countryId;
+            Country = country;
             Rating = rating;
             ReviewText = reviewText;
             IsShared = isShared;
         }
 
-        public UserVisitedCountry() { }
+
+        // =========================
+        // Properties
+        // =========================
+
+        public int UserId
+        {
+            get => userId;
+            set => userId = value;
+        }
+
+        public Country Country
+        {
+            get => country;
+            set => country = value;
+        }
+
+        public int Rating
+        {
+            get => rating;
+            set
+            {
+                if (value < 1 || value > 5)
+                {
+                    throw new ArgumentException(
+                        "Rating must be between 1 and 5.");
+                }
+
+                rating = value;
+            }
+        }
+
+        public string ReviewText
+        {
+            get => reviewText;
+            set => reviewText = value;
+        }
+
+        public bool IsShared
+        {
+            get => isShared;
+            set => isShared = value;
+        }
 
 
+        // =========================
+        // CRUD
+        // =========================
 
         public UserVisitedCountry Insert()
         {
-            DBUserVisitCountryServices db = new DBUserVisitCountryServices();
+            DBUserVisitCountryServices db =
+                new DBUserVisitCountryServices();
+
+            db.InsertVisit(this);
+
             return this;
         }
 
-        public bool Update()
+        public int Update()
         {
-            DBUserVisitCountryServices db = new DBUserVisitCountryServices();
+            DBUserVisitCountryServices db =
+                new DBUserVisitCountryServices();
+
             return db.UpdateVisit(this);
         }
 
         public bool Delete()
         {
-            DBUserVisitCountryServices db = new DBUserVisitCountryServices();
-            return db.DeleteVisit(userId, countryId);
+            DBUserVisitCountryServices db =
+                new DBUserVisitCountryServices();
+
+            return db.DeleteVisit(
+                UserId,
+                Country.CountryId
+            );
         }
 
-        public static List<UserVisitedCountry> ReadAllUserReviews(int userId)
+
+        // =========================
+        // Read
+        // =========================
+
+        public static List<UserVisitedCountry>
+            ReadVisitedCountriesByUser(int userId)
         {
-            DBUserVisitCountryServices db = new DBUserVisitCountryServices();
+            DBUserVisitCountryServices db =
+                new DBUserVisitCountryServices();
+
             return db.ReadVisitsByUser(userId);
         }
-      
-       
-        public static List<UserVisitedCountry> ReadAll()
-        {
-            DBUserVisitCountryServices db = new DBUserVisitCountryServices();
-            return db.ReadAllVisits();
-        }
 
-        public static List<UserVisitedCountry> ReadAllCountryReviews(int countryId)
+
+        public static List<UserVisitedCountry>
+            ReadVisitsByCountry(int countryId)
         {
-            DBUserVisitCountryServices db = new DBUserVisitCountryServices();
+            DBUserVisitCountryServices db =
+                new DBUserVisitCountryServices();
+
             return db.ReadVisitsByCountry(countryId);
         }
 
-        public List<UserVisitedCountry> ReadCountrySharedReviews(int countryId)
-        {
 
-            DBUserVisitCountryServices db = new DBUserVisitCountryServices();
+        // =========================
+        // Shared Reviews
+        // =========================
+
+        public static List<UserVisitedCountry>
+            ReadSharedReviewsByCountry(int countryId)
+        {
+            DBUserVisitCountryServices db =
+                new DBUserVisitCountryServices();
+
             return db.ReadSharedVisitsByCountry(countryId);
         }
 
-        public List<UserVisitedCountry> ReadUserSharedReviews(int userId)
+
+        public static List<UserVisitedCountry>
+            ReadSharedReviewsByUser(int userId)
         {
-            DBUserVisitCountryServices db = new DBUserVisitCountryServices();
+            DBUserVisitCountryServices db =
+                new DBUserVisitCountryServices();
+
             return db.ReadSharedVisitsByUser(userId);
         }
-
     }
 
 
-    
 }

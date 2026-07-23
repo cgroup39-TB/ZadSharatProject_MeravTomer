@@ -136,3 +136,13 @@ CREATE TABLE UserWantedCountries(
         REFERENCES Countries(CountryId) ON DELETE CASCADE
 );
 
+CREATE TABLE UserLogins
+(
+    LoginId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    LoginDate DATETIME NOT NULL DEFAULT GETDATE(),
+
+    FOREIGN KEY (UserId)
+        REFERENCES Users(UserId)
+        ON DELETE CASCADE
+);

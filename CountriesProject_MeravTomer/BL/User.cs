@@ -122,11 +122,15 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         }
 
 
-        public User Login(string email, string password)
+        public User Login(
+    string email,
+    string password)
         {
-            DBUserServices db = new DBUserServices();
+            DBUserServices db =
+                new DBUserServices();
 
-            User user = db.ReadUserByEmail(email);
+            User user =
+                db.ReadUserByEmail(email);
 
             if (user == null)
             {
@@ -145,6 +149,9 @@ namespace ServerSideCountriesProject_MeravTomer.BL
                 throw new Exception(
                     "Invalid email or password.");
             }
+
+            // Login succeeded
+            db.InsertUserLogin(user.UserId);
 
             return user;
         }
@@ -335,6 +342,23 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             DBUserServices db = new DBUserServices();
 
             db.UpdateUserLanguages(userId, languages);
+        }
+
+
+
+
+        public AdminStatistics ReadStatistics()
+        {
+            if (!this.IsAdmin)
+            {
+                throw new UnauthorizedAccessException(
+                    "Only admins can view statistics.");
+            }
+
+            DBUserServices db =
+                new DBUserServices();
+
+            return db.ReadStatistics();
         }
     }
 }

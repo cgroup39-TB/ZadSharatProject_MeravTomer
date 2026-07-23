@@ -1,41 +1,53 @@
-﻿-- =============================================
--- Author:      <Tomer,Merav>
--- Create date: <23.7.2026>
--- Description: <Insert a new Language>
--- =============================================
-CREATE PROCEDURE spInsertLanguage_3MD_TB
+﻿CREATE PROCEDURE spReadAllLanguages
+AS
+BEGIN
+    SELECT
+        LanguageId,
+        LanguageName
+    FROM Languages;
+END
+GO
+
+
+CREATE PROCEDURE spReadLanguageById
+    @LanguageId INT
+AS
+BEGIN
+    SELECT
+        LanguageId,
+        LanguageName
+    FROM Languages
+    WHERE LanguageId = @LanguageId;
+END
+GO
+
+
+CREATE PROCEDURE spReadLanguageByName
     @LanguageName NVARCHAR(50)
 AS
 BEGIN
-    --SET NOCOUNT ON;
+    SELECT
+        LanguageId,
+        LanguageName
+    FROM Languages
+    WHERE LanguageName = @LanguageName;
+END
+GO
 
+
+CREATE PROCEDURE spInsertLanguage
+    @LanguageName NVARCHAR(50)
+AS
+BEGIN
     INSERT INTO Languages
     (
-        LanguageName  
+        LanguageName
     )
     VALUES
     (
         @LanguageName
     );
 
-    SELECT SCOPE_IDENTITY() AS NewLanguageId; --returns the last id that identity insereted in the table (last game that was inserted) for now it is not neccessary but maybe later
+    SELECT CAST(SCOPE_IDENTITY() AS INT);
 END
 GO
-
-
--- =============================================
--- Author:      <Tomer,Merav>
--- Create date: <23.7.2026>
--- Description: <Read all languages existing>
--- =============================================
-CREATE PROCEDURE spReadAllLanguages_3MD_TB
-AS
-BEGIN
-    --SET NOCOUNT ON;
-
-    SELECT *
-    FROM Languages;
-END
-GO 
-
-

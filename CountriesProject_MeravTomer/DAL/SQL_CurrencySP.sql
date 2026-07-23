@@ -1,31 +1,65 @@
-﻿-- =============================================
--- Author:      <Tomer,Merav>
--- Create date: <23.7.2026>
--- Description: <Insert a new coin(Currency)>
--- =============================================
-CREATE PROCEDURE spInsertCurrency_3MD_TB
-    @CurrencyCode NVARCHAR(3),
-    @Name NVARCHAR(50),
-    @Symbol  NVARCHAR(20)
-
+﻿CREATE PROCEDURE spReadAllCurrencies
 AS
 BEGIN
-    --SET NOCOUNT ON;
+    SELECT
+        CurrencyId,
+        CurrencyCode,
+        [Name],
+        Symbol
+    FROM Currencies;
+END
+GO
 
-    INSERT INTO Languages
+
+CREATE PROCEDURE spReadCurrencyById
+    @CurrencyId INT
+AS
+BEGIN
+    SELECT
+        CurrencyId,
+        CurrencyCode,
+        [Name],
+        Symbol
+    FROM Currencies
+    WHERE CurrencyId = @CurrencyId;
+END
+GO
+
+
+CREATE PROCEDURE spReadCurrencyByCode
+    @CurrencyCode NVARCHAR(3)
+AS
+BEGIN
+    SELECT
+        CurrencyId,
+        CurrencyCode,
+        [Name],
+        Symbol
+    FROM Currencies
+    WHERE CurrencyCode = @CurrencyCode;
+END
+GO
+
+
+CREATE PROCEDURE spInsertCurrency
+    @CurrencyCode NVARCHAR(3),
+    @Name NVARCHAR(50),
+    @Symbol NVARCHAR(20)
+AS
+BEGIN
+    INSERT INTO Currencies
     (
         CurrencyCode,
         [Name],
         Symbol
-      
     )
     VALUES
     (
-        @Code,
+        @CurrencyCode,
         @Name,
         @Symbol
     );
 
-    SELECT SCOPE_IDENTITY() AS NewCurrencyId; --returns the last id that identity insereted in the table (last game that was inserted) for now it is not neccessary but maybe later
+    SELECT CAST(SCOPE_IDENTITY() AS INT);
 END
 GO
