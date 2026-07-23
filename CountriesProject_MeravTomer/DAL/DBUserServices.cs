@@ -85,7 +85,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
 
 
-            cmd = CreateCommandWithStoredProcedureGeneral("spInsertUser_MD_TB2", con, paramDic);
+            cmd = CreateCommandWithStoredProcedureGeneral("spInsertUser", con, paramDic);
 
             try
             {
@@ -121,7 +121,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                 throw ex;
             }
 
-            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllUsers_MD_TB2", con, null);
+            cmd = CreateCommandWithStoredProcedureGeneral("spReadAllUsers", con, null);
 
             try
             {
@@ -157,7 +157,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             }
         }
 
-        //Reads A User in the db that has the specific email
+        //Reads A User in the db that has the specific email -password will be check in the BL layer
         public User ReadUserByEmail(string email)
         {
             SqlConnection con;
@@ -248,7 +248,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
         //UPDATES A User in the db by its userId
-        public int UpdateUser(int userToUpdateId, User user)
+        public int UpdateUser(int userToUpdateId, User userDetails)
         {
             SqlConnection con;
             SqlCommand cmd;
@@ -264,10 +264,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
             Dictionary<string, object> paramDic = new Dictionary<string, object>();
             paramDic.Add("@Id", userToUpdateId);
-            paramDic.Add("@Name", user.Name);
-            paramDic.Add("@Email", user.Email);
-            paramDic.Add("@Password", user.Password);
-            paramDic.Add("@Active", user.IsActive);
+            paramDic.Add("@Name", userDetails.Name);
+            paramDic.Add("@Email", userDetails.Email);
+            paramDic.Add("@Password", userDetails.Password);
+            paramDic.Add("@Active", userDetails.IsActive);
 
             cmd = CreateCommandWithStoredProcedureGeneral("spUpdateUser_MD_TB2", con, paramDic);
 
@@ -292,7 +292,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         ////ADDS A Game to a specific User's Collection
         ////-- Tags are inserted when the game is inserted into GamesTable.
         ////-- UsersGamesTable contains only UserId and GameId.
-        ////-- Therefore,this method is adding an existing game to a user collection  and does not duplicate tags or inserting new tags.
+        ////-- Therefore,this method is adding an existing game to a userDetails collection  and does not duplicate tags or inserting new tags.
         //public int AddGameToUserCollection(int userId, int gameId)
         //{
         //    SqlConnection con;
@@ -435,7 +435,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
 
 
-        ////Returns recommended games for a specific user according to his games tags
+        ////Returns recommended games for a specific userDetails according to his games tags
         //public List<Game> GetRecommendedCountries(int userId)
         //{
         //    SqlConnection con;
