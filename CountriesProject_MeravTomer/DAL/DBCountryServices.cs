@@ -54,7 +54,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             if (paramDic != null)
                 foreach (KeyValuePair<string, object> param in paramDic)
                 {
-                    cmd.Parameters.AddWithValue(param.Key, param.Value);
+                    cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
 
                 }
 

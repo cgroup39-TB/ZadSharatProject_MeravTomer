@@ -56,7 +56,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                 {
                     cmd.Parameters.AddWithValue(
                         param.Key,
-                        param.Value);
+                        param.Value ?? DBNull.Value);
                 }
             }
 
