@@ -477,7 +477,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
 
             try
             {
-                Dictionary<string, int> statistics =
+                AdminStatistics statistics =
                     admin.ReadStatistics();
 
                 return Ok(statistics);

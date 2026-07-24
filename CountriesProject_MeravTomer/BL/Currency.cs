@@ -65,7 +65,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         public Currency ReadCurrencyById(int currencyId)
         {
-            DBCountryServices db = new DBCountryServices();
+            DBCurrencyServices db = new DBCurrencyServices();
 
             return db.ReadCurrencyById(currencyId);
         }
@@ -73,7 +73,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         public Currency ReadCurrencyByCode(string currencyCode)
         {
-            DBCountryServices db = new DBCountryServices();
+            DBCurrencyServices db = new DBCurrencyServices();
 
             return db.ReadCurrencyByCode(currencyCode);
         }
