@@ -77,7 +77,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             }
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadAllLanguages",
+                "spReadAllLanguages_3MD_TB",
                 con,
                 null);
 
@@ -138,7 +138,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@LanguageId", languageId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadLanguageById",
+                "spReadLanguageById_3MD_TB",
                 con,
                 paramDic);
 
@@ -199,7 +199,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@LanguageName", languageName);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadLanguageByName",
+                "spReadLanguageByName_3MD_TB",
                 con,
                 paramDic);
 
@@ -262,7 +262,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                 language.LanguageName);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertLanguage",
+                "spInsertLanguage_3MD_TB",
                 con,
                 paramDic);
 

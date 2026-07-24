@@ -82,7 +82,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             }
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadAllCountries_MD_TB2",
+                "spReadAllCountries_3MD_TB",
                 con,
                 null);
 
@@ -167,7 +167,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@Id", id);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadCountryById_MD_TB2",
+                "spReadCountryById_3MD_TB",
                 con,
                 paramDic);
 
@@ -252,7 +252,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@Name", countryName);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadCountryByName",
+                "spReadCountryByName_3MD_TB",
                 con,
                 paramDic);
 
@@ -339,7 +339,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@RegionId", region.RegionId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadCountriesByRegion",
+                "spReadCountriesByRegion_3MD_TB",
                 con,
                 paramDic);
 
@@ -432,7 +432,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@Borders", string.Join(",", country.Borders));
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertCountry_MD_TB2",
+                "spInsertCountry_3MD_TB",
                 con,
                 paramDic);
 
@@ -488,7 +488,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@Borders", string.Join(",", country.Borders));
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spUpdateCountry",
+                "spUpdateCountry_3MD_TB",
                 con,
                 paramDic);
 
@@ -534,7 +534,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spDeleteCountry",
+                "spDeleteCountry_3MD_TB",
                 con,
                 paramDic);
 
@@ -580,7 +580,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             }
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadAllLanguages",
+                "spReadAllLanguages_3MD_TB",
                 con,
                 null);
 
@@ -641,7 +641,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@LanguageName", language.LanguageName);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertLanguage_MD_TB2",
+                "spInsertLanguage_3MD_TB",
                 con,
                 paramDic);
 
@@ -684,7 +684,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             }
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadAllCurrencies_MD_TB2",
+                "spReadAllCurrencies_3MD_TB",
                 con,
                 null);
 
@@ -753,7 +753,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@Symbol", currency.Symbol);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertCurrency_MD_TB2",
+                "spInsertCurrency_3MD_TB",
                 con,
                 paramDic);
 
@@ -801,7 +801,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "sp_CountryLanguages_GetByCountryId",
+                "sp_CountryLanguages_GetByCountryId_3MD_TB",
                 con,
                 paramDic);
 
@@ -873,7 +873,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
 
                     SqlCommand cmd =
                         CreateCommandWithStoredProcedureGeneral(
-                            "sp_CountryLanguages_Insert",
+                            "sp_CountryLanguages_Insert_3MD_TB",
                             con,
                             paramDic);
 
@@ -918,7 +918,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spDeleteLanguageByCountryId_MD_TB2",
+                "spDeleteLanguageByCountryId_3MD_TB",
                 con,
                 paramDic);
 
@@ -966,7 +966,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "sp_CountryCurrencies_GetByCountryId",
+                "sp_CountryCurrencies_GetByCountryId_3MD_TB",
                 con,
                 paramDic);
 
@@ -1048,7 +1048,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
 
                     SqlCommand cmd =
                         CreateCommandWithStoredProcedureGeneral(
-                            "sp_CountryCurrencies_Insert",
+                            "sp_CountryCurrencies_Insert_3MD_TB",
                             con,
                             paramDic);
 
@@ -1093,7 +1093,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spDeleteCurrencyByCountryId_MD_TB2",
+                "spDeleteCurrencyByCountryId_3MD_TB",
                 con,
                 paramDic);
 
@@ -1142,7 +1142,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
             paramDic.Add("@Ascending", ascending);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadSortedCountries",
+                "spReadSortedCountries_3MD_TB",
                 con,
                 paramDic);
 

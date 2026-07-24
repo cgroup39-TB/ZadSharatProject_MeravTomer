@@ -74,7 +74,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             }
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadAllRegions",
+                "spReadAllRegions_3MD_TB",
                 con,
                 null);
 
@@ -132,7 +132,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@RegionId", regionId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadRegionById",
+                "spReadRegionById_3MD_TB",
                 con,
                 paramDic);
 
@@ -190,7 +190,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@RegionName", regionName);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadRegionByName",
+                "spReadRegionByName_3MD_TB",
                 con,
                 paramDic);
 
@@ -250,7 +250,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                 region.RegionName);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertRegion",
+                "spInsertRegion_3MD_TB",
                 con,
                 paramDic);
 

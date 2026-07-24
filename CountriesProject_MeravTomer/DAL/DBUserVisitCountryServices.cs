@@ -88,7 +88,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@UserId", userId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadVisitsByUser",
+                "spReadVisitsByUser_3MD_TB",
                 con,
                 paramDic);
 
@@ -180,7 +180,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadVisitsByCountry",
+                "spReadVisitsByCountry_3MD_TB",
                 con,
                 paramDic);
 
@@ -271,7 +271,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadSharedVisitsByCountry",
+                "spReadSharedVisitsByCountry_3MD_TB",
                 con,
                 paramDic);
 
@@ -368,7 +368,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@UserId", userId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadSharedVisitsByUser",
+                "spReadSharedVisitsByUser_3MD_TB",
                 con,
                 paramDic);
 
@@ -560,7 +560,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@IsShared", visit.IsShared);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertVisit",
+                "spInsertVisit_3MD_TB",
                 con,
                 paramDic);
 
@@ -616,7 +616,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@IsShared", visit.IsShared);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spUpdateVisit",
+                "spUpdateVisit_3MD_TB",
                 con,
                 paramDic);
 
@@ -667,7 +667,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spDeleteVisit",
+                "spDeleteVisit_3MD_TB",
                 con,
                 paramDic);
 

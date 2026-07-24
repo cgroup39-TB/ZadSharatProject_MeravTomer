@@ -74,7 +74,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             }
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadAllCurrencies",
+                "spReadAllCurrencies_3MD_TB",
                 con,
                 null);
 
@@ -138,7 +138,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@CurrencyId", currencyId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadCurrencyById",
+                "spReadCurrencyById_3MD_TB",
                 con,
                 paramDic);
 
@@ -202,7 +202,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@CurrencyCode", currencyCode);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadCurrencyByCode",
+                "spReadCurrencyByCode_3MD_TB",
                 con,
                 paramDic);
 
@@ -276,7 +276,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                 currency.Symbol);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertCurrency",
+                "spInsertCurrency_3MD_TB",
                 con,
                 paramDic);
 

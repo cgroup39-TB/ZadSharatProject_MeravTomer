@@ -97,7 +97,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@CanShare", user.CanShare);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertUser",
+                "spInsertUser_3MD_TB",
                 con,
                 paramDic);
 
@@ -143,7 +143,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             }
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadAllUsers",
+                "spReadAllUsers_3MD_TB",
                 con,
                 null);
 
@@ -219,7 +219,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@UserId", userId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadUserById",
+                "spReadUserById_3MD_TB",
                 con,
                 paramDic);
 
@@ -296,7 +296,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@Email", email);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadUserByEmail",
+                "spReadUserByEmail_3MD_TB",
                 con,
                 paramDic);
 
@@ -372,7 +372,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@Name", name);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadUserByName",
+                "spReadUserByName_3MD_TB",
                 con,
                 paramDic);
 
@@ -457,7 +457,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@CanShare", userDetails.CanShare);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spUpdateUser",
+                "spUpdateUser_3MD_TB",
                 con,
                 paramDic);
 
@@ -513,7 +513,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@UserId", userId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadUserRegions",
+                "spReadUserRegions_3MD_TB",
                 con,
                 paramDic);
 
@@ -589,7 +589,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
                     SqlCommand cmd =
                         CreateCommandWithStoredProcedureGeneral(
-                            "spInsertUserRegion",
+                            "spInsertUserRegion_3MD_TB",
                             con,
                             paramDic);
 
@@ -633,7 +633,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@UserId", userId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spDeleteUserRegions",
+                "spDeleteUserRegions_3MD_TB",
                 con,
                 paramDic);
 
@@ -687,7 +687,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@UserId", userId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadUserLanguages",
+                "spReadUserLanguages_3MD_TB",
                 con,
                 paramDic);
 
@@ -787,7 +787,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
                     SqlCommand cmd =
                         CreateCommandWithStoredProcedureGeneral(
-                            "spInsertUserLanguage",
+                            "spInsertUserLanguage_3MD_TB",
                             con,
                             paramDic);
 
@@ -831,7 +831,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@UserId", userId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spDeleteUserLanguages",
+                "spDeleteUserLanguages_3MD_TB",
                 con,
                 paramDic);
 
@@ -884,7 +884,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@UserId", userId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadUserWantedCountries",
+                "spReadUserWantedCountries_3MD_TB",
                 con,
                 paramDic);
 
@@ -995,7 +995,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertUserWantedCountry",
+                "spInsertUserWantedCountry_3MD_TB",
                 con,
                 paramDic);
 
@@ -1043,7 +1043,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@CountryId", countryId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spDeleteUserWantedCountry",
+                "spDeleteUserWantedCountry_3MD_TB",
                 con,
                 paramDic);
 
@@ -1087,7 +1087,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             paramDic.Add("@UserId", userId);
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spInsertUserLogin",
+                "spInsertUserLogin_3MD_TB",
                 con,
                 paramDic);
 
@@ -1126,7 +1126,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             }
 
             cmd = CreateCommandWithStoredProcedureGeneral(
-                "spReadAdminStatistics",
+                "spReadAdminStatistics_3MD_TB",
                 con,
                 null);
 
