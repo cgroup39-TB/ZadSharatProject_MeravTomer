@@ -345,6 +345,34 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         }
 
 
+        // =====================================================
+        // Wanted Countries
+        // =====================================================
+
+        public List<Country> ReadWantedCountries(int userId)
+        {
+            DBUserServices db = new DBUserServices();
+
+            return db.ReadWantedCountries(userId);
+        }
+
+
+        public int AddWantedCountry(int countryId)
+        {
+            DBUserServices db = new DBUserServices();
+
+            return db.AddWantedCountry(this.UserId, countryId);
+        }
+
+
+        public int RemoveWantedCountry(int countryId)
+        {
+            DBUserServices db = new DBUserServices();
+
+            return db.RemoveWantedCountry(this.UserId, countryId);
+        }
+
+
 
 
         public AdminStatistics ReadStatistics()
