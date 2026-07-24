@@ -55,10 +55,12 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             get => rating;
             set
             {
-                if (value < 1 || value > 5)
+                // 0 means "not rated yet" (e.g. a country just marked as
+                // visited, before the user writes a review).
+                if (value != 0 && (value < 1 || value > 5))
                 {
                     throw new ArgumentException(
-                        "Rating must be between 1 and 5.");
+                        "Rating must be 0 (unrated) or between 1 and 5.");
                 }
 
                 rating = value;
@@ -76,6 +78,12 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             get => isShared;
             set => isShared = value;
         }
+
+        // Populated only when reading shared reviews (joined from Users /
+        // read from the DB) - not part of the writable visit data.
+        public string UserName { get; set; }
+
+        public DateTime? CreatedAt { get; set; }
 
 
         // =========================
@@ -157,6 +165,16 @@ namespace ServerSideCountriesProject_MeravTomer.BL
                 new DBUserVisitCountryServices();
 
             return db.ReadSharedVisitsByUser(userId);
+        }
+
+
+        public static List<UserVisitedCountry>
+            ReadAllSharedReviews()
+        {
+            DBUserVisitCountryServices db =
+                new DBUserVisitCountryServices();
+
+            return db.ReadAllSharedVisits();
         }
     }
 

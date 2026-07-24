@@ -9,6 +9,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Allows the static ClientSide app (opened from a different origin, e.g. a
+// local file server or Live Server port) to call this Web API.
+const string ClientAppCorsPolicy = "ClientAppCorsPolicy";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(ClientAppCorsPolicy, policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -19,6 +33,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(ClientAppCorsPolicy);
 
 app.UseAuthorization();
 

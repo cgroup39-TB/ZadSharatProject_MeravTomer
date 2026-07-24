@@ -2,17 +2,10 @@
  * quizzes.js
  * Powers pages/quiz-list.html (choose a quiz) and pages/quiz-play.html (timed quiz).
  *
- * Quiz metadata (title/description) shown on the list page is just UI catalog data -
- * there is no "list all quizzes" endpoint in the spec, only:
- *   GET  /api/Quizzes/{quizId}/questions
- *   POST /api/Quizzes/submit
- * so the actual questions always come from Api.Quizzes.getQuestions().
+ * The quiz catalog comes from GET /api/Quizzes (DB-backed - see
+ * QuizzesController on the server). The actual questions/answers always come
+ * from Api.Quizzes.getQuestions() / .submit().
  */
-const QUIZ_CATALOG = [
-    { id: 1, title: "Flags & Capitals Quiz", description: "Test your knowledge of capital cities and flags." },
-    { id: 2, title: "World Geography Quiz", description: "Areas, populations, currencies and languages." }
-];
-
 $(function () {
     if ($("#quizCatalog").length) renderQuizCatalog();
     if ($("#quizPlayArea").length) initQuizPlay();
@@ -21,15 +14,24 @@ $(function () {
 function renderQuizCatalog() {
     Auth.requireAuth();
     const $catalog = $("#quizCatalog");
-    QUIZ_CATALOG.forEach(function (quiz) {
-        $catalog.append(
-            '<div class="quiz-card">' +
-            '<h3>' + quiz.title + '</h3>' +
-            '<p>' + quiz.description + '</p>' +
-            '<a class="btn" href="quiz-play.html?quizId=' + quiz.id + '">Start Quiz</a>' +
-            '</div>'
-        );
-    });
+
+    Api.Quizzes.getCatalog()
+        .done(function (quizzes) {
+            if (!quizzes.length) {
+                $catalog.html('<p class="muted">No quizzes available yet.</p>');
+                return;
+            }
+            quizzes.forEach(function (quiz) {
+                $catalog.append(
+                    '<div class="quiz-card">' +
+                    '<h3>' + quiz.title + '</h3>' +
+                    '<p>' + (quiz.description || "") + '</p>' +
+                    '<a class="btn" href="quiz-play.html?quizId=' + quiz.id + '">Start Quiz</a>' +
+                    '</div>'
+                );
+            });
+        })
+        .fail(Common.showError);
 }
 
 // ---------- Quiz play state ----------

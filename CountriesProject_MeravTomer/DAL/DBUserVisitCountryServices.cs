@@ -304,6 +304,12 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                     visit.IsShared =
                         Convert.ToBoolean(dataReader["IsShared"]);
 
+                    visit.CreatedAt =
+                        Convert.ToDateTime(dataReader["CreatedAt"]);
+
+                    visit.UserName =
+                        dataReader["UserName"].ToString();
+
                     visits.Add(visit);
                 }
 
@@ -394,6 +400,103 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
                     visit.IsShared =
                         Convert.ToBoolean(dataReader["IsShared"]);
+
+                    visit.CreatedAt =
+                        Convert.ToDateTime(dataReader["CreatedAt"]);
+
+                    visit.UserName =
+                        dataReader["UserName"].ToString();
+
+                    visits.Add(visit);
+                }
+
+                dataReader.Close();
+
+                DBCountryServices countryDB =
+                    new DBCountryServices();
+
+                foreach (UserVisitedCountry visit in visits)
+                {
+                    visit.Country =
+                        countryDB.ReadCountryById(
+                            visit.Country.CountryId);
+                }
+
+                return visits;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
+
+
+        //--------------------------------------------------------------------------------------------------
+        // Read all shared reviews (every country, every user)
+        //--------------------------------------------------------------------------------------------------
+        public List<UserVisitedCountry> ReadAllSharedVisits()
+        {
+            List<UserVisitedCountry> visits =
+                new List<UserVisitedCountry>();
+
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            cmd = CreateCommandWithStoredProcedureGeneral(
+                "spReadAllSharedVisits_3MD_TB",
+                con,
+                null);
+
+            try
+            {
+                SqlDataReader dataReader =
+                    cmd.ExecuteReader(CommandBehavior.CloseConnection);
+
+                while (dataReader.Read())
+                {
+                    UserVisitedCountry visit =
+                        new UserVisitedCountry();
+
+                    visit.UserId =
+                        Convert.ToInt32(dataReader["UserId"]);
+
+                    Country country = new Country();
+
+                    country.CountryId =
+                        Convert.ToInt32(dataReader["CountryId"]);
+
+                    visit.Country = country;
+
+                    visit.Rating =
+                        Convert.ToInt32(dataReader["Rating"]);
+
+                    visit.ReviewText =
+                        dataReader["ReviewText"].ToString();
+
+                    visit.IsShared =
+                        Convert.ToBoolean(dataReader["IsShared"]);
+
+                    visit.CreatedAt =
+                        Convert.ToDateTime(dataReader["CreatedAt"]);
+
+                    visit.UserName =
+                        dataReader["UserName"].ToString();
 
                     visits.Add(visit);
                 }

@@ -2,18 +2,16 @@
  * config.js
  * Global configuration for the client app.
  *
- * ===> WHEN THE SERVER IS READY <===
- * 1. Set API_BASE_URL to the real Web API address (see launchSettings.json on the server project).
- * 2. Set USE_MOCK to false.
- * That's it - api.js already calls the real endpoints listed in the comments in api.js,
- * it only used the Mock.* functions in mockData.js while USE_MOCK was true.
+ * The server is connected: USE_MOCK is false and API_BASE_URL points at the
+ * ASP.NET Core Web API (see CountriesProject_MeravTomer/Properties/launchSettings.json
+ * for the port - "applicationUrl": "https://localhost:7182;http://localhost:5262").
+ * Switch USE_MOCK back to true to fall back to the in-browser mock data.
  */
 const CONFIG = {
-    // TODO: replace with the real server URL (e.g. "https://localhost:7202/api")
-    API_BASE_URL: "https://localhost:7202/api",
+    API_BASE_URL: "https://localhost:7182/api",
 
     // Master switch: true = use mockData.js, false = use real AJAX calls to API_BASE_URL
-    USE_MOCK: true,
+    USE_MOCK: false,
 
     // Fake network latency (ms) so the mock behaves like a real AJAX call (loaders, spinners, etc.)
     MOCK_DELAY_MS: 300,

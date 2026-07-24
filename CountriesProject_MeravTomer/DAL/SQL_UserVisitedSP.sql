@@ -55,14 +55,18 @@ AS
 BEGIN
 
     SELECT
-        UserId,
-        CountryId,
-        Rating,
-        ReviewText,
-        IsShared
-    FROM UserVisitedCountries
-    WHERE CountryId = @CountryId
-      AND IsShared = 1;
+        v.UserId,
+        v.CountryId,
+        v.Rating,
+        v.ReviewText,
+        v.IsShared,
+        v.CreatedAt,
+        u.[Name] AS UserName
+    FROM UserVisitedCountries v
+    INNER JOIN Users u
+        ON v.UserId = u.UserId
+    WHERE v.CountryId = @CountryId
+      AND v.IsShared = 1;
 
 END
 GO
@@ -79,14 +83,45 @@ AS
 BEGIN
 
     SELECT
-        UserId,
-        CountryId,
-        Rating,
-        ReviewText,
-        IsShared
-    FROM UserVisitedCountries
-    WHERE UserId = @UserId
-      AND IsShared = 1;
+        v.UserId,
+        v.CountryId,
+        v.Rating,
+        v.ReviewText,
+        v.IsShared,
+        v.CreatedAt,
+        u.[Name] AS UserName
+    FROM UserVisitedCountries v
+    INNER JOIN Users u
+        ON v.UserId = u.UserId
+    WHERE v.UserId = @UserId
+      AND v.IsShared = 1;
+
+END
+GO
+
+
+-- =============================================
+-- Author:		<Tomer,Merav>
+-- Create date: <24.7.26>
+-- Description:	<Read All Shared Reviews/Visits (every country/user)>
+-- =============================================
+CREATE PROCEDURE spReadAllSharedVisits_3MD_TB
+AS
+BEGIN
+
+    SELECT
+        v.UserId,
+        v.CountryId,
+        v.Rating,
+        v.ReviewText,
+        v.IsShared,
+        v.CreatedAt,
+        u.[Name] AS UserName
+    FROM UserVisitedCountries v
+    INNER JOIN Users u
+        ON v.UserId = u.UserId
+    WHERE v.IsShared = 1
+    ORDER BY v.CreatedAt DESC;
 
 END
 GO

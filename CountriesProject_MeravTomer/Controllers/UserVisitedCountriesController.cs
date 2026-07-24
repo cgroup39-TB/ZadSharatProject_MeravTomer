@@ -35,6 +35,18 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
 
 
         // GET:
+        // api/UserVisitedCountries/shared
+        [HttpGet("shared")]
+        public IActionResult GetAllShared()
+        {
+            List<UserVisitedCountry> result =
+                UserVisitedCountry.ReadAllSharedReviews();
+
+            return Ok(result);
+        }
+
+
+        // GET:
         // api/UserVisitedCountries/shared/country/10
         [HttpGet("shared/country/{countryId}")]
         public IActionResult GetSharedByCountry(
