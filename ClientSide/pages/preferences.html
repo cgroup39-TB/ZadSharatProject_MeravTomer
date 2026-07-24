@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Preferences - Countries App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="navbar"></div>
+
+    <div class="page-container">
+        <div id="alertBox"></div>
+
+        <h1 class="page-title">My Preferences</h1>
+        <p class="muted">These preferences personalize your experience (e.g. suggested countries and quizzes).</p>
+
+        <form id="preferencesForm">
+            <div class="card">
+                <h3>Favorite continents</h3>
+                <div id="continentsList"></div>
+            </div>
+
+            <div class="card">
+                <h3>Favorite countries</h3>
+                <div class="form-row">
+                    <select id="countriesSelect" multiple size="8"></select>
+                    <span class="muted">Ctrl/Cmd + click to select multiple.</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Languages I speak</h3>
+                <div id="languagesList"></div>
+                <button type="button" id="addLanguageBtn" class="btn btn-small btn-outline">+ Add language</button>
+            </div>
+
+            <button type="submit" class="btn">Save preferences</button>
+        </form>
+    </div>
+
+    <!-- Row template for a language + proficiency level -->
+    <template id="languageRowTemplate">
+        <div class="form-row" style="flex-direction:row; align-items:center;">
+            <input type="text" class="language-name" placeholder="Language" style="flex:1;">
+            <select class="language-level">
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+                <option value="Native">Native</option>
+            </select>
+            <button type="button" class="btn btn-small btn-danger remove-language-btn">Remove</button>
+        </div>
+    </template>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/mockData.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/common.js"></script>
+    <script>
+        const CONTINENTS = ["Africa", "Americas", "Asia", "Europe", "Oceania"];
+
+        $(function () {
+            Auth.requireAuth();
+            const prefs = Auth.getPreferences();
+
+            renderContinents(prefs.continents || []);
+            loadCountries(prefs.countries || []);
+            (prefs.languages || []).forEach(addLanguageRow);
+            if (!prefs.languages || !prefs.languages.length) addLanguageRow();
+
+            $("#addLanguageBtn").on("click", function () { addLanguageRow(); });
+            $("#languagesList").on("click", ".remove-language-btn", function () {
+                $(this).closest(".form-row").remove();
+            });
+
+            $("#preferencesForm").on("submit", function (e) {
+                e.preventDefault();
+                savePreferences();
+            });
+        });
+
+        function renderContinents(selected) {
+            const $list = $("#continentsList");
+            CONTINENTS.forEach(function (continent) {
+                const checked = selected.indexOf(continent) !== -1 ? "checked" : "";
+                $list.append(
+                    '<label class="checkbox-row" style="display:flex;">' +
+                    '<input type="checkbox" class="continent-checkbox" value="' + continent + '" ' + checked + '> ' + continent +
+                    '</label>'
+                );
+            });
+        }
+
+        function loadCountries(selectedIds) {
+            Api.Countries.getAll().done(function (countries) {
+                const $select = $("#countriesSelect");
+                countries.forEach(function (c) {
+                    const selected = selectedIds.indexOf(c.id) !== -1 ? "selected" : "";
+                    $select.append('<option value="' + c.id + '" ' + selected + '>' + c.commonName + '</option>');
+                });
+            }).fail(Common.showError);
+        }
+
+        function addLanguageRow(language) {
+            const $row = $($("#languageRowTemplate").html());
+            if (language) {
+                $row.find(".language-name").val(language.name);
+                $row.find(".language-level").val(language.level);
+            }
+            $("#languagesList").append($row);
+        }
+
+        function savePreferences() {
+            const continents = $(".continent-checkbox:checked").map(function () { return this.value; }).get();
+            const countries = $("#countriesSelect").val() ? $("#countriesSelect").val().map(Number) : [];
+            const languages = $("#languagesList .form-row").map(function () {
+                return {
+                    name: $(this).find(".language-name").val().trim(),
+                    level: $(this).find(".language-level").val()
+                };
+            }).get().filter(function (l) { return l.name; });
+
+            Auth.savePreferences({ continents: continents, countries: countries, languages: languages })
+                .done(function () { Common.showAlert("Preferences saved.", "success"); })
+                .fail(Common.showError);
+        }
+    </script>
+</body>
+</html>

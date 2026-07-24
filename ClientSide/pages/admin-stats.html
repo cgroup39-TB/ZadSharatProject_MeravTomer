@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Stats - Countries App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="navbar"></div>
+
+    <div class="page-container" id="adminStats">
+        <div id="alertBox"></div>
+
+        <h1 class="page-title">Usage Statistics</h1>
+
+        <div class="stats-grid">
+            <div class="stat-tile"><span class="stat-value" id="statTodayLogins">-</span>Logins Today</div>
+            <div class="stat-tile"><span class="stat-value" id="statTotalLogins">-</span>Total Logins</div>
+            <div class="stat-tile"><span class="stat-value" id="statCountriesImported">-</span>Countries Imported</div>
+            <div class="stat-tile"><span class="stat-value" id="statCountriesSaved">-</span>Countries Saved</div>
+            <div class="stat-tile"><span class="stat-value" id="statSharesCreated">-</span>Shares Created</div>
+        </div>
+
+        <div class="card">
+            <h3>Daily Logins</h3>
+            <div id="dailyLoginsList"></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/mockData.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>
