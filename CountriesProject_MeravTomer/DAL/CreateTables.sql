@@ -196,3 +196,12 @@ VALUES
     (2, N'Which currency is used in Germany?', N'Franc', N'Euro', N'Mark', N'Pound', 1),
     (2, N'Which country has the largest population?', N'India', N'USA', N'Indonesia', N'China', 3),
     (2, N'What language is mainly spoken in Brazil?', N'Spanish', N'Portuguese', N'French', N'Italian', 1);
+
+-- =============================================
+-- Seed data: demo users (matches the hint shown on the client's login page)
+-- =============================================
+
+INSERT INTO Users ([Name], Email, [Password], IsAdmin, IsActive, CanShare)
+VALUES
+    (N'Admin', N'admin@test.com', N'admin123', 1, 1, 1),
+    (N'Test User', N'test@test.com', N'123456', 0, 1, 1);
