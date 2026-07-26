@@ -56,6 +56,11 @@ $(function () {
     function loadVisitedCountriesIntoNewShareSelect(countries) {
         const $newShareCountry = $("#newShareCountry");
         $newShareCountry.empty();
+        // Fail closed until the visited check actually confirms a country -
+        // an empty select falls back safely on its own (createShare() finds
+        // no matching country), but keep the button disabled too so it
+        // doesn't just look broken while it's blocked.
+        $("#newShareContent, #newShareSubmitBtn").prop("disabled", true);
 
         const user = Auth.getCurrentUser();
         if (!user) return;
@@ -76,6 +81,7 @@ $(function () {
             visitedCountries.forEach(function (c) {
                 $newShareCountry.append($("<option>").val(c.id).text(c.commonName));
             });
+            $("#newShareContent, #newShareSubmitBtn").prop("disabled", false);
         });
     }
 

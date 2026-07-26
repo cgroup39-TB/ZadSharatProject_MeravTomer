@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ServerSideCountriesProject_MeravTomer.BL;
+using System.Data.SqlClient;
 
 namespace ServerSideCountriesProject_MeravTomer.Controllers
 {
@@ -80,16 +81,24 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         public IActionResult Post(
             [FromBody] UserVisitedCountry visit)
         {
-            UserVisitedCountry result =
-                visit.Insert();
-
-            if (result == null)
+            try
             {
-                return BadRequest(
-                    "Visit was not inserted");
-            }
+                UserVisitedCountry result =
+                    visit.Insert();
 
-            return Ok(result);
+                if (result == null)
+                {
+                    return BadRequest(
+                        "Visit was not inserted");
+                }
+
+                return Ok(result);
+            }
+            catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
+            {
+                return Conflict(
+                    "This country is already in your list.");
+            }
         }
 
 
