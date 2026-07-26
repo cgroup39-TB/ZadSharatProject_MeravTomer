@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ServerSideCountriesProject_MeravTomer.BL;
+using System.Data.SqlClient;
 
 namespace ServerSideCountriesProject_MeravTomer.Controllers
 {
@@ -271,24 +272,32 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
             int id,
             int countryId)
         {
-            User user = new User();
-
-            user.UserId = id;
-
-            int result =
-                user.AddWantedCountry(countryId);
-
-            if (result == 0)
+            try
             {
-                return BadRequest(
-                    "Country was not added");
+                User user = new User();
+
+                user.UserId = id;
+
+                int result =
+                    user.AddWantedCountry(countryId);
+
+                if (result == 0)
+                {
+                    return BadRequest(
+                        "Country was not added");
+                }
+
+                return Ok(new
+                {
+                    message =
+                        "Country added to wanted list"
+                });
             }
-
-            return Ok(new
+            catch (SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
             {
-                message =
-                    "Country added to wanted list"
-            });
+                return Conflict(
+                    "This country is already in your wishlist.");
+            }
         }
 
 
