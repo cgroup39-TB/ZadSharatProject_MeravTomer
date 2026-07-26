@@ -45,6 +45,10 @@ CREATE TABLE Users(
     
 );
 
+
+
+
+
 CREATE TABLE CountryCurrencies (
     
     CountryId INT NOT NULL,
