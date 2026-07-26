@@ -94,10 +94,15 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         // POST: api/Users/login
         [HttpPost("login")]
         public IActionResult Login(
-            [FromBody] User loginDetails)
+            [FromBody] LoginRequest loginDetails)
         {
             try
             {
+                if (loginDetails == null)
+                {
+                    return BadRequest("Email and password are required.");
+                }
+
                 User user = new User();
 
                 User result =
