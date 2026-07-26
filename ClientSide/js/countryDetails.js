@@ -98,6 +98,13 @@ function refreshShareFormState(countryId) {
         return;
     }
 
+    // Fail closed: keep it locked until the visited check actually
+    // confirms otherwise, instead of leaving the form's default (enabled)
+    // HTML state in place if the status lookup itself fails.
+    $("#shareForm").show();
+    $("#shareContent, #shareSubmitBtn").prop("disabled", true);
+    $("#shareLockedMsg").show();
+
     const user = Auth.getCurrentUser();
     Api.UserCountries.getByUser(user.id).done(function (entries) {
         const visited = (entries || []).some(function (e) {
