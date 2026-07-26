@@ -52,10 +52,15 @@ $(function () {
 function loadLists() {
     const user = Auth.getCurrentUser();
 
+    // Both of these are already single-value-resolving promises (each ends
+    // in its own .then() that returns one array), not raw $.ajax() promises -
+    // so $.when hands them back as-is, not wrapped in a [data, status, jqXHR]
+    // array. Indexing with [0] here would silently grab the first *entry*/
+    // *country* instead of the array, and .filter() on that throws, which
+    // jQuery swallows instead of routing to .fail() - the lists just stay
+    // empty with no visible error.
     $.when(Api.UserCountries.getByUser(user.id), Api.Countries.getAll())
-        .done(function (entriesResult, countriesResult) {
-            const entries = entriesResult[0];
-            const countries = countriesResult[0];
+        .done(function (entries, countries) {
             renderList(entries, countries, "visited", "#visitedList");
             renderList(entries, countries, "wishlist", "#wishlistList");
         })
