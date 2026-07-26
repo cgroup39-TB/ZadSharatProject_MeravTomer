@@ -17,6 +17,36 @@ $(function () {
         const entryId = $(this).data("entry-id");
         removeEntry(entryId);
     });
+
+    $("#visitedList").on("click", ".btn-share", function () {
+        const $inline = $(this).closest(".list-row").find(".share-inline");
+        if ($inline.is(":visible")) {
+            $inline.hide().empty();
+            return;
+        }
+        $inline.html(
+            '<textarea class="share-inline-textarea" rows="2" placeholder="Write your review..."></textarea>' +
+            '<button class="btn btn-small btn-post-inline-share">Post</button>'
+        ).show();
+    });
+
+    $("#visitedList").on("click", ".btn-post-inline-share", function () {
+        const $inline = $(this).closest(".share-inline");
+        const content = $inline.find(".share-inline-textarea").val().trim();
+        if (!content) return;
+
+        const user = Auth.getCurrentUser();
+        Api.Shares.create({
+            userId: user.id,
+            countryId: Number($inline.data("country-id")),
+            userName: user.name,
+            countryName: $inline.data("country-name"),
+            content: content
+        }).done(function () {
+            Common.showAlert("Review posted.", "success");
+            $inline.hide().empty();
+        }).fail(Common.showError);
+    });
 });
 
 function loadLists() {
@@ -49,14 +79,23 @@ function renderList(entries, countries, listType, containerSelector) {
         const country = countries.find(function (c) { return c.id === entry.countryId; });
         if (!country) return;
 
+        const shareButton = listType === "visited"
+            ? '<button class="btn btn-small btn-share">Write a Review</button>'
+            : '';
+
         $container.append(
             '<div class="list-row">' +
             '<img src="' + country.flagPng + '" class="flag-thumb-small" alt="">' +
             '<a href="country-details.html?id=' + country.id + '">' + country.commonName + '</a>' +
             '<div class="list-row-actions">' +
+            shareButton +
             '<button class="btn btn-small btn-outline btn-move" data-entry-id="' + entry.id + '" data-target-list="' + otherList + '">' + moveLabel + '</button>' +
             '<button class="btn btn-small btn-danger btn-remove" data-entry-id="' + entry.id + '">Remove</button>' +
-            '</div></div>'
+            '</div>' +
+            (listType === "visited"
+                ? '<div class="share-inline" data-country-id="' + country.id + '" data-country-name="' + country.commonName + '" style="display:none; width:100%; margin-top:8px;"></div>'
+                : '') +
+            '</div>'
         );
     });
 }

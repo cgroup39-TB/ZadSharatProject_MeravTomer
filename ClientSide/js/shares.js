@@ -43,12 +43,40 @@ $(function () {
             countriesCache = countries;
 
             const $filter = $("#countryFilter");
-            const $newShareCountry = $("#newShareCountry");
             countries.forEach(function (c) {
                 $filter.append($("<option>").val(c.id).text(c.commonName));
+            });
+
+            loadVisitedCountriesIntoNewShareSelect(countries);
+        }).fail(Common.showError);
+    }
+
+    // A share is a review on a visited country, so only countries already
+    // in the logged-in user's visited list can be picked here.
+    function loadVisitedCountriesIntoNewShareSelect(countries) {
+        const $newShareCountry = $("#newShareCountry");
+        $newShareCountry.empty();
+
+        const user = Auth.getCurrentUser();
+        if (!user) return;
+
+        Api.UserCountries.getByUser(user.id).done(function (entries) {
+            const visitedIds = (entries || [])
+                .filter(function (e) { return e.listType === "visited"; })
+                .map(function (e) { return Number(e.countryId); });
+
+            const visitedCountries = countries.filter(function (c) { return visitedIds.indexOf(c.id) !== -1; });
+
+            if (!visitedCountries.length) {
+                $newShareCountry.append($("<option>").val("").text("Mark a country as visited first"));
+                $("#newShareContent, #newShareSubmitBtn").prop("disabled", true);
+                return;
+            }
+
+            visitedCountries.forEach(function (c) {
                 $newShareCountry.append($("<option>").val(c.id).text(c.commonName));
             });
-        }).fail(Common.showError);
+        });
     }
 
     function loadShares() {
