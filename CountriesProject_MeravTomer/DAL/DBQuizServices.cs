@@ -6,8 +6,17 @@ using ServerSideCountriesProject_MeravTomer.BL;
 
 namespace ServerSideCountriesProject_MeravTomer.DAL
 {
+    /// <summary>
+    /// Data access layer for the quiz catalog, quiz questions, and their answer options.
+    /// Read methods that return data to callers outside the server (catalog, single quiz) never
+    /// include the correct answer; only <see cref="ReadQuestionsByQuizId"/> exposes CorrectIndex,
+    /// and it is intended for server-side scoring use only.
+    /// </summary>
     public class DBQuizServices
     {
+        /// <summary>
+        /// Creates a new instance of the service. Holds no state; a fresh DB connection is opened per call.
+        /// </summary>
         public DBQuizServices()
         {
         }
@@ -16,6 +25,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Create DB connection
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Opens and returns a new <see cref="SqlConnection"/> using the named connection string
+        /// read from appsettings.json. The caller is responsible for closing the connection.
+        /// </summary>
         public SqlConnection connect(String conString)
         {
             IConfigurationRoot configuration =
@@ -67,6 +80,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read quiz catalog (no correct answers)
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the catalog of all quizzes (id, title, description, duration) without their questions
+        /// or answers.
+        /// </summary>
         public List<Quiz> ReadQuizCatalog()
         {
             List<Quiz> quizzes = new List<Quiz>();
@@ -117,6 +134,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read a single quiz by id (no correct answers)
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the quiz metadata matching <paramref name="quizId"/> (without questions or answers),
+        /// or null if no such quiz exists.
+        /// </summary>
         public Quiz ReadQuizById(int quizId)
         {
             SqlConnection con;
@@ -170,6 +191,11 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read all questions of a quiz, including CorrectIndex (server-side only)
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns every question for the given quiz, including its four options and the
+        /// <c>CorrectIndex</c> of the right answer. CorrectIndex is meant for server-side scoring only
+        /// and must not be forwarded to the client as-is.
+        /// </summary>
         public List<QuizQuestion> ReadQuestionsByQuizId(int quizId)
         {
             List<QuizQuestion> questions = new List<QuizQuestion>();

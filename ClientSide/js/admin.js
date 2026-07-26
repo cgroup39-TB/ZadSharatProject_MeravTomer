@@ -8,6 +8,11 @@ $(function () {
     if ($("#adminStats").length) initAdminStats();
 });
 
+/**
+ * Boots the admin-users page: enforces the admin-only client-side guard,
+ * loads the table, and wires the lock/unlock buttons via event delegation
+ * (so they work for rows re-rendered later by loadUsers()).
+ */
 function initAdminUsers() {
     Auth.requireAdmin();
     loadUsers();
@@ -20,12 +25,21 @@ function initAdminUsers() {
     });
 }
 
+/**
+ * Fetches the user list from the admin-only API and re-renders the table;
+ * called both on page load and after every lock/unlock action.
+ */
 function loadUsers() {
     Api.Admin.getUsers()
         .done(renderUsers)
         .fail(Common.showError);
 }
 
+/**
+ * Renders the users table, replacing the lock/unlock action button with a
+ * "(you)" label for the currently logged-in admin's own row so an admin
+ * can't lock themselves out.
+ */
 function renderUsers(users) {
     const $tbody = $("#adminUsersTable tbody").empty();
     const currentUser = Auth.getCurrentUser();
@@ -53,6 +67,11 @@ function renderUsers(users) {
     });
 }
 
+/**
+ * Calls the admin-only lock/unlock endpoint and refreshes the table on success.
+ * The server independently enforces the admin check (User BL throws
+ * UnauthorizedAccessException for non-admins), so this is UX only, not the real gate.
+ */
 function toggleLock(userId, action) {
     const request = action === "lock" ? Api.Admin.lockUser(userId) : Api.Admin.unlockUser(userId);
     request
@@ -63,6 +82,10 @@ function toggleLock(userId, action) {
         .fail(Common.showError);
 }
 
+/**
+ * Boots the admin-stats page: enforces the admin-only client-side guard,
+ * then fetches and fills in the summary stat tiles plus the daily-logins list.
+ */
 function initAdminStats() {
     Auth.requireAdmin();
 
@@ -78,6 +101,10 @@ function initAdminStats() {
         .fail(Common.showError);
 }
 
+/**
+ * Renders the per-day login counts list, showing a "no data yet" message
+ * instead of an empty list when there's no history.
+ */
 function renderDailyLogins(dailyLogins) {
     const $list = $("#dailyLoginsList").empty();
     if (!dailyLogins.length) {

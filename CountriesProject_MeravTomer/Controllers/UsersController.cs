@@ -4,6 +4,13 @@ using System.Data.SqlClient;
 
 namespace ServerSideCountriesProject_MeravTomer.Controllers
 {
+    /// <summary>
+    /// REST endpoints for users: read/register/login, profile editing, languages/preferred
+    /// regions, the wanted-countries wishlist, and admin-only operations (activate/deactivate,
+    /// grant sharing, grant admin, statistics). Authorization checks are enforced in the BL
+    /// layer (<see cref="User"/>) rather than here, so most admin endpoints look up an "acting
+    /// user" by id and rely on it to throw <see cref="UnauthorizedAccessException"/> if not an admin.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -12,6 +19,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         // READ USERS
         // =========================
 
+        /// <summary>Returns every user (admin user-management list).</summary>
         // GET: api/Users
         [HttpGet]
         public IEnumerable<User> Get()
@@ -22,6 +30,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns the user matching <paramref name="id"/>, or 404 if none exists.</summary>
         // GET: api/Users/5
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
@@ -40,6 +49,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns the user matching <paramref name="name"/>, or 404 if none exists.</summary>
         // GET: api/Users/getByName?name=May
         [HttpGet("getByName")]
         public IActionResult GetByName(string name)
@@ -62,6 +72,10 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         // REGISTER / LOGIN
         // =========================
 
+        /// <summary>
+        /// Registers a new user. Forces IsActive=true, IsAdmin=false, CanShare=true regardless of
+        /// what was posted. Returns 400 (with the exception message) if the email is already taken.
+        /// </summary>
         // POST: api/Users/register
         [HttpPost("register")]
         public IActionResult Register(
@@ -92,6 +106,11 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>
+        /// Authenticates by email/password. Returns 401 if the account has been deactivated
+        /// (blocked) by an admin, and 400 for an unknown email, wrong password, or a missing body.
+        /// On success returns the full <see cref="User"/> object (used as the client's session state).
+        /// </summary>
         // POST: api/Users/login
         [HttpPost("login")]
         public IActionResult Login(
@@ -128,6 +147,11 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         // PROFILE
         // =========================
 
+        /// <summary>
+        /// Updates a user's name/email. <paramref name="actingUserId"/> must either be the same
+        /// user or an admin (enforced in <see cref="User.UpdateProfile"/>); returns 401 otherwise,
+        /// 404 if the acting user or target user doesn't exist.
+        /// </summary>
         // PUT:
         // api/Users/5/profile?actingUserId=5
         [HttpPut("{id}/profile")]
@@ -180,6 +204,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         // USER LANGUAGES
         // =========================
 
+        /// <summary>Returns the languages (and proficiency levels) recorded for the given user.</summary>
         // GET: api/Users/5/languages
         [HttpGet("{id}/languages")]
         public IActionResult GetUserLanguages(int id)
@@ -193,6 +218,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Replaces the user's recorded languages with the posted list.</summary>
         // PUT: api/Users/5/languages
         [HttpPut("{id}/languages")]
         public IActionResult UpdateUserLanguages(
@@ -216,6 +242,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         // USER REGIONS
         // =========================
 
+        /// <summary>Returns the regions the given user has marked as a travel preference.</summary>
         // GET: api/Users/5/regions
         [HttpGet("{id}/regions")]
         public IActionResult GetPreferredRegions(int id)
@@ -229,6 +256,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Replaces the user's preferred-region list with the posted region ids.</summary>
         // PUT: api/Users/5/regions
         [HttpPut("{id}/regions")]
         public IActionResult UpdatePreferredRegions(
@@ -253,6 +281,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         // WANTED COUNTRIES
         // =========================
 
+        /// <summary>Returns the countries on the given user's wishlist ("wanted" countries).</summary>
         // GET: api/Users/5/wantedCountries
         [HttpGet("{id}/wantedCountries")]
         public IActionResult GetWantedCountries(int id)
@@ -266,6 +295,11 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>
+        /// Adds a country to the user's wishlist. UserWantedCountries has a composite (UserId,
+        /// CountryId) primary key, so adding a country already on the wishlist throws SqlException
+        /// 2627/2601, caught here and returned as 409 Conflict.
+        /// </summary>
         // POST: api/Users/5/wantedCountries/10
         [HttpPost("{id}/wantedCountries/{countryId}")]
         public IActionResult AddWantedCountry(
@@ -301,6 +335,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Removes a country from the user's wishlist; returns 404 if it wasn't on the list.</summary>
         // DELETE:
         // api/Users/5/wantedCountries/10
         [HttpDelete("{id}/wantedCountries/{countryId}")]
@@ -333,6 +368,10 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         // ADMIN
         // =========================
 
+        /// <summary>
+        /// Activates/deactivates (blocks) <paramref name="targetUserId"/>. <paramref name="actingUserId"/>
+        /// must be an admin - returns 401 if not, 404 if either user doesn't exist.
+        /// </summary>
         // PUT:
         // api/Users/10/active?actingUserId=1
         [HttpPut("{targetUserId}/active")]
@@ -378,6 +417,10 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>
+        /// Grants/revokes <paramref name="targetUserId"/>'s permission to share reviews.
+        /// <paramref name="actingUserId"/> must be an admin - returns 401 if not, 404 if either user doesn't exist.
+        /// </summary>
         // PUT:
         // api/Users/10/canShare?actingUserId=1
         [HttpPut("{targetUserId}/canShare")]
@@ -423,6 +466,10 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>
+        /// Grants/revokes admin rights for <paramref name="targetUserId"/>. <paramref name="actingUserId"/>
+        /// must itself already be an admin - returns 401 if not, 404 if either user doesn't exist.
+        /// </summary>
         // PUT:
         // api/Users/10/admin?actingUserId=1
         [HttpPut("{targetUserId}/admin")]
@@ -472,6 +519,10 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         // ADMIN STATISTICS
         // =========================
 
+        /// <summary>
+        /// Returns admin dashboard counters (daily logins, imported/saved countries, shared
+        /// reviews). <paramref name="actingUserId"/> must be an admin - returns 401 if not, 404 if that user doesn't exist.
+        /// </summary>
         // GET:
         // api/Users/statistics?actingUserId=1
         [HttpGet("statistics")]

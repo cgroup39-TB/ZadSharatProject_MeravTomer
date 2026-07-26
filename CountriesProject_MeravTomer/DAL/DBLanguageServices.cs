@@ -6,13 +6,23 @@ using ServerSideCountriesProject_MeravTomer.BL;
 
 namespace ServerSideCountriesProject_MeravTomer.DAL
 {
+    /// <summary>
+    /// Data access layer for Language reference data (the languages spoken in countries).
+    /// </summary>
     public class DBLanguageServices
     {
+        /// <summary>
+        /// Creates a new instance of the service. Holds no state; a fresh DB connection is opened per call.
+        /// </summary>
         public DBLanguageServices()
         {
         }
 
 
+        /// <summary>
+        /// Opens and returns a new <see cref="SqlConnection"/> using the named connection string
+        /// read from appsettings.json. The caller is responsible for closing the connection.
+        /// </summary>
         public SqlConnection connect(String conString)
         {
             IConfigurationRoot configuration =
@@ -61,6 +71,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read all Languages
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns every language in the database.
+        /// </summary>
         public List<Language> ReadAllLanguages()
         {
             SqlConnection con;
@@ -118,6 +131,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read Language by ID
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the language matching <paramref name="languageId"/>, or null if none exists.
+        /// </summary>
         public Language ReadLanguageById(int languageId)
         {
             SqlConnection con;
@@ -179,6 +195,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read Language by Name
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the language whose name matches <paramref name="languageName"/>, or null if none exists.
+        /// </summary>
         public Language ReadLanguageByName(string languageName)
         {
             SqlConnection con;
@@ -240,6 +259,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Insert Language
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Inserts a new language using <paramref name="language"/>'s name.
+        /// </summary>
+        /// <returns>The database-generated LanguageId of the newly inserted row.</returns>
         public int InsertLanguage(Language language)
         {
             SqlConnection con;

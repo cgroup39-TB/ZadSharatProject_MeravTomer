@@ -4,10 +4,17 @@ using System.Data.SqlClient;
 
 namespace ServerSideCountriesProject_MeravTomer.Controllers
 {
+    /// <summary>
+    /// REST endpoints for a user's visited-country records (marking a country visited, rating/
+    /// reviewing it, and sharing that review publicly). UserVisitedCountries has a composite
+    /// (UserId, CountryId) primary key in the database, so duplicate-insert attempts throw a
+    /// SqlException that <see cref="Post"/> catches and turns into 409 Conflict.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class UserVisitedCountriesController : ControllerBase
     {
+        /// <summary>Returns every country the given user has marked visited (including unrated ones).</summary>
         // GET:
         // api/UserVisitedCountries/user/5
         [HttpGet("user/{userId}")]
@@ -21,6 +28,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns every visit record for the given country, across all users (not just shared ones).</summary>
         // GET:
         // api/UserVisitedCountries/country/10
         [HttpGet("country/{countryId}")]
@@ -35,6 +43,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns every publicly shared review across all users and countries.</summary>
         // GET:
         // api/UserVisitedCountries/shared
         [HttpGet("shared")]
@@ -47,6 +56,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns only the publicly shared reviews for the given country.</summary>
         // GET:
         // api/UserVisitedCountries/shared/country/10
         [HttpGet("shared/country/{countryId}")]
@@ -61,6 +71,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns only the publicly shared reviews written by the given user.</summary>
         // GET:
         // api/UserVisitedCountries/shared/user/5
         [HttpGet("shared/user/{userId}")]
@@ -75,6 +86,13 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>
+        /// Marks a country as visited for a user. Accepts a partial <see cref="UserVisitedCountry"/>
+        /// (only UserId + Country.CountryId are required, thanks to
+        /// SuppressImplicitRequiredAttributeForNonNullableReferenceTypes in Program.cs). Because
+        /// UserVisitedCountries has a composite (UserId, CountryId) primary key, marking the same
+        /// country visited twice throws SqlException 2627/2601, caught here and returned as 409 Conflict.
+        /// </summary>
         // POST:
         // api/UserVisitedCountries
         [HttpPost]
@@ -102,6 +120,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Updates the rating/review text/share flag of an existing visit; returns 404 if it doesn't exist.</summary>
         // PUT:
         // api/UserVisitedCountries
         [HttpPut]
@@ -123,6 +142,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Removes a user's visit record for the given country; returns 404 if it doesn't exist.</summary>
         // DELETE:
         // api/UserVisitedCountries/5/10
         [HttpDelete("{userId}/{countryId}")]

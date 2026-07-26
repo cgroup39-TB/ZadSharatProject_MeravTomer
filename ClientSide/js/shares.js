@@ -9,6 +9,11 @@ $(function () {
 
     init();
 
+    /**
+     * Bootstraps the page: shows the new-share box only when logged in,
+     * loads countries into both selects, loads the shares list, and wires
+     * up filter/create/edit/delete/cancel handlers.
+     */
     function init() {
         $("#newShareBox").toggle(Auth.isLoggedIn());
         loadCountriesIntoSelects();
@@ -38,6 +43,11 @@ $(function () {
         });
     }
 
+    /**
+     * Loads the full country catalog, caches it, fills the country filter
+     * dropdown, and then narrows the new-share country select to only
+     * visited countries.
+     */
     function loadCountriesIntoSelects() {
         Api.Countries.getAll().done(function (countries) {
             countriesCache = countries;
@@ -53,6 +63,11 @@ $(function () {
 
     // A share is a review on a visited country, so only countries already
     // in the logged-in user's visited list can be picked here.
+    /**
+     * Rebuilds the new-share country select from the user's visited
+     * countries only, disabling the content field/submit button until at
+     * least one visited country is available to pick.
+     */
     function loadVisitedCountriesIntoNewShareSelect(countries) {
         const $newShareCountry = $("#newShareCountry");
         $newShareCountry.empty();
@@ -85,6 +100,10 @@ $(function () {
         });
     }
 
+    /**
+     * Loads either all shares or shares for the selected country filter,
+     * caches the result for later edit/lookup, and renders it.
+     */
     function loadShares() {
         const countryId = $("#countryFilter").val();
         const request = countryId ? Api.Shares.getByCountry(countryId) : Api.Shares.getAll();
@@ -96,6 +115,10 @@ $(function () {
         }).fail(Common.showError);
     }
 
+    /**
+     * Renders the shares list, showing edit/delete buttons only on cards
+     * owned by the currently logged-in user.
+     */
     function renderShares(shares) {
         const $container = $("#sharesContainer");
         $container.empty();
@@ -131,6 +154,10 @@ $(function () {
         });
     }
 
+    /**
+     * Creates a new share from the form, resolving the selected country id
+     * against the cached country list to get its display name.
+     */
     function createShare() {
         const user = Auth.getCurrentUser();
         const countryId = Number($("#newShareCountry").val());
@@ -151,6 +178,10 @@ $(function () {
         }).fail(Common.showError);
     }
 
+    /**
+     * Switches a share card into inline-edit mode by swapping its content
+     * for a textarea and its action buttons for save/cancel.
+     */
     function startEdit(shareId) {
         const share = sharesCache.find(function (s) { return s.id === shareId; });
         if (!share) return;
@@ -165,6 +196,10 @@ $(function () {
         );
     }
 
+    /**
+     * Reads the inline edit textarea's value and persists it as the share's
+     * updated content.
+     */
     function saveEdit(shareId) {
         const $card = $('.share-card[data-share-id="' + shareId + '"]');
         const newContent = $card.find(".edit-share-textarea").val().trim();
@@ -178,6 +213,9 @@ $(function () {
             .fail(Common.showError);
     }
 
+    /**
+     * Deletes a share after a confirm prompt.
+     */
     function deleteShare(shareId) {
         if (!confirm("Delete this share?")) return;
         Api.Shares.delete(shareId)

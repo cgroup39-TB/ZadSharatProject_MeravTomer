@@ -11,6 +11,10 @@ $(function () {
     if ($("#quizPlayArea").length) initQuizPlay();
 });
 
+/**
+ * Loads and renders the list of available quizzes as link cards to the
+ * play page; requires login first.
+ */
 function renderQuizCatalog() {
     Auth.requireAuth();
     const $catalog = $("#quizCatalog");
@@ -43,6 +47,10 @@ let quizState = {
     timerHandle: null
 };
 
+/**
+ * Loads the selected quiz's questions, resets quizState (index, answers,
+ * countdown) for a fresh attempt, and starts the timer.
+ */
 function initQuizPlay() {
     Auth.requireAuth();
     const quizId = Common.getQueryParams().quizId;
@@ -68,6 +76,10 @@ function initQuizPlay() {
     $("#submitQuizBtn").on("click", submitQuiz);
 }
 
+/**
+ * Starts the 1-second countdown interval; once secondsLeft reaches 0 it
+ * auto-submits the quiz with whatever answers were selected so far.
+ */
 function startTimer() {
     updateTimerDisplay();
     quizState.timerHandle = setInterval(function () {
@@ -84,6 +96,11 @@ function updateTimerDisplay() {
     $("#timerDisplay").text(quizState.secondsLeft + "s");
 }
 
+/**
+ * Renders the current question's options, pre-checking whichever option was
+ * previously selected in quizState.answers, and toggles Next vs Submit
+ * depending on whether this is the last question.
+ */
 function renderQuestion() {
     const question = quizState.quiz.questions[quizState.currentIndex];
     const total = quizState.quiz.questions.length;
@@ -106,6 +123,11 @@ function renderQuestion() {
     $("#submitQuizBtn").toggle(isLast);
 }
 
+/**
+ * Records the currently selected option for the current question into
+ * quizState.answers; leaves the prior answer untouched if nothing is
+ * selected (e.g. navigating without picking an option).
+ */
 function saveCurrentAnswer() {
     const question = quizState.quiz.questions[quizState.currentIndex];
     const selected = $("#optionsList input[name='option']:checked").val();
@@ -114,12 +136,21 @@ function saveCurrentAnswer() {
     }
 }
 
+/**
+ * Saves the current answer before advancing, so it isn't lost when moving
+ * to the next question.
+ */
 function goToNextQuestion() {
     saveCurrentAnswer();
     quizState.currentIndex++;
     renderQuestion();
 }
 
+/**
+ * Saves the last answer, stops the countdown, converts the answers map
+ * (questionId -> selectedIndex) into the array shape the API expects, and
+ * submits it for grading.
+ */
 function submitQuiz() {
     saveCurrentAnswer();
     clearInterval(quizState.timerHandle);

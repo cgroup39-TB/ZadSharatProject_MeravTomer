@@ -6,6 +6,10 @@
 const Common = (function () {
 
     // Reads the current page's query string into a plain object, e.g. ?id=3&mode=edit
+    /**
+     * Parses `window.location.search` into a plain key/value object, URL-decoding
+     * both sides and defaulting a valueless param (e.g. "?flag") to an empty string.
+     */
     function getQueryParams() {
         const params = {};
         const search = window.location.search.substring(1);
@@ -19,6 +23,10 @@ const Common = (function () {
 
     // Shows a dismissible message inside the #alertBox element every page includes.
     // type: "success" | "error" | "info"
+    /**
+     * Shows a message in #alertBox, auto-hiding after 4s; falls back to a
+     * native `alert()` on pages that don't include the #alertBox element.
+     */
     function showAlert(message, type) {
         const $box = $("#alertBox");
         if (!$box.length) {
@@ -32,6 +40,11 @@ const Common = (function () {
         setTimeout(function () { $box.fadeOut(); }, 4000);
     }
 
+    /**
+     * Normalizes a jQuery AJAX failure into a user-facing error message: accepts
+     * a plain string, or pulls a message/title/error out of responseJSON (string
+     * or object) or falls back to raw responseText, before showing it via showAlert.
+     */
     function showError(jqXHRorMessage) {
         let message;
 
@@ -54,6 +67,11 @@ const Common = (function () {
     }
 
     // Renders the shared top navbar into #navbar, adjusting links to the logged-in state.
+    /**
+     * Rebuilds the navbar's HTML based on login/admin state (extra links for
+     * logged-in users, admin-only links for admins) and rewires the logout click
+     * handler each time, since the markup is fully replaced.
+     */
     function renderNavbar() {
         const $nav = $("#navbar");
         if (!$nav.length) return;

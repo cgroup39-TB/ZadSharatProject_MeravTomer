@@ -4,9 +4,14 @@ using System.Text.Json;
 
 namespace ServerSideCountriesProject_MeravTomer.BL
 {
+    /// <summary>
+    /// Business-logic representation of a country, including its region,
+    /// languages and currencies. Read/write operations delegate to
+    /// <see cref="DAL.DBCountryServices"/>.
+    /// </summary>
     public class Country
     {
-       
+
             private int countryId;
             private string cca3;
             private string name;
@@ -21,11 +26,13 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             private List<Currency> currencies;
 
 
+            /// <summary>Creates an empty country instance (used by model binding/deserialization).</summary>
             public Country()
             {
             }
 
 
+            /// <summary>Creates a fully-populated country with its region, languages and currencies.</summary>
             public Country(
                 int countryId,
                 string cca3,
@@ -136,6 +143,11 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             // CRUD
             // =========================
 
+            /// <summary>
+            /// Placeholder insert method - currently a no-op stub that does not persist
+            /// anything to the database (the DAL call is commented out) and just returns
+            /// the instance unchanged. Country creation actually happens via <see cref="ImportCountriesFromApi"/>.
+            /// </summary>
             public Country Insert()
             {
                 DBCountryServices db = new DBCountryServices();
@@ -145,6 +157,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             }
 
 
+            /// <summary>Updates the country identified by <paramref name="countryId"/> and returns the number of affected rows.</summary>
             public int UpdateCountry(
                 int countryId,
                 Country updatedCountry)
@@ -155,6 +168,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             }
 
 
+            /// <summary>Deletes the country identified by <paramref name="countryId"/> and returns the number of affected rows.</summary>
             public int DeleteCountry(int countryId)
             {
                 DBCountryServices db = new DBCountryServices();
@@ -167,6 +181,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             // Read
             // =========================
 
+            /// <summary>Returns every country in the database.</summary>
             public List<Country> ReadAllCountries()
             {
                 DBCountryServices db = new DBCountryServices();
@@ -175,6 +190,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             }
 
 
+            /// <summary>Returns the country matching <paramref name="countryId"/>, or null if none exists.</summary>
             public Country ReadCountryById(int countryId)
             {
                 DBCountryServices db = new DBCountryServices();
@@ -183,6 +199,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             }
 
 
+            /// <summary>Returns the country matching <paramref name="countryName"/> (exact match), or null if none exists.</summary>
             public Country ReadCountryByName(string countryName)
             {
                 DBCountryServices db = new DBCountryServices();
@@ -191,6 +208,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             }
 
 
+            /// <summary>Returns all countries belonging to the given region.</summary>
             public List<Country> ReadCountriesByRegion(Region region)
             {
                 DBCountryServices db = new DBCountryServices();
@@ -201,6 +219,12 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
 
 
+        /// <summary>
+        /// Fetches the full country list from the public countries.dev API and inserts any
+        /// countries that don't already exist yet (matched by name), creating any missing
+        /// region/language/currency lookup rows along the way. Returns the number of newly
+        /// inserted countries. Existing countries are skipped, so this is safe to call repeatedly.
+        /// </summary>
         public async Task<int> ImportCountriesFromApi()
         {
             string url =
@@ -486,6 +510,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         }
 
 
+        /// <summary>Returns all countries sorted by <paramref name="sortBy"/>; ascending unless <paramref name="ascending"/> is false.</summary>
         public List<Country> ReadSortedCountries( string sortBy, bool ascending = true)//true = ascending, false = descending
         {
             DBCountryServices db =
