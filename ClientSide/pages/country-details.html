@@ -35,12 +35,15 @@
             <h3>Shares &amp; Reviews for this country</h3>
             <div id="sharesList"></div>
 
+            <p id="shareLockedMsg" class="muted" style="display:none; margin-top:16px;">
+                Mark this country as visited to write a review.
+            </p>
             <form id="shareForm" style="margin-top:16px;" class="hide-if-logged-out">
                 <div class="form-row">
                     <label for="shareContent">Share your experience</label>
                     <textarea id="shareContent" rows="3" placeholder="Write a short review..."></textarea>
                 </div>
-                <button type="submit" class="btn">Post Share</button>
+                <button id="shareSubmitBtn" type="submit" class="btn">Post Share</button>
             </form>
         </div>
     </div>
@@ -52,10 +55,5 @@
     <script src="../js/auth.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/countryDetails.js"></script>
-    <script>
-        $(function () {
-            $("#shareForm").toggle(Auth.isLoggedIn());
-        });
-    </script>
 </body>
 </html>
