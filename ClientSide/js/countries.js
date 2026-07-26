@@ -7,11 +7,13 @@
 $(function () {
 
     let allCountries = [];
+    let requestSeq = 0;
 
     init();
 
     function init() {
         $("#addCountryBtn").toggle(Auth.isAdmin());
+        $("#myStatusFilterRow").toggle(Auth.isLoggedIn());
         populateRegionFilter();
         bindEvents();
         loadCountries();
@@ -26,7 +28,7 @@ $(function () {
             $("#searchForm")[0].reset();
             loadCountries();
         });
-        $("#sortBy, #sortDir").on("change", loadCountries);
+        $("#sortBy, #sortDir, #myStatusFilter").on("change", loadCountries);
     }
 
     function populateRegionFilter() {
@@ -55,14 +57,46 @@ $(function () {
 
     function loadCountries() {
         const params = readFiltersFromForm();
+        const seq = ++requestSeq;
         $("#countriesGrid").html('<p class="muted">Loading countries...</p>');
 
         Api.Countries.search(params)
             .done(function (countries) {
-                allCountries = countries;
-                renderCountries(countries);
+                // A newer request (e.g. the user changed the sort right after
+                // page load) may have already been issued - ignore this
+                // response so it can't clobber a more recent one.
+                if (seq !== requestSeq) return;
+                applyMyStatusFilter(countries, seq);
             })
-            .fail(Common.showError);
+            .fail(function (err) {
+                if (seq !== requestSeq) return;
+                Common.showError(err);
+            });
+    }
+
+    function applyMyStatusFilter(countries, seq) {
+        const statusFilter = $("#myStatusFilter").val();
+        if (!statusFilter || !Auth.isLoggedIn()) {
+            allCountries = countries;
+            renderCountries(countries);
+            return;
+        }
+
+        const user = Auth.getCurrentUser();
+        Api.UserCountries.getByUser(user.id).done(function (entries) {
+            if (seq !== requestSeq) return;
+
+            const statusByCountry = {};
+            (entries || []).forEach(function (e) { statusByCountry[e.countryId] = e.listType; });
+
+            const filtered = countries.filter(function (c) {
+                const status = statusByCountry[c.id];
+                return statusFilter === "none" ? !status : status === statusFilter;
+            });
+
+            allCountries = filtered;
+            renderCountries(filtered);
+        });
     }
 
     function renderCountries(countries) {

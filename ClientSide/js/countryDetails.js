@@ -24,6 +24,7 @@ function initDetailsPage() {
 
     loadCountry(id);
     loadSharesForCountry(id);
+    refreshShareFormState(id);
 
     $("#deleteCountryBtn").on("click", function () {
         if (!confirm("Delete this country? This cannot be undone.")) return;
@@ -80,8 +81,33 @@ function addToList(countryId, listType) {
     Api.UserCountries.create({ userId: user.id, countryId: Number(countryId), listType: listType })
         .done(function () {
             Common.showAlert("Added to your " + (listType === "visited" ? "visited" : "wishlist") + " list.", "success");
+            if (listType === "visited") {
+                refreshShareFormState(countryId);
+            }
         })
         .fail(Common.showError);
+}
+
+// Reviews are stored as a field on the visited-country record itself, so
+// writing one only makes sense once the country is actually in "My Lists".
+// Shows the form (enabled) once visited, or a locked explanation until then.
+function refreshShareFormState(countryId) {
+    if (!Auth.isLoggedIn()) {
+        $("#shareForm").hide();
+        $("#shareLockedMsg").hide();
+        return;
+    }
+
+    const user = Auth.getCurrentUser();
+    Api.UserCountries.getByUser(user.id).done(function (entries) {
+        const visited = (entries || []).some(function (e) {
+            return e.listType === "visited" && Number(e.countryId) === Number(countryId);
+        });
+
+        $("#shareForm").show();
+        $("#shareContent, #shareSubmitBtn").prop("disabled", !visited);
+        $("#shareLockedMsg").toggle(!visited);
+    });
 }
 
 function loadSharesForCountry(countryId) {
