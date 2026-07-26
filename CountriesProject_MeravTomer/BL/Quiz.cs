@@ -46,6 +46,11 @@ namespace ServerSideCountriesProject_MeravTomer.BL
 
         public static QuizResult Score(QuizSubmission submission)
         {
+            if (submission == null)
+            {
+                return null;
+            }
+
             Quiz quiz = ReadWithQuestions(submission.QuizId);
 
             if (quiz == null)

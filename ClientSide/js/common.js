@@ -33,10 +33,20 @@ const Common = (function () {
     }
 
     function showError(jqXHRorMessage) {
-        const message = (jqXHRorMessage && jqXHRorMessage.responseJSON && jqXHRorMessage.responseJSON.message)
-            || jqXHRorMessage
-            || "Something went wrong.";
-        showAlert(message, "error");
+        let message;
+
+        if (typeof jqXHRorMessage === "string") {
+            message = jqXHRorMessage;
+        } else if (jqXHRorMessage && jqXHRorMessage.responseJSON) {
+            const body = jqXHRorMessage.responseJSON;
+            message = typeof body === "string"
+                ? body
+                : (body.message || body.title || body.error);
+        } else if (jqXHRorMessage && jqXHRorMessage.responseText) {
+            message = jqXHRorMessage.responseText;
+        }
+
+        showAlert(message || "Something went wrong.", "error");
     }
 
     function formatNumber(num) {
