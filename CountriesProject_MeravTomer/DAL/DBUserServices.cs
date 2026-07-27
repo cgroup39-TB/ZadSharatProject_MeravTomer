@@ -749,7 +749,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                             dataReader["ProficiencyLevel"].ToString()
                         );
 
-                    int ProficiencyLevel = null;
+                    int ProficiencyLevel;
 
                     if (dataReader["ProficiencyLevel"] != DBNull.Value)
                     {
