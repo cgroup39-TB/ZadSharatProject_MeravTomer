@@ -471,3 +471,16 @@ BEGIN
 
 END
 GO
+
+
+
+CREATE PROCEDURE spDeleteUser_3MD_TB
+    @UserId INT
+AS
+BEGIN
+
+    DELETE FROM Users
+    WHERE UserId = @UserId;
+
+END
+GO
