@@ -20,6 +20,7 @@ $(function () {
         populateRegionFilter();
         bindEvents();
         loadCountries();
+        if (Auth.isLoggedIn()) loadRecommendations();
     }
 
     /**
@@ -162,6 +163,52 @@ $(function () {
                     loadCountries();
                 })
                 .fail(Common.showError);
+        });
+    }
+
+    /**
+     * Loads countries matching the logged-in user's preferred continents/
+     * languages (excluding anything already on their visited/wishlist), and
+     * shows the "Recommended for You" section only if there's at least one.
+     */
+    function loadRecommendations() {
+        const user = Auth.getCurrentUser();
+        Api.Recommendations.getForUser(user.id)
+            .done(function (recommendations) {
+                if (!recommendations.length) {
+                    $("#recommendedSection").hide();
+                    return;
+                }
+                renderRecommendations(recommendations.slice(0, 6));
+                $("#recommendedSection").show();
+            })
+            .fail(function () {
+                // No preferences set yet, or the lookup failed - just hide
+                // the section rather than surfacing an error on page load.
+                $("#recommendedSection").hide();
+            });
+    }
+
+    /**
+     * Renders up to a handful of recommended country cards, each labeled
+     * with which of the user's preferences it matched (region and/or
+     * spoken languages).
+     */
+    function renderRecommendations(recommendations) {
+        const $grid = $("#recommendedGrid").empty();
+
+        recommendations.forEach(function (rec) {
+            const country = rec.country;
+            const reasons = [];
+            if (rec.matchedRegion) reasons.push(country.region);
+            reasons.push.apply(reasons, rec.matchedLanguages);
+
+            const $card = $('<div class="country-card"></div>');
+            $card.append('<img src="' + country.flagPng + '" alt="' + country.commonName + ' flag" class="flag-thumb">');
+            $card.append('<h3>' + country.commonName + '</h3>');
+            $card.append('<p class="muted">Matches: ' + reasons.join(", ") + '</p>');
+            $card.append('<div class="card-actions"><a class="btn btn-small" href="country-details.html?id=' + country.id + '">View</a></div>');
+            $grid.append($card);
         });
     }
 });
