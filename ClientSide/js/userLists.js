@@ -4,6 +4,8 @@
  * "wishlist" countries, lets them move a country between lists or remove it.
  */
 $(function () {
+    let requestSeq = 0;
+
     Auth.requireAuth();
     loadLists();
 
@@ -47,30 +49,66 @@ $(function () {
             $inline.hide().empty();
         }).fail(Common.showError);
     });
+
+    /**
+     * Loads both the visited and wishlist entries plus the full country catalog
+     * in parallel via $.when, then renders each list. See the comment below on
+     * why neither result is [0]-indexed. Tagged with an incrementing sequence
+     * number (same pattern as countries.js's loadCountries()) so that a
+     * slower/older response - e.g. from the initial page load, or from a
+     * previous move/remove action - can't land after a newer one and clobber
+     * the render with stale data.
+     */
+    function loadLists() {
+        const user = Auth.getCurrentUser();
+        const seq = ++requestSeq;
+
+        // Both of these are already single-value-resolving promises (each ends
+        // in its own .then() that returns one array), not raw $.ajax() promises -
+        // so $.when hands them back as-is, not wrapped in a [data, status, jqXHR]
+        // array. Indexing with [0] here would silently grab the first *entry*/
+        // *country* instead of the array, and .filter() on that throws, which
+        // jQuery swallows instead of routing to .fail() - the lists just stay
+        // empty with no visible error.
+        $.when(Api.UserCountries.getByUser(user.id), Api.Countries.getAll())
+            .done(function (entries, countries) {
+                if (seq !== requestSeq) return;
+                renderList(entries, countries, "visited", "#visitedList");
+                renderList(entries, countries, "wishlist", "#wishlistList");
+            })
+            .fail(function (err) {
+                if (seq !== requestSeq) return;
+                Common.showError(err);
+            });
+    }
+
+    /**
+     * Moves an entry to the other list (visited <-> wishlist) by updating its
+     * listType, then reloads both lists to reflect the change.
+     */
+    function moveEntry(entryId, targetList) {
+        Api.UserCountries.update(entryId, { listType: targetList })
+            .done(function () {
+                Common.showAlert("List updated.", "success");
+                loadLists();
+            })
+            .fail(Common.showError);
+    }
+
+    /**
+     * Removes an entry from whichever list it belongs to, after a confirm
+     * prompt, then reloads both lists.
+     */
+    function removeEntry(entryId) {
+        if (!confirm("Remove this country from your list?")) return;
+        Api.UserCountries.delete(entryId)
+            .done(function () {
+                Common.showAlert("Removed.", "success");
+                loadLists();
+            })
+            .fail(Common.showError);
+    }
 });
-
-/**
- * Loads both the visited and wishlist entries plus the full country catalog
- * in parallel via $.when, then renders each list. See the comment below on
- * why neither result is [0]-indexed.
- */
-function loadLists() {
-    const user = Auth.getCurrentUser();
-
-    // Both of these are already single-value-resolving promises (each ends
-    // in its own .then() that returns one array), not raw $.ajax() promises -
-    // so $.when hands them back as-is, not wrapped in a [data, status, jqXHR]
-    // array. Indexing with [0] here would silently grab the first *entry*/
-    // *country* instead of the array, and .filter() on that throws, which
-    // jQuery swallows instead of routing to .fail() - the lists just stay
-    // empty with no visible error.
-    $.when(Api.UserCountries.getByUser(user.id), Api.Countries.getAll())
-        .done(function (entries, countries) {
-            renderList(entries, countries, "visited", "#visitedList");
-            renderList(entries, countries, "wishlist", "#wishlistList");
-        })
-        .fail(Common.showError);
-}
 
 /**
  * Renders one list (visited or wishlist) by filtering entries to listType
@@ -113,31 +151,4 @@ function renderList(entries, countries, listType, containerSelector) {
             '</div>'
         );
     });
-}
-
-/**
- * Moves an entry to the other list (visited <-> wishlist) by updating its
- * listType, then reloads both lists to reflect the change.
- */
-function moveEntry(entryId, targetList) {
-    Api.UserCountries.update(entryId, { listType: targetList })
-        .done(function () {
-            Common.showAlert("List updated.", "success");
-            loadLists();
-        })
-        .fail(Common.showError);
-}
-
-/**
- * Removes an entry from whichever list it belongs to, after a confirm
- * prompt, then reloads both lists.
- */
-function removeEntry(entryId) {
-    if (!confirm("Remove this country from your list?")) return;
-    Api.UserCountries.delete(entryId)
-        .done(function () {
-            Common.showAlert("Removed.", "success");
-            loadLists();
-        })
-        .fail(Common.showError);
 }

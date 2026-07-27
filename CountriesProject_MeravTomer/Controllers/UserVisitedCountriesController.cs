@@ -117,6 +117,10 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
                 return Conflict(
                     "This country is already in your list.");
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
         }
 
 
@@ -127,18 +131,25 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         public IActionResult Update(
             [FromBody] UserVisitedCountry visit)
         {
-            int result = visit.Update();
-
-            if (result == 0)
+            try
             {
-                return NotFound(
-                    "Visit not found");
+                int result = visit.Update();
+
+                if (result == 0)
+                {
+                    return NotFound(
+                        "Visit not found");
+                }
+
+                return Ok(new
+                {
+                    message = "Visit updated successfully"
+                });
             }
-
-            return Ok(new
+            catch (UnauthorizedAccessException ex)
             {
-                message = "Visit updated successfully"
-            });
+                return Unauthorized(ex.Message);
+            }
         }
 
 

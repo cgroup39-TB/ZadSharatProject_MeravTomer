@@ -23,6 +23,12 @@ function initAdminUsers() {
     $("#adminUsersTable").on("click", ".btn-unlock", function () {
         toggleLock($(this).data("id"), "unlock");
     });
+    $("#adminUsersTable").on("click", ".btn-share-disable", function () {
+        toggleCanShare($(this).data("id"), false);
+    });
+    $("#adminUsersTable").on("click", ".btn-share-enable", function () {
+        toggleCanShare($(this).data("id"), true);
+    });
 }
 
 /**
@@ -55,13 +61,25 @@ function renderUsers(users) {
                 ? '<button class="btn btn-small btn-danger btn-lock" data-id="' + user.id + '">Lock</button>'
                 : '<button class="btn btn-small btn-outline btn-unlock" data-id="' + user.id + '">Unlock</button>');
 
+        const shareLabel = user.canShare
+            ? '<span class="badge badge-success">Allowed</span>'
+            : '<span class="badge badge-danger">Blocked</span>';
+
+        const shareActionBtn = user.id === currentUser.id
+            ? '<span class="muted">(you)</span>'
+            : (user.canShare
+                ? '<button class="btn btn-small btn-danger btn-share-disable" data-id="' + user.id + '">Revoke sharing</button>'
+                : '<button class="btn btn-small btn-outline btn-share-enable" data-id="' + user.id + '">Allow sharing</button>');
+
         $tbody.append(
             '<tr>' +
             '<td>' + user.name + '</td>' +
             '<td>' + user.email + '</td>' +
             '<td>' + (user.isAdmin ? "Admin" : "User") + '</td>' +
             '<td>' + statusLabel + '</td>' +
+            '<td>' + shareLabel + '</td>' +
             '<td>' + actionBtn + '</td>' +
+            '<td>' + shareActionBtn + '</td>' +
             '</tr>'
         );
     });
@@ -77,6 +95,22 @@ function toggleLock(userId, action) {
     request
         .done(function () {
             Common.showAlert(action === "lock" ? "User locked." : "User unlocked.", "success");
+            loadUsers();
+        })
+        .fail(Common.showError);
+}
+
+/**
+ * Calls the admin-only enable/disable-sharing endpoint and refreshes the table on success.
+ * The server independently enforces both the admin check and the CanShare flag itself
+ * (BL/UserVisitedCountry.cs rejects isShared=true posts/updates for blocked users), so this
+ * is UX only, not the real gate.
+ */
+function toggleCanShare(userId, canShare) {
+    const request = canShare ? Api.Admin.enableSharing(userId) : Api.Admin.disableSharing(userId);
+    request
+        .done(function () {
+            Common.showAlert(canShare ? "Sharing allowed for user." : "Sharing revoked for user.", "success");
             loadUsers();
         })
         .fail(Common.showError);

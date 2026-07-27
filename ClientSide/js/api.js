@@ -1,47 +1,25 @@
 /*
  * api.js
  * Single place that talks to the backend. Every other JS file calls Api.* and
- * never touches $.ajax or Mock.* directly.
- *
- * Each function has two branches:
- *   - CONFIG.USE_MOCK === true  -> resolves/rejects using mockData.js (fake latency included)
- *   - CONFIG.USE_MOCK === false -> real $.ajax call to CONFIG.API_BASE_URL
+ * never touches $.ajax directly.
  *
  * The real server (see CountriesProject_MeravTomer/Controllers) uses different
- * route names/shapes than the original mock contract in a few places (no
+ * route names/shapes than the client's original view-model in a few places (no
  * generic search/UserCountries/Shares/Admin resources - those are composed
  * here out of the real endpoints: Countries, Users, UserVisitedCountries,
  * Users/{id}/wantedCountries, Users/{id}/regions, Users/{id}/languages,
  * Users/statistics, Quizzes). This file is the only place that knows about
- * that mapping - every other page keeps using the original mock-era shapes
+ * that mapping - every other page keeps using the client's own flat shapes
  * (country.commonName, share.userName, userCountry.listType, ...).
  *
- * All functions return a jQuery Promise, so callers use them the same way regardless
- * of mock/real: Api.Countries.getAll().done(function(data){...}).fail(function(err){...});
+ * All functions return a jQuery Promise: Api.Countries.getAll().done(function(data){...}).fail(function(err){...});
  */
 const Api = (function () {
 
     // ---------- generic helpers ----------
 
     /**
-     * Wraps a synchronous work function as an async jQuery promise with a fake network delay (CONFIG.MOCK_DELAY_MS).
-     * A thrown error inside workFn is turned into a rejected promise shaped like a real jqXHR failure ({responseJSON:{message}}).
-     */
-    function mockResponse(workFn) {
-        const dfd = $.Deferred();
-        setTimeout(function () {
-            try {
-                const result = workFn();
-                dfd.resolve(result);
-            } catch (err) {
-                dfd.reject({ responseJSON: { message: err.message || "Mock error" } });
-            }
-        }, CONFIG.MOCK_DELAY_MS);
-        return dfd.promise();
-    }
-
-    /**
-     * Performs the real (non-mock) $.ajax call to CONFIG.API_BASE_URL, JSON-encoding the body and attaching the auth header.
+     * Performs the real $.ajax call to CONFIG.API_BASE_URL, JSON-encoding the body and attaching the auth header.
      * Returns the raw $.ajax() promise - $.when() wraps this in a [data, status, jqXHR] array when combined with other promises.
      */
     function realRequest(method, path, data) {
@@ -128,52 +106,16 @@ const Api = (function () {
     //   PUT  /api/Users/{id}/profile?actingUserId=...
     //   GET  /api/Users/{id}
     const Users = {
-        /** Registers a new user. Mock branch pre-checks for a duplicate email and throws; real branch just posts to /Users/register (raw $.ajax() promise) and lets the server validate. */
+        /** Registers a new user (raw $.ajax() promise); the server validates (e.g. duplicate email). */
         register: function (userData) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const users = Mock.getUsers();
-                    const emailTaken = users.some(function (u) { return u.email.toLowerCase() === userData.email.toLowerCase(); });
-                    if (emailTaken) throw new Error("This email is already registered.");
-                    const newUser = {
-                        id: Mock.nextUserId(),
-                        name: userData.name,
-                        email: userData.email,
-                        password: userData.password,
-                        active: true,
-                        isAdmin: false,
-                        preferences: { continents: [], countries: [], languages: [] }
-                    };
-                    users.push(newUser);
-                    Mock.saveUsers(users);
-                    return sanitizeUser(newUser);
-                });
-            }
             return realRequest("POST", "/Users/register", userData);
         },
 
         /**
          * Logs in a user. The real server issues no JWT, so a lightweight local session token ("session-{id}-{timestamp}") is synthesized client-side from the returned user row.
-         * Real branch is a `.then()`-derived promise - resolves directly with {token, user}, not the [data,status,jqXHR] triple, so `$.when()` callers must NOT index the result with [0].
+         * `.then()`-derived promise - resolves directly with {token, user}, not the [data,status,jqXHR] triple, so `$.when()` callers must NOT index the result with [0].
          */
         login: function (credentials) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const users = Mock.getUsers();
-                    const user = users.find(function (u) { return u.email.toLowerCase() === credentials.email.toLowerCase(); });
-                    if (!user || user.password !== credentials.password) throw new Error("Invalid email or password.");
-                    if (!user.active) throw new Error("This account is locked. Please contact an administrator.");
-
-                    const log = Mock.getLoginLog();
-                    log.push({ userId: user.id, date: new Date().toISOString().slice(0, 10) });
-                    Mock.saveLoginLog(log);
-
-                    return { token: "mock-token-" + user.id + "-" + Date.now(), user: sanitizeUser(user) };
-                });
-            }
-            // The real server has no JWT issuance yet - it just validates the
-            // credentials and returns the user row, so a lightweight local
-            // session token is synthesized here (same role as the mock token).
             return realRequest("POST", "/Users/login", credentials).then(function (user) {
                 return {
                     token: "session-" + user.userId + "-" + Date.now(),
@@ -183,21 +125,10 @@ const Api = (function () {
         },
 
         /**
-         * Updates a user's profile. Real branch is a `.then()`-derived promise that ultimately resolves with a single mapped user object
+         * Updates a user's profile. `.then()`-derived promise that ultimately resolves with a single mapped user object
          * (not the [data,status,jqXHR] triple), so `$.when()` callers must NOT index the result with [0].
          */
         update: function (id, data) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const users = Mock.getUsers();
-                    const idx = users.findIndex(function (u) { return u.id === Number(id); });
-                    if (idx === -1) throw new Error("User not found.");
-                    users[idx] = $.extend({}, users[idx], data, { id: users[idx].id });
-                    Mock.saveUsers(users);
-                    return sanitizeUser(users[idx]);
-                });
-            }
-
             // "preferences" updates (continents/countries/languages) aren't
             // backed by a matching field on the real User - the server keeps
             // them as separate resources (Users/{id}/regions, .../languages)
@@ -233,15 +164,8 @@ const Api = (function () {
             });
         },
 
-        /** Fetches a user by id. Real branch is `.then()`-derived (maps through mapUserFromServer), resolving with a single object - not the [data,status,jqXHR] triple. */
+        /** Fetches a user by id. `.then()`-derived (maps through mapUserFromServer), resolving with a single object - not the [data,status,jqXHR] triple. */
         getById: function (id) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const user = Mock.getUsers().find(function (u) { return u.id === Number(id); });
-                    if (!user) throw new Error("User not found.");
-                    return sanitizeUser(user);
-                });
-            }
             return realRequest("GET", "/Users/" + id).then(mapUserFromServer);
         }
     };
@@ -253,50 +177,30 @@ const Api = (function () {
     //   POST   /api/Countries
     //   PUT    /api/Countries/{id}
     //   DELETE /api/Countries/{id}
-    // (no generic /Countries/search - filtering/sorting is done client-side
-    // over the full list, same as the mock branch already did)
+    // (no generic /Countries/search - filtering/sorting is done client-side over the full list)
     const Countries = {
         /**
-         * Fetches and maps every country. Real branch is a `.then()`-derived promise - resolves directly with the mapped array
+         * Fetches and maps every country. `.then()`-derived promise - resolves directly with the mapped array
          * (not the [data,status,jqXHR] triple), so `$.when()` callers must NOT index the result with [0].
          */
         getAll: function () {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () { return Mock.getCountries().slice(); });
-            }
             return realRequest("GET", "/Countries").then(function (list) {
                 return (list || []).map(mapCountryFromServer);
             });
         },
 
-        /** Fetches a single country. Real branch is `.then()`-derived (maps through mapCountryFromServer), resolving with a single object. */
+        /** Fetches a single country. `.then()`-derived (maps through mapCountryFromServer), resolving with a single object. */
         getById: function (id) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const country = Mock.getCountries().find(function (c) { return c.id === Number(id); });
-                    if (!country) throw new Error("Country not found.");
-                    return country;
-                });
-            }
             return realRequest("GET", "/Countries/" + id).then(mapCountryFromServer);
         },
 
         /**
-         * Creates a country: real branch resolves the region via findRegionRaw, then POSTs.
+         * Creates a country: resolves the region via findRegionRaw, then POSTs.
          * NOTE ON PROMISE SHAPE: although this chains `.then()`, the callback's `return realRequest(...)` returns the raw ajax
          * promise itself (not a plain value), so the outer promise adopts its multi-arg resolution - it behaves like a raw
          * $.ajax() promise for `$.when()` purposes (wrapped as [data,status,jqXHR]), unlike Countries.getAll/getById/update.
          */
         create: function (data) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const countries = Mock.getCountries();
-                    const newCountry = $.extend({}, data, { id: Mock.nextCountryId() });
-                    countries.push(newCountry);
-                    Mock.saveCountries(countries);
-                    return newCountry;
-                });
-            }
             // NOTE: the server's Country.Insert() BL method is currently a
             // stub that never calls the DAL insert - this call is wired to
             // the documented real endpoint but won't persist until that's
@@ -318,19 +222,9 @@ const Api = (function () {
 
         /**
          * Updates a country: resolves the region via findRegionRaw, PUTs the change, then re-fetches via Countries.getById.
-         * Real branch is a `.then()`-derived promise that ultimately resolves with the single mapped country object (not the [data,status,jqXHR] triple).
+         * `.then()`-derived promise that ultimately resolves with the single mapped country object (not the [data,status,jqXHR] triple).
          */
         update: function (id, data) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const countries = Mock.getCountries();
-                    const idx = countries.findIndex(function (c) { return c.id === Number(id); });
-                    if (idx === -1) throw new Error("Country not found.");
-                    countries[idx] = $.extend({}, countries[idx], data, { id: countries[idx].id });
-                    Mock.saveCountries(countries);
-                    return countries[idx];
-                });
-            }
             return findRegionRaw(data.region).then(function (region) {
                 return realRequest("PUT", "/Countries/" + id, {
                     cca3: data.apiCountryCode,
@@ -348,37 +242,25 @@ const Api = (function () {
             });
         },
 
-        /** Deletes a country by id; real branch is a raw $.ajax() promise (unlike most other Countries methods), so $.when() wraps a single result as [data,status,jqXHR]. */
+        /** Deletes a country by id; raw $.ajax() promise (unlike most other Countries methods), so $.when() wraps a single result as [data,status,jqXHR]. */
         delete: function (id) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const countries = Mock.getCountries().filter(function (c) { return c.id !== Number(id); });
-                    Mock.saveCountries(countries);
-                    return { success: true };
-                });
-            }
             return realRequest("DELETE", "/Countries/" + id);
         },
 
-        // params: { name, region, language, currency, minPopulation, maxPopulation, minArea, maxArea, sortBy, sortDir }
+        // params: { name, region, language, currency, sortBy, sortDir }
         /**
-         * Searches/filters countries entirely client-side (no server-side search endpoint): real branch fetches the full list
+         * Searches/filters countries entirely client-side (no server-side search endpoint): fetches the full list
          * via Countries.getAll() and then filters/sorts it in JS. `.then()`-derived promise - resolves with a single array.
          */
         search: function (params) {
             params = params || {};
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    return filterAndSortCountries(Mock.getCountries().slice(), params);
-                });
-            }
             return Countries.getAll().then(function (list) {
                 return filterAndSortCountries(list, params);
             });
         }
     };
 
-    /** Applies client-side filtering (name/region/language/currency/min-max population/area) and optional sorting to a country list. */
+    /** Applies client-side filtering (name/region/language/currency) and optional sorting to a country list. */
     function filterAndSortCountries(list, params) {
         if (params.name) {
             const term = params.name.toLowerCase();
@@ -395,10 +277,6 @@ const Api = (function () {
             const cur = params.currency.toLowerCase();
             list = list.filter(function (c) { return c.currencyName.toLowerCase().indexOf(cur) !== -1; });
         }
-        if (params.minPopulation) list = list.filter(function (c) { return c.population >= Number(params.minPopulation); });
-        if (params.maxPopulation) list = list.filter(function (c) { return c.population <= Number(params.maxPopulation); });
-        if (params.minArea) list = list.filter(function (c) { return c.area >= Number(params.minArea); });
-        if (params.maxArea) list = list.filter(function (c) { return c.area <= Number(params.maxArea); });
 
         if (params.sortBy) {
             const dir = params.sortDir === "desc" ? -1 : 1;
@@ -427,12 +305,6 @@ const Api = (function () {
          * THIS function's result in their own `$.when()` must NOT index the result with [0] (see userLists.js loadLists()).
          */
         getByUser: function (userId) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    return Mock.getUserCountries().filter(function (uc) { return uc.userId === Number(userId); });
-                });
-            }
-
             const visitedReq = realRequest("GET", "/UserVisitedCountries/user/" + userId);
             const wantedReq = realRequest("GET", "/Users/" + userId + "/wantedCountries");
 
@@ -466,24 +338,10 @@ const Api = (function () {
         // data: { userId, countryId, listType }
         /**
          * Adds a country to a user's visited or wishlist list depending on data.listType (different real endpoint for each), raw $.ajax() promise.
-         * A duplicate (userId+countryId+listType) insert is a composite-key conflict server-side (HTTP 409); this function does no special
-         * handling for it - the 409 just reaches the caller's .fail() like any other error (mock branch instead throws a JS Error up front).
+         * A duplicate (userId+countryId+listType) insert is a composite-key conflict server-side (HTTP 409) - it just reaches
+         * the caller's .fail() like any other error.
          */
         create: function (data) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const list = Mock.getUserCountries();
-                    const exists = list.some(function (uc) {
-                        return uc.userId === data.userId && uc.countryId === data.countryId && uc.listType === data.listType;
-                    });
-                    if (exists) throw new Error("This country is already in that list.");
-                    const entry = $.extend({}, data, { id: Mock.nextUserCountryId() });
-                    list.push(entry);
-                    Mock.saveUserCountries(list);
-                    return entry;
-                });
-            }
-
             if (data.listType === "wishlist") {
                 return realRequest("POST", "/Users/" + data.userId + "/wantedCountries/" + data.countryId);
             }
@@ -503,17 +361,6 @@ const Api = (function () {
          * move's `.then()` callback returns the raw ajax promise of the final POST, so it resolves multi-arg like a raw $.ajax() call.
          */
         update: function (id, data) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const list = Mock.getUserCountries();
-                    const idx = list.findIndex(function (uc) { return uc.id === Number(id); });
-                    if (idx === -1) throw new Error("Entry not found.");
-                    list[idx] = $.extend({}, list[idx], data, { id: list[idx].id });
-                    Mock.saveUserCountries(list);
-                    return list[idx];
-                });
-            }
-
             const parts = String(id).split(":");
             const fromType = parts[0];
             const countryId = Number(parts[1]);
@@ -542,16 +389,8 @@ const Api = (function () {
             });
         },
 
-        /** Removes an entry from whichever list it belongs to (parsed from the synthetic id's "visited:"/"wishlist:" prefix); real branch is a raw $.ajax() promise. */
+        /** Removes an entry from whichever list it belongs to (parsed from the synthetic id's "visited:"/"wishlist:" prefix); raw $.ajax() promise. */
         delete: function (id) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const list = Mock.getUserCountries().filter(function (uc) { return uc.id !== Number(id); });
-                    Mock.saveUserCountries(list);
-                    return { success: true };
-                });
-            }
-
             const parts = String(id).split(":");
             const listType = parts[0];
             const countryId = Number(parts[1]);
@@ -595,23 +434,15 @@ const Api = (function () {
     }
 
     const Shares = {
-        /** Fetches every shared review across all users. Real branch is `.then()`-derived (maps through mapShareFromVisit), resolving with a single array. */
+        /** Fetches every shared review across all users. `.then()`-derived (maps through mapShareFromVisit), resolving with a single array. */
         getAll: function () {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () { return Mock.getShares().slice().reverse(); });
-            }
             return realRequest("GET", "/UserVisitedCountries/shared").then(function (list) {
                 return (list || []).map(mapShareFromVisit);
             });
         },
 
-        /** Fetches shared reviews for one country. Real branch is `.then()`-derived (maps through mapShareFromVisit), resolving with a single array. */
+        /** Fetches shared reviews for one country. `.then()`-derived (maps through mapShareFromVisit), resolving with a single array. */
         getByCountry: function (countryId) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    return Mock.getShares().filter(function (s) { return s.countryId === Number(countryId); }).reverse();
-                });
-            }
             return realRequest("GET", "/UserVisitedCountries/shared/country/" + countryId).then(function (list) {
                 return (list || []).map(mapShareFromVisit);
             });
@@ -625,22 +456,6 @@ const Api = (function () {
          * like a raw $.ajax() promise for `$.when()` (wrapped as [data,status,jqXHR]), unlike most other `.then()`-derived Api functions.
          */
         create: function (data) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const author = Mock.getUsers().find(function (u) { return u.id === data.userId; });
-                    if (!author || !author.active) throw new Error("Locked accounts cannot post shares.");
-
-                    const shares = Mock.getShares();
-                    const newShare = $.extend({}, data, {
-                        id: Mock.nextShareId(),
-                        createdAt: new Date().toISOString().slice(0, 10)
-                    });
-                    shares.push(newShare);
-                    Mock.saveShares(shares);
-                    return newShare;
-                });
-            }
-
             return findVisitEntry(data.userId, data.countryId).then(function (existing) {
                 const body = {
                     userId: data.userId,
@@ -661,17 +476,6 @@ const Api = (function () {
          * promise's multi-arg resolution, so it behaves like raw $.ajax() for `$.when()` purposes.
          */
         update: function (id, data) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const shares = Mock.getShares();
-                    const idx = shares.findIndex(function (s) { return s.id === Number(id); });
-                    if (idx === -1) throw new Error("Share not found.");
-                    shares[idx] = $.extend({}, shares[idx], data, { id: shares[idx].id });
-                    Mock.saveShares(shares);
-                    return shares[idx];
-                });
-            }
-
             const parts = String(id).split("_");
             const userId = Number(parts[0]);
             const countryId = Number(parts[1]);
@@ -695,14 +499,6 @@ const Api = (function () {
          * Same promise-shape caveat as Shares.create/update: on success it adopts the raw PUT ajax promise's multi-arg resolution.
          */
         delete: function (id) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const shares = Mock.getShares().filter(function (s) { return s.id !== Number(id); });
-                    Mock.saveShares(shares);
-                    return { success: true };
-                });
-            }
-
             const parts = String(id).split("_");
             const userId = Number(parts[0]);
             const countryId = Number(parts[1]);
@@ -730,51 +526,19 @@ const Api = (function () {
     //   GET  /api/Quizzes/{quizId}/questions
     //   POST /api/Quizzes/submit
     const Quizzes = {
-        /** Returns the quiz catalog (id/title/description); real branch is a raw $.ajax() promise. */
+        /** Returns the quiz catalog (id/title/description); raw $.ajax() promise. */
         getCatalog: function () {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    return Mock.getQuizzes().map(function (q) {
-                        return { id: q.id, title: q.title, description: q.description || "" };
-                    });
-                });
-            }
             return realRequest("GET", "/Quizzes");
         },
 
-        /** Returns a quiz's questions; mock branch strips correctIndex to mimic what a real server response should omit. Real branch is a raw $.ajax() promise. */
+        /** Returns a quiz's questions; raw $.ajax() promise. */
         getQuestions: function (quizId) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const quiz = Mock.getQuizById(quizId);
-                    if (!quiz) throw new Error("Quiz not found.");
-                    // correctIndex is stripped out here on purpose, same as a real server would do
-                    const safeQuestions = quiz.questions.map(function (q) {
-                        return { id: q.id, text: q.text, options: q.options };
-                    });
-                    return { id: quiz.id, title: quiz.title, durationSeconds: CONFIG.QUIZ_DURATION_SECONDS, questions: safeQuestions };
-                });
-            }
             return realRequest("GET", "/Quizzes/" + quizId + "/questions");
         },
 
         // data: { quizId, userId, answers: [{ questionId, selectedIndex }] }
-        /** Submits quiz answers; mock branch grades client-side and returns per-question correctness. Real branch is a raw $.ajax() promise POSTing the raw answers for server-side grading. */
+        /** Submits quiz answers; raw $.ajax() promise POSTing the raw answers for server-side grading. */
         submit: function (data) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const quiz = Mock.getQuizById(data.quizId);
-                    if (!quiz) throw new Error("Quiz not found.");
-                    let correct = 0;
-                    const details = quiz.questions.map(function (q) {
-                        const answer = data.answers.find(function (a) { return a.questionId === q.id; });
-                        const isCorrect = !!answer && answer.selectedIndex === q.correctIndex;
-                        if (isCorrect) correct++;
-                        return { questionId: q.id, correctIndex: q.correctIndex, isCorrect: isCorrect };
-                    });
-                    return { quizId: quiz.id, total: quiz.questions.length, correct: correct, details: details };
-                });
-            }
             return realRequest("POST", "/Quizzes/submit", data);
         }
     };
@@ -783,6 +547,7 @@ const Api = (function () {
     // Real endpoints:
     //   GET /api/Users                              (catalog, reused as the admin user list)
     //   PUT /api/Users/{id}/active?actingUserId=...  (lock/unlock)
+    //   PUT /api/Users/{id}/canShare?actingUserId=... (allow/revoke sharing)
     //   GET /api/Users/statistics?actingUserId=...
     /**
      * Locks/unlocks a user: fetches the current row (PUT .../active overwrites every column, same reasoning as Users.update)
@@ -809,77 +574,60 @@ const Api = (function () {
         });
     }
 
+    // Grants/revokes a user's permission to publicly share reviews via PUT
+    // .../canShare (same "fetch full row first" reasoning as setUserActive).
+    function setCanShare(id, canShare) {
+        const admin = Auth.getCurrentUser();
+
+        return realRequest("GET", "/Users/" + id).then(function (user) {
+            return realRequest("PUT", "/Users/" + id + "/canShare?actingUserId=" + admin.id, {
+                userId: user.userId,
+                name: user.name,
+                email: user.email,
+                password: user.password,
+                isActive: user.isActive,
+                isAdmin: user.isAdmin,
+                canShare: canShare
+            });
+        }).then(function () {
+            return realRequest("GET", "/Users/" + id).then(mapUserFromServer);
+        });
+    }
+
     const Admin = {
-        /** Fetches every user (reused as the admin user list). Real branch is `.then()`-derived (maps through mapUserFromServer), resolving with a single array. */
+        /** Fetches every user (reused as the admin user list). `.then()`-derived (maps through mapUserFromServer), resolving with a single array. */
         getUsers: function () {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () { return Mock.getUsers().map(sanitizeUser); });
-            }
             return realRequest("GET", "/Users").then(function (list) {
                 return (list || []).map(mapUserFromServer);
             });
         },
 
-        /** Locks a user; real branch delegates directly to setUserActive(id, false) (same `.then()`-derived, single-value promise shape). */
+        /** Locks a user; delegates to setUserActive(id, false) (`.then()`-derived, single-value promise shape). */
         lockUser: function (id) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const users = Mock.getUsers();
-                    const idx = users.findIndex(function (u) { return u.id === Number(id); });
-                    if (idx === -1) throw new Error("User not found.");
-                    users[idx].active = false;
-                    Mock.saveUsers(users);
-                    return sanitizeUser(users[idx]);
-                });
-            }
             return setUserActive(id, false);
         },
 
-        /** Unlocks a user; real branch delegates directly to setUserActive(id, true) (same `.then()`-derived, single-value promise shape). */
+        /** Unlocks a user; delegates to setUserActive(id, true) (`.then()`-derived, single-value promise shape). */
         unlockUser: function (id) {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const users = Mock.getUsers();
-                    const idx = users.findIndex(function (u) { return u.id === Number(id); });
-                    if (idx === -1) throw new Error("User not found.");
-                    users[idx].active = true;
-                    Mock.saveUsers(users);
-                    return sanitizeUser(users[idx]);
-                });
-            }
             return setUserActive(id, true);
         },
 
+        /** Revokes a user's sharing permission; delegates to setCanShare(id, false) (`.then()`-derived, single-value promise shape). */
+        disableSharing: function (id) {
+            return setCanShare(id, false);
+        },
+
+        /** Grants a user's sharing permission; delegates to setCanShare(id, true) (`.then()`-derived, single-value promise shape). */
+        enableSharing: function (id) {
+            return setCanShare(id, true);
+        },
+
         /**
-         * Fetches admin dashboard stats. Real branch is `.then()`-derived and reshapes the server's aggregate-only response:
+         * Fetches admin dashboard stats. `.then()`-derived and reshapes the server's aggregate-only response:
          * todayLogins is set equal to totalLogins (server tracks no per-day breakdown) and dailyLogins is always returned
          * empty, so the daily-logins chart has nothing to render against the real API yet.
          */
         getStats: function () {
-            if (CONFIG.USE_MOCK) {
-                return mockResponse(function () {
-                    const log = Mock.getLoginLog();
-                    const today = new Date().toISOString().slice(0, 10);
-
-                    const byDate = {};
-                    log.forEach(function (entry) {
-                        byDate[entry.date] = (byDate[entry.date] || 0) + 1;
-                    });
-                    const dailyLogins = Object.keys(byDate).sort().map(function (date) {
-                        return { date: date, count: byDate[date] };
-                    });
-
-                    return {
-                        todayLogins: byDate[today] || 0,
-                        totalLogins: log.length,
-                        countriesImported: Mock.getCountries().length,
-                        countriesSaved: Mock.getUserCountries().length,
-                        sharesCreated: Mock.getShares().length,
-                        dailyLogins: dailyLogins
-                    };
-                });
-            }
-
             const admin = Auth.getCurrentUser();
             return realRequest("GET", "/Users/statistics?actingUserId=" + admin.id).then(function (stats) {
                 // The server only tracks aggregate counts, not a per-day
