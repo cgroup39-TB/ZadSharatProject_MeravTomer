@@ -196,7 +196,7 @@ const Api = (function () {
             return realRequest("GET", "/Users/" + id + "/regions");
         },
 
-        /** Returns the user's recorded languages ([{userId, language:{languageId,languageName}, levelLanguage}]); raw $.ajax() promise. */
+        /** Returns the user's recorded languages ([{userId, language:{languageId,languageName}, proficiencyLevel}]); raw $.ajax() promise. */
         getUserLanguages: function (id) {
             return realRequest("GET", "/Users/" + id + "/languages");
         }
@@ -252,7 +252,10 @@ const Api = (function () {
                     return {
                         userId: userId,
                         language: lang,
-                        levelLanguage: LANGUAGE_LEVEL_TO_NUMBER[l.level] || null
+                        // Must match the server's UserLanguages.ProficiencyLevel property name
+                        // (camelCased) - a mismatched key silently fails model binding, leaving
+                        // ProficiencyLevel null and violating the DB's NOT NULL constraint.
+                        proficiencyLevel: LANGUAGE_LEVEL_TO_NUMBER[l.level] || null
                     };
                 })
                 .filter(Boolean);
@@ -662,10 +665,11 @@ const Api = (function () {
 
     // ---------- Admin ----------
     // Real endpoints:
-    //   GET /api/Users                              (catalog, reused as the admin user list)
-    //   PUT /api/Users/{id}/active?actingUserId=...  (lock/unlock)
-    //   PUT /api/Users/{id}/canShare?actingUserId=... (allow/revoke sharing)
-    //   GET /api/Users/statistics?actingUserId=...
+    //   GET    /api/Users                              (catalog, reused as the admin user list)
+    //   PUT    /api/Users/{id}/active?actingUserId=...  (lock/unlock)
+    //   PUT    /api/Users/{id}/canShare?actingUserId=... (allow/revoke sharing)
+    //   DELETE /api/Users/{id}?actingUserId=...          (permanently delete a user)
+    //   GET    /api/Users/statistics?actingUserId=...
     /**
      * Locks/unlocks a user: fetches the current row (PUT .../active overwrites every column, same reasoning as Users.update)
      * and PUTs it back with isActive toggled. `.then()`-derived promise - resolves directly with the mapped user (not the
@@ -737,6 +741,12 @@ const Api = (function () {
         /** Grants a user's sharing permission; delegates to setCanShare(id, true) (`.then()`-derived, single-value promise shape). */
         enableSharing: function (id) {
             return setCanShare(id, true);
+        },
+
+        /** Permanently deletes a user; raw $.ajax() promise (unlike most other Admin methods), so $.when() wraps a single result as [data,status,jqXHR]. */
+        deleteUser: function (id) {
+            const admin = Auth.getCurrentUser();
+            return realRequest("DELETE", "/Users/" + id + "?actingUserId=" + admin.id);
         },
 
         /**

@@ -342,6 +342,32 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         }
 
 
+        /// <summary>
+        /// Permanently deletes <paramref name="userTargetId"/> and every row that references them
+        /// (languages, preferred regions, visited/wanted countries, quiz results, logins - all
+        /// cascade-deleted at the DB level). Admin-only; throws <see cref="UnauthorizedAccessException"/>
+        /// otherwise, and also if an admin tries to delete their own account.
+        /// </summary>
+        public int DeleteUser(int userTargetId)
+        {
+            if (!this.IsAdmin)
+            {
+                throw new UnauthorizedAccessException(
+                    "Only admins can delete users.");
+            }
+
+            if (this.UserId == userTargetId)
+            {
+                throw new UnauthorizedAccessException(
+                    "An admin cannot delete their own account.");
+            }
+
+            DBUserServices db = new DBUserServices();
+
+            return db.DeleteUser(userTargetId);
+        }
+
+
         // =====================================================
         // User Preferences
         // =====================================================

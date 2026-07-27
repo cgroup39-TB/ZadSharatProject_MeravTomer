@@ -125,6 +125,20 @@ END
 ');
 GO
 
+-- ---------- Delete user procedure ----------
+
+IF OBJECT_ID('dbo.spDeleteUser_3MD_TB', 'P') IS NULL
+EXEC('
+CREATE PROCEDURE spDeleteUser_3MD_TB
+    @UserId INT
+AS
+BEGIN
+    DELETE FROM Users
+    WHERE UserId = @UserId;
+END
+');
+GO
+
 -- ---------- Sanity checks ----------
 
 SELECT DB_NAME() AS ranAgainstDatabase;
@@ -136,5 +150,6 @@ WHERE Email IN (N'admin@test.com', N'test@test.com');
 SELECT name FROM sys.objects
 WHERE type = 'P' AND name IN (
     'spReadUserRegions_3MD_TB', 'spInsertUserRegion_3MD_TB', 'spDeleteUserRegions_3MD_TB',
-    'spReadUserLanguages_3MD_TB', 'spInsertUserLanguage_3MD_TB', 'spDeleteUserLanguages_3MD_TB'
+    'spReadUserLanguages_3MD_TB', 'spInsertUserLanguage_3MD_TB', 'spDeleteUserLanguages_3MD_TB',
+    'spDeleteUser_3MD_TB'
 );

@@ -166,6 +166,23 @@ GO
 
 -- =============================================
 -- Author:		<Tomer,Merav>
+-- Create date: <27.7.26>
+-- Description:	<Delete User>
+-- =============================================
+CREATE PROCEDURE spDeleteUser_3MD_TB
+    @UserId INT
+AS
+BEGIN
+
+    DELETE FROM Users
+    WHERE UserId = @UserId;
+
+END
+GO
+
+
+-- =============================================
+-- Author:		<Tomer,Merav>
 -- Create date: <23.7.26>
 -- Description:	<Read User Preferred Regions>
 -- =============================================

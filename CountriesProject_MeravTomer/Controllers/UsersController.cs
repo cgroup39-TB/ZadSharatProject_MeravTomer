@@ -515,6 +515,53 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>
+        /// Permanently deletes <paramref name="targetUserId"/>. <paramref name="actingUserId"/>
+        /// must be an admin and cannot delete their own account - returns 401 in either case,
+        /// 404 if either user doesn't exist.
+        /// </summary>
+        // DELETE:
+        // api/Users/10?actingUserId=1
+        [HttpDelete("{targetUserId}")]
+        public IActionResult DeleteUser(
+            int targetUserId,
+            int actingUserId)
+        {
+            User reader = new User();
+
+            User admin =
+                reader.ReadById(actingUserId);
+
+            if (admin == null)
+            {
+                return NotFound(
+                    "Acting user not found");
+            }
+
+            try
+            {
+                int result =
+                    admin.DeleteUser(targetUserId);
+
+                if (result == 0)
+                {
+                    return NotFound(
+                        "Target user not found");
+                }
+
+                return Ok(new
+                {
+                    message =
+                        "User deleted successfully"
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+        }
+
+
         // =========================
         // ADMIN STATISTICS
         // =========================
