@@ -8,6 +8,7 @@ $(function () {
 
     let allCountries = [];
     let requestSeq = 0;
+    let recommendationsCache = null;
 
     init();
 
@@ -17,15 +18,15 @@ $(function () {
      */
     function init() {
         $("#myStatusFilterRow").toggle(Auth.isLoggedIn());
+        $("#showRecommendedBtn").toggle(Auth.isLoggedIn());
         populateRegionFilter();
         bindEvents();
         loadCountries();
-        if (Auth.isLoggedIn()) loadRecommendations();
     }
 
     /**
-     * Wires the search form, reset button, and sort/status controls so any
-     * of them re-runs loadCountries().
+     * Wires the search form, reset button, sort/status controls, and the
+     * recommended-countries toggle button.
      */
     function bindEvents() {
         $("#searchForm").on("submit", function (e) {
@@ -37,6 +38,7 @@ $(function () {
             loadCountries();
         });
         $("#sortBy, #sortDir, #myStatusFilter").on("change", loadCountries);
+        $("#showRecommendedBtn").on("click", toggleRecommendations);
     }
 
     /**
@@ -167,25 +169,41 @@ $(function () {
     }
 
     /**
+     * Toggles the "Recommended for You" section open/closed on button click;
+     * fetches the recommendations on first open only, then reuses the cached
+     * result on subsequent toggles.
+     */
+    function toggleRecommendations() {
+        const $section = $("#recommendedSection");
+        if ($section.is(":visible")) {
+            $section.hide();
+            return;
+        }
+
+        $section.show();
+        if (recommendationsCache) {
+            renderRecommendations(recommendationsCache);
+            return;
+        }
+        loadRecommendations();
+    }
+
+    /**
      * Loads countries matching the logged-in user's preferred continents/
-     * languages (excluding anything already on their visited/wishlist), and
-     * shows the "Recommended for You" section only if there's at least one.
+     * languages (excluding anything already on their visited/wishlist).
      */
     function loadRecommendations() {
         const user = Auth.getCurrentUser();
+        $("#recommendedGrid").html('<p class="muted">Loading...</p>');
+
         Api.Recommendations.getForUser(user.id)
             .done(function (recommendations) {
-                if (!recommendations.length) {
-                    $("#recommendedSection").hide();
-                    return;
-                }
-                renderRecommendations(recommendations.slice(0, 6));
-                $("#recommendedSection").show();
+                recommendationsCache = recommendations.slice(0, 6);
+                renderRecommendations(recommendationsCache);
             })
             .fail(function () {
-                // No preferences set yet, or the lookup failed - just hide
-                // the section rather than surfacing an error on page load.
-                $("#recommendedSection").hide();
+                recommendationsCache = [];
+                renderRecommendations(recommendationsCache);
             });
     }
 
@@ -196,6 +214,11 @@ $(function () {
      */
     function renderRecommendations(recommendations) {
         const $grid = $("#recommendedGrid").empty();
+
+        if (!recommendations.length) {
+            $grid.html('<p class="muted">No recommendations yet - set your preferred continents/languages in My Preferences.</p>');
+            return;
+        }
 
         recommendations.forEach(function (rec) {
             const country = rec.country;
