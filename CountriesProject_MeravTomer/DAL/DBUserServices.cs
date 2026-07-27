@@ -703,7 +703,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
         //--------------------------------------------------------------------------------------------------
         // Read User Languages
-        // UserLanguages contains UserId + Language Object + LevelLanguage
+        // UserLanguages contains UserId + Language Object + ProficiencyLevel
         //--------------------------------------------------------------------------------------------------
         /// <summary>
         /// Returns the user's known languages, each paired with an optional proficiency level, via spReadUserLanguages_3MD_TB.
@@ -746,23 +746,23 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                         new Language(
                             Convert.ToInt32(
                                 dataReader["LanguageId"]),
-                            dataReader["LanguageName"].ToString()
+                            dataReader["ProficiencyLevel"].ToString()
                         );
 
-                    int? levelLanguage = null;
+                    int ProficiencyLevel = null;
 
-                    if (dataReader["LevelLanguage"] != DBNull.Value)
+                    if (dataReader["ProficiencyLevel"] != DBNull.Value)
                     {
-                        levelLanguage =
+                        ProficiencyLevel =
                             Convert.ToInt32(
-                                dataReader["LevelLanguage"]);
+                                dataReader["ProficiencyLevel"]);
                     }
 
                     UserLanguages userLanguage =
                         new UserLanguages(
                             userId,
                             language,
-                            levelLanguage
+                            ProficiencyLevel
                         );
 
                     userLanguages.Add(userLanguage);
@@ -827,7 +827,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
                         userLanguage.Language.LanguageId);
 
                     paramDic.Add(
-                        "@LevelLanguage",
+                        "@ProficiencyLevel",
                         userLanguage.ProficiencyLevel.HasValue
                             ? userLanguage.ProficiencyLevel.Value
                             : DBNull.Value);
