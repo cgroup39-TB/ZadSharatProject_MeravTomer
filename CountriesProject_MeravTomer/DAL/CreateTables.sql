@@ -47,6 +47,12 @@ CREATE TABLE Users(
 
 
 
+IF NOT EXISTS (SELECT 1 FROM Users WHERE Email = N'admin@test.com')
+INSERT INTO Users ([Name], Email, [Password], IsAdmin, IsActive, CanShare)
+VALUES (N'Admin', N'admin@test.com', N'admin123', 1, 1, 1);
+
+
+
 
 
 CREATE TABLE CountryCurrencies (
