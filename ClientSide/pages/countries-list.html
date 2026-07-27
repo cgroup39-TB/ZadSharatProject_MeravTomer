@@ -12,7 +12,16 @@
     <div class="page-container">
         <div id="alertBox"></div>
 
-        <h1 class="page-title">Countries</h1>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 class="page-title">Countries</h1>
+            <button id="showRecommendedBtn" class="btn btn-outline" style="display:none;">Recommended Countries</button>
+        </div>
+
+        <div id="recommendedSection" class="card" style="display:none;">
+            <h3>Recommended for You</h3>
+            <p class="muted">Based on your preferred continents and languages (see <a href="preferences.html">My Preferences</a>).</p>
+            <div id="recommendedGrid" class="country-grid"></div>
+        </div>
 
         <form id="searchForm" class="card">
             <div class="filters-bar">

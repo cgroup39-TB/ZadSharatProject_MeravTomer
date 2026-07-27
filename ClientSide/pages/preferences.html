@@ -60,15 +60,45 @@
     <script src="../js/common.js"></script>
     <script>
         const CONTINENTS = ["Africa", "Americas", "Asia", "Europe", "Oceania"];
+        // Mirrors Api.js's LANGUAGE_LEVEL_TO_NUMBER, reversed, just for display here.
+        const LEVEL_NUMBER_TO_LABEL = { 1: "Beginner", 2: "Intermediate", 3: "Advanced", 4: "Native" };
 
         $(function () {
             Auth.requireAuth();
+            const user = Auth.getCurrentUser();
             const prefs = Auth.getPreferences();
 
-            renderContinents(prefs.continents || []);
+            // "Favorite countries" has no server resource, so it's still read
+            // from the locally cached preferences. Continents and languages
+            // ARE real server resources (Users/{id}/regions, .../languages),
+            // so they're loaded fresh from there instead of trusting any
+            // local cache, which could be stale or missing entirely (e.g.
+            // first login on a new device/browser).
             loadCountries(prefs.countries || []);
-            (prefs.languages || []).forEach(addLanguageRow);
-            if (!prefs.languages || !prefs.languages.length) addLanguageRow();
+
+            $.when(Api.Users.getPreferredRegions(user.id), Api.Users.getUserLanguages(user.id))
+                .done(function (regionsResp, languagesResp) {
+                    const regions = regionsResp[0] || [];
+                    const languages = languagesResp[0] || [];
+
+                    renderContinents(regions.map(function (r) { return r.regionName; }));
+
+                    if (languages.length) {
+                        languages.forEach(function (ul) {
+                            addLanguageRow({
+                                name: ul.language.languageName,
+                                level: LEVEL_NUMBER_TO_LABEL[ul.levelLanguage] || "Beginner"
+                            });
+                        });
+                    } else {
+                        addLanguageRow();
+                    }
+                })
+                .fail(function (err) {
+                    renderContinents([]);
+                    addLanguageRow();
+                    Common.showError(err);
+                });
 
             $("#addLanguageBtn").on("click", function () { addLanguageRow(); });
             $("#languagesList").on("click", ".remove-language-btn", function () {

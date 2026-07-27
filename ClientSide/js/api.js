@@ -99,6 +99,27 @@ const Api = (function () {
         });
     }
 
+    // Same idea as findRegionRaw, but for languages: there's no dedicated
+    // /Languages endpoint either, so a language's real {languageId,
+    // languageName} is looked up from whichever country happens to speak it.
+    const LANGUAGE_LEVEL_TO_NUMBER = { Beginner: 1, Intermediate: 2, Advanced: 3, Native: 4 };
+
+    function findLanguagesRaw(languageNames) {
+        if (!languageNames.length) {
+            return $.Deferred().resolve([]).promise();
+        }
+        return realRequest("GET", "/Countries").then(function (countries) {
+            const byName = {};
+            (countries || []).forEach(function (c) {
+                (c.languages || []).forEach(function (l) { byName[l.languageName] = l; });
+            });
+            // Names that don't match any language currently spoken by a
+            // seeded country are silently dropped - there's no endpoint to
+            // create a brand-new Language row from the client.
+            return languageNames.map(function (name) { return byName[name]; }).filter(Boolean);
+        });
+    }
+
     // ---------- Users ----------
     // Real endpoints:
     //   POST /api/Users/register
@@ -130,13 +151,14 @@ const Api = (function () {
          */
         update: function (id, data) {
             // "preferences" updates (continents/countries/languages) aren't
-            // backed by a matching field on the real User - the server keeps
-            // them as separate resources (Users/{id}/regions, .../languages)
-            // and there is no way yet to read them back onto the logged-in
-            // user object, so that part of the Preferences page is UI-only
-            // for now and is accepted without a network call.
+            // backed by a matching field on the real User - continents and
+            // languages are persisted via the dedicated Users/{id}/regions
+            // and Users/{id}/languages resources (see savePreferences below).
+            // "countries" (the favorite-countries picklist) has no server
+            // resource at all, so it's only ever kept in the locally cached
+            // user object, same as before.
             if (data && data.preferences && data.name === undefined && data.email === undefined) {
-                return $.Deferred().resolve(Auth.getCurrentUser()).promise();
+                return savePreferences(id, data.preferences);
             }
 
             const actingUser = Auth.getCurrentUser();
@@ -167,8 +189,77 @@ const Api = (function () {
         /** Fetches a user by id. `.then()`-derived (maps through mapUserFromServer), resolving with a single object - not the [data,status,jqXHR] triple. */
         getById: function (id) {
             return realRequest("GET", "/Users/" + id).then(mapUserFromServer);
+        },
+
+        /** Returns the user's preferred-region rows ([{regionId, regionName}]); raw $.ajax() promise. */
+        getPreferredRegions: function (id) {
+            return realRequest("GET", "/Users/" + id + "/regions");
+        },
+
+        /** Returns the user's recorded languages ([{userId, language:{languageId,languageName}, levelLanguage}]); raw $.ajax() promise. */
+        getUserLanguages: function (id) {
+            return realRequest("GET", "/Users/" + id + "/languages");
         }
     };
+
+    /**
+     * Persists the "continents" and "languages" parts of a preferences save to their real
+     * server resources (Users/{id}/regions, Users/{id}/languages) - "countries" has no server
+     * resource, so it only ever lives in the locally cached user object. Resolves with a merged
+     * user object (existing cached user + the given preferences) so Auth.updateProfile's
+     * setSession() call actually keeps the local cache in sync, instead of the previous no-op
+     * stub that silently dropped every preferences save.
+     */
+    function savePreferences(userId, preferences) {
+        const continents = preferences.continents || [];
+        const languages = preferences.languages || [];
+
+        const regionsSaved = saveContinentsAsRegions(userId, continents);
+        const languagesSaved = saveLanguagesByName(userId, languages);
+
+        return $.when(regionsSaved, languagesSaved).then(function () {
+            const current = Auth.getCurrentUser();
+            return $.extend({}, current, { preferences: preferences });
+        });
+    }
+
+    /** Resolves each continent name to its real regionId (via findRegionRaw) before PUTting the id list. */
+    function saveContinentsAsRegions(userId, continentNames) {
+        if (!continentNames.length) {
+            return realRequest("PUT", "/Users/" + userId + "/regions", []);
+        }
+        return realRequest("GET", "/Countries").then(function (countries) {
+            const idByName = {};
+            (countries || []).forEach(function (c) {
+                if (c.region) idByName[c.region.regionName] = c.region.regionId;
+            });
+            const regionIds = continentNames.map(function (name) { return idByName[name]; }).filter(Boolean);
+            return realRequest("PUT", "/Users/" + userId + "/regions", regionIds);
+        });
+    }
+
+    /** Resolves each {name, level} to a real language object (via findLanguagesRaw) before PUTting the UserLanguages list. */
+    function saveLanguagesByName(userId, languages) {
+        const names = languages.map(function (l) { return l.name; });
+        return findLanguagesRaw(names).then(function (resolvedLanguages) {
+            const byName = {};
+            resolvedLanguages.forEach(function (lang) { byName[lang.languageName] = lang; });
+
+            const payload = languages
+                .map(function (l) {
+                    const lang = byName[l.name];
+                    if (!lang) return null;
+                    return {
+                        userId: userId,
+                        language: lang,
+                        levelLanguage: LANGUAGE_LEVEL_TO_NUMBER[l.level] || null
+                    };
+                })
+                .filter(Boolean);
+
+            return realRequest("PUT", "/Users/" + userId + "/languages", payload);
+        });
+    }
 
     // ---------- Countries ----------
     // Real endpoints:
@@ -670,12 +761,64 @@ const Api = (function () {
         }
     };
 
+    // ---------- Recommendations ----------
+    // Not a real server resource - composed client-side from the user's
+    // preferred regions/languages (Users/{id}/regions, .../languages) plus
+    // the full country catalog and their existing visited/wishlist entries.
+    const Recommendations = {
+        /**
+         * Suggests countries the user hasn't already listed (visited or
+         * wishlisted) whose region or spoken languages match the user's
+         * saved preferences, best matches first. Resolves with
+         * [{ country, score, matchedRegion, matchedLanguages }] - score is
+         * just 1 point per matched region + 1 point per matched language.
+         */
+        getForUser: function (userId) {
+            return $.when(
+                Users.getPreferredRegions(userId),
+                Users.getUserLanguages(userId),
+                Countries.getAll(),
+                UserCountries.getByUser(userId)
+            ).then(function (regionsResp, languagesResp, countries, entries) {
+                // getPreferredRegions/getUserLanguages are raw $.ajax() promises, so $.when
+                // wraps each as [data,status,jqXHR] - but Countries.getAll()/UserCountries.getByUser()
+                // are already `.then()`-derived single-value promises, so those two are NOT indexed.
+                const preferredRegionNames = (regionsResp[0] || []).map(function (r) { return r.regionName; });
+                const preferredLanguageNames = (languagesResp[0] || []).map(function (ul) { return ul.language.languageName; });
+
+                const alreadyListedIds = {};
+                (entries || []).forEach(function (e) { alreadyListedIds[e.countryId] = true; });
+
+                return countries
+                    .filter(function (c) { return !alreadyListedIds[c.id]; })
+                    .map(function (c) {
+                        const matchedLanguages = (c.languages || []).filter(function (l) {
+                            return preferredLanguageNames.indexOf(l) !== -1;
+                        });
+                        const matchedRegion = preferredRegionNames.indexOf(c.region) !== -1;
+
+                        return {
+                            country: c,
+                            score: (matchedRegion ? 1 : 0) + matchedLanguages.length,
+                            matchedRegion: matchedRegion,
+                            matchedLanguages: matchedLanguages
+                        };
+                    })
+                    .filter(function (r) { return r.score > 0; })
+                    .sort(function (a, b) {
+                        return b.score - a.score || a.country.commonName.localeCompare(b.country.commonName);
+                    });
+            });
+        }
+    };
+
     return {
         Users: Users,
         Countries: Countries,
         UserCountries: UserCountries,
         Shares: Shares,
         Quizzes: Quizzes,
-        Admin: Admin
+        Admin: Admin,
+        Recommendations: Recommendations
     };
 })();
