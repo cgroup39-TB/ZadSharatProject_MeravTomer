@@ -252,7 +252,10 @@ const Api = (function () {
                     return {
                         userId: userId,
                         language: lang,
-                        ProficiencyLevel: LANGUAGE_LEVEL_TO_NUMBER[l.level] || null
+                        // Must match the server's UserLanguages.ProficiencyLevel property name
+                        // (camelCased in the actual JSON) - a mismatched key silently fails model
+                        // binding, leaving ProficiencyLevel null and violating the DB's NOT NULL constraint.
+                        proficiencyLevel: LANGUAGE_LEVEL_TO_NUMBER[l.level] || null
                     };
                 })
                 .filter(Boolean);
