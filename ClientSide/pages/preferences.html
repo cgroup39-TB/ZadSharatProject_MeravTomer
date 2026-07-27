@@ -42,7 +42,7 @@
     <!-- Row template for a language + proficiency level -->
     <template id="languageRowTemplate">
         <div class="form-row" style="flex-direction:row; align-items:center;">
-            <input type="text" class="language-name" placeholder="Language" style="flex:1;">
+            <select class="language-name" style="flex:1;"></select>
             <select class="language-level">
                 <option value="Beginner">Beginner</option>
                 <option value="Intermediate">Intermediate</option>
@@ -62,43 +62,51 @@
         const CONTINENTS = ["Africa", "Americas", "Asia", "Europe", "Oceania"];
         // Mirrors Api.js's LANGUAGE_LEVEL_TO_NUMBER, reversed, just for display here.
         const LEVEL_NUMBER_TO_LABEL = { 1: "Beginner", 2: "Intermediate", 3: "Advanced", 4: "Native" };
+        // Filled from the real country catalog before any language row is built, so the
+        // language picker below is always a dropdown of names that actually exist in the
+        // DB - free-text language names could never resolve to a real languageId when
+        // saving (see api.js's findLanguagesRaw), so they'd silently be dropped.
+        let ALL_LANGUAGES = [];
 
         $(function () {
             Auth.requireAuth();
             const user = Auth.getCurrentUser();
             const prefs = Auth.getPreferences();
 
-            // "Favorite countries" has no server resource, so it's still read
-            // from the locally cached preferences. Continents and languages
-            // ARE real server resources (Users/{id}/regions, .../languages),
-            // so they're loaded fresh from there instead of trusting any
-            // local cache, which could be stale or missing entirely (e.g.
-            // first login on a new device/browser).
-            loadCountries(prefs.countries || []);
+            Api.Countries.getAll().done(function (countries) {
+                loadCountries(countries, prefs.countries || []);
+                ALL_LANGUAGES = collectUniqueLanguages(countries);
 
-            $.when(Api.Users.getPreferredRegions(user.id), Api.Users.getUserLanguages(user.id))
-                .done(function (regionsResp, languagesResp) {
-                    const regions = regionsResp[0] || [];
-                    const languages = languagesResp[0] || [];
+                // "Favorite countries" has no server resource, so it's still read
+                // from the locally cached preferences. Continents and languages
+                // ARE real server resources (Users/{id}/regions, .../languages),
+                // so they're loaded fresh from there instead of trusting any
+                // local cache, which could be stale or missing entirely (e.g.
+                // first login on a new device/browser).
+                $.when(Api.Users.getPreferredRegions(user.id), Api.Users.getUserLanguages(user.id))
+                    .done(function (regionsResp, languagesResp) {
+                        const regions = regionsResp[0] || [];
+                        const languages = languagesResp[0] || [];
 
-                    renderContinents(regions.map(function (r) { return r.regionName; }));
+                        renderContinents(regions.map(function (r) { return r.regionName; }));
 
-                    if (languages.length) {
-                        languages.forEach(function (ul) {
-                            addLanguageRow({
-                                name: ul.language.languageName,
-                                level: LEVEL_NUMBER_TO_LABEL[ul.levelLanguage] || "Beginner"
+                        if (languages.length) {
+                            languages.forEach(function (ul) {
+                                addLanguageRow({
+                                    name: ul.language.languageName,
+                                    level: LEVEL_NUMBER_TO_LABEL[ul.levelLanguage] || "Beginner"
+                                });
                             });
-                        });
-                    } else {
+                        } else {
+                            addLanguageRow();
+                        }
+                    })
+                    .fail(function (err) {
+                        renderContinents([]);
                         addLanguageRow();
-                    }
-                })
-                .fail(function (err) {
-                    renderContinents([]);
-                    addLanguageRow();
-                    Common.showError(err);
-                });
+                        Common.showError(err);
+                    });
+            }).fail(Common.showError);
 
             $("#addLanguageBtn").on("click", function () { addLanguageRow(); });
             $("#languagesList").on("click", ".remove-language-btn", function () {
@@ -123,20 +131,34 @@
             });
         }
 
-        function loadCountries(selectedIds) {
-            Api.Countries.getAll().done(function (countries) {
-                const $select = $("#countriesSelect");
-                countries.forEach(function (c) {
-                    const selected = selectedIds.indexOf(c.id) !== -1 ? "selected" : "";
-                    $select.append('<option value="' + c.id + '" ' + selected + '>' + c.commonName + '</option>');
-                });
-            }).fail(Common.showError);
+        /** Returns the sorted, de-duplicated list of every language name spoken by any country. */
+        function collectUniqueLanguages(countries) {
+            const seen = {};
+            countries.forEach(function (c) {
+                (c.languages || []).forEach(function (name) { seen[name] = true; });
+            });
+            return Object.keys(seen).sort();
+        }
+
+        function loadCountries(countries, selectedIds) {
+            const $select = $("#countriesSelect");
+            countries.forEach(function (c) {
+                const selected = selectedIds.indexOf(c.id) !== -1 ? "selected" : "";
+                $select.append('<option value="' + c.id + '" ' + selected + '>' + c.commonName + '</option>');
+            });
         }
 
         function addLanguageRow(language) {
             const $row = $($("#languageRowTemplate").html());
+            const $nameSelect = $row.find(".language-name");
+
+            $nameSelect.append($("<option>").val("").text("Select a language..."));
+            ALL_LANGUAGES.forEach(function (name) {
+                $nameSelect.append($("<option>").val(name).text(name));
+            });
+
             if (language) {
-                $row.find(".language-name").val(language.name);
+                $nameSelect.val(language.name);
                 $row.find(".language-level").val(language.level);
             }
             $("#languagesList").append($row);
