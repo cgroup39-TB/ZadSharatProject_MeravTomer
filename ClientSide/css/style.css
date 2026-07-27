@@ -158,7 +158,10 @@ a { color: var(--color-primary-dark); }
 .edit-share-textarea { width: 100%; min-height: 70px; }
 
 /* ---------- Lists (my-lists / admin daily logins) ---------- */
-.list-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+/* flex-wrap so the full-width .share-inline review box (my-lists.html) drops
+   to its own line instead of competing for space with the flag/name/actions
+   on the same row, which used to squeeze them all sideways when it opened. */
+.list-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
 .list-row-actions { margin-left: auto; display: flex; gap: 8px; }
 
 /* ---------- Quiz ---------- */

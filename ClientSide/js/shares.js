@@ -1,30 +1,23 @@
 /*
  * shares.js
- * Powers pages/shares.html: list all shares, filter by country, create a new
- * share, and edit/delete shares that belong to the logged-in user.
+ * Powers pages/shares.html: list all shares, filter by country, and
+ * edit/delete shares that belong to the logged-in user. Writing a new review
+ * is only available from my-lists.html, not from this page.
  */
 $(function () {
-    let countriesCache = [];
     let sharesCache = [];
 
     init();
 
     /**
-     * Bootstraps the page: shows the new-share box only when logged in,
-     * loads countries into both selects, loads the shares list, and wires
-     * up filter/create/edit/delete/cancel handlers.
+     * Bootstraps the page: fills the country filter, loads the shares list,
+     * and wires up filter/edit/delete/cancel handlers.
      */
     function init() {
-        $("#newShareBox").toggle(Auth.isLoggedIn());
-        loadCountriesIntoSelects();
+        loadCountriesIntoFilter();
         loadShares();
 
         $("#countryFilter").on("change", loadShares);
-
-        $("#newShareForm").on("submit", function (e) {
-            e.preventDefault();
-            createShare();
-        });
 
         $("#sharesContainer").on("click", ".btn-delete-share", function () {
             deleteShare($(this).data("id"));
@@ -44,60 +37,15 @@ $(function () {
     }
 
     /**
-     * Loads the full country catalog, caches it, fills the country filter
-     * dropdown, and then narrows the new-share country select to only
-     * visited countries.
+     * Fills the country filter dropdown from the full country catalog.
      */
-    function loadCountriesIntoSelects() {
+    function loadCountriesIntoFilter() {
         Api.Countries.getAll().done(function (countries) {
-            countriesCache = countries;
-
             const $filter = $("#countryFilter");
             countries.forEach(function (c) {
                 $filter.append($("<option>").val(c.id).text(c.commonName));
             });
-
-            loadVisitedCountriesIntoNewShareSelect(countries);
         }).fail(Common.showError);
-    }
-
-    // A share is a review on a visited country, so only countries already
-    // in the logged-in user's visited list can be picked here.
-    /**
-     * Rebuilds the new-share country select from the user's visited
-     * countries only, disabling the content field/submit button until at
-     * least one visited country is available to pick.
-     */
-    function loadVisitedCountriesIntoNewShareSelect(countries) {
-        const $newShareCountry = $("#newShareCountry");
-        $newShareCountry.empty();
-        // Fail closed until the visited check actually confirms a country -
-        // an empty select falls back safely on its own (createShare() finds
-        // no matching country), but keep the button disabled too so it
-        // doesn't just look broken while it's blocked.
-        $("#newShareContent, #newShareSubmitBtn").prop("disabled", true);
-
-        const user = Auth.getCurrentUser();
-        if (!user) return;
-
-        Api.UserCountries.getByUser(user.id).done(function (entries) {
-            const visitedIds = (entries || [])
-                .filter(function (e) { return e.listType === "visited"; })
-                .map(function (e) { return Number(e.countryId); });
-
-            const visitedCountries = countries.filter(function (c) { return visitedIds.indexOf(c.id) !== -1; });
-
-            if (!visitedCountries.length) {
-                $newShareCountry.append($("<option>").val("").text("Mark a country as visited first"));
-                $("#newShareContent, #newShareSubmitBtn").prop("disabled", true);
-                return;
-            }
-
-            visitedCountries.forEach(function (c) {
-                $newShareCountry.append($("<option>").val(c.id).text(c.commonName));
-            });
-            $("#newShareContent, #newShareSubmitBtn").prop("disabled", false);
-        });
     }
 
     /**
@@ -152,30 +100,6 @@ $(function () {
 
             $container.append($card);
         });
-    }
-
-    /**
-     * Creates a new share from the form, resolving the selected country id
-     * against the cached country list to get its display name.
-     */
-    function createShare() {
-        const user = Auth.getCurrentUser();
-        const countryId = Number($("#newShareCountry").val());
-        const country = countriesCache.find(function (c) { return c.id === countryId; });
-        const content = $("#newShareContent").val().trim();
-        if (!content || !country) return;
-
-        Api.Shares.create({
-            userId: user.id,
-            countryId: countryId,
-            userName: user.name,
-            countryName: country.commonName,
-            content: content
-        }).done(function () {
-            $("#newShareContent").val("");
-            Common.showAlert("Share posted.", "success");
-            loadShares();
-        }).fail(Common.showError);
     }
 
     /**

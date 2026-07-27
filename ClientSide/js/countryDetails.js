@@ -14,8 +14,8 @@ $(function () {
 
 /**
  * Bootstraps the read-only details view: loads the country and its shares,
- * evaluates the "write a share" form's locked/unlocked state, and wires the
- * delete/add-to-list/share-form handlers.
+ * and wires the delete/add-to-list handlers. Writing a review is only
+ * available from My Lists, not from this page.
  */
 function initDetailsPage() {
     const id = Common.getQueryParams().id;
@@ -29,7 +29,6 @@ function initDetailsPage() {
 
     loadCountry(id);
     loadSharesForCountry(id);
-    refreshShareFormState(id);
 
     $("#deleteCountryBtn").on("click", function () {
         if (!confirm("Delete this country? This cannot be undone.")) return;
@@ -43,11 +42,6 @@ function initDetailsPage() {
 
     $("#addVisitedBtn").on("click", function () { addToList(id, "visited"); });
     $("#addWishlistBtn").on("click", function () { addToList(id, "wishlist"); });
-
-    $("#shareForm").on("submit", function (e) {
-        e.preventDefault();
-        submitShare(id);
-    });
 }
 
 /**
@@ -55,6 +49,7 @@ function initDetailsPage() {
  * details container if the request fails.
  */
 function loadCountry(id) {
+    $("#countryDetailsView").html('<p class="muted">Loading country...</p>');
     Api.Countries.getById(id)
         .done(function (country) {
             renderCountry(country);
@@ -89,59 +84,22 @@ function renderCountry(country) {
 }
 
 /**
- * Adds the country to the user's visited or wishlist list; when it's added
- * as visited, also re-evaluates the share form's locked state since writing
- * a review now becomes possible.
+ * Adds the country to the user's visited or wishlist list.
  */
 function addToList(countryId, listType) {
     const user = Auth.getCurrentUser();
     Api.UserCountries.create({ userId: user.id, countryId: Number(countryId), listType: listType })
         .done(function () {
             Common.showAlert("Added to your " + (listType === "visited" ? "visited" : "wishlist") + " list.", "success");
-            if (listType === "visited") {
-                refreshShareFormState(countryId);
-            }
         })
         .fail(Common.showError);
-}
-
-// Reviews are stored as a field on the visited-country record itself, so
-// writing one only makes sense once the country is actually in "My Lists".
-// Shows the form (enabled) once visited, or a locked explanation until then.
-/**
- * Locks the share form by default, then unlocks it only if a fresh check of
- * the user's visited entries confirms this country is actually visited.
- */
-function refreshShareFormState(countryId) {
-    if (!Auth.isLoggedIn()) {
-        $("#shareForm").hide();
-        $("#shareLockedMsg").hide();
-        return;
-    }
-
-    // Fail closed: keep it locked until the visited check actually
-    // confirms otherwise, instead of leaving the form's default (enabled)
-    // HTML state in place if the status lookup itself fails.
-    $("#shareForm").show();
-    $("#shareContent, #shareSubmitBtn").prop("disabled", true);
-    $("#shareLockedMsg").show();
-
-    const user = Auth.getCurrentUser();
-    Api.UserCountries.getByUser(user.id).done(function (entries) {
-        const visited = (entries || []).some(function (e) {
-            return e.listType === "visited" && Number(e.countryId) === Number(countryId);
-        });
-
-        $("#shareForm").show();
-        $("#shareContent, #shareSubmitBtn").prop("disabled", !visited);
-        $("#shareLockedMsg").toggle(!visited);
-    });
 }
 
 /**
  * Fetches the shares for this country and renders them.
  */
 function loadSharesForCountry(countryId) {
+    $("#sharesList").html('<p class="muted">Loading shares...</p>');
     Api.Shares.getByCountry(countryId)
         .done(renderShareList)
         .fail(Common.showError);
@@ -168,29 +126,6 @@ function renderShareList(shares) {
             '</div>'
         );
     });
-}
-
-/**
- * Posts a new share using the current country's displayed name (read back
- * from the DOM rather than a stored variable) and reloads the share list.
- */
-function submitShare(countryId) {
-    const user = Auth.getCurrentUser();
-    const country = $("#countryDetailsView h2").text();
-    const content = $("#shareContent").val().trim();
-    if (!content) return;
-
-    Api.Shares.create({
-        userId: user.id,
-        countryId: Number(countryId),
-        userName: user.name,
-        countryName: country,
-        content: content
-    }).done(function () {
-        $("#shareContent").val("");
-        Common.showAlert("Share posted.", "success");
-        loadSharesForCountry(countryId);
-    }).fail(Common.showError);
 }
 
 // ===================== Add / Edit form page =====================

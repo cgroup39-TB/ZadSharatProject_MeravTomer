@@ -318,7 +318,10 @@ const Api = (function () {
                         id: "visited:" + v.country.countryId,
                         userId: v.userId,
                         countryId: v.country.countryId,
-                        listType: "visited"
+                        listType: "visited",
+                        rating: v.rating,
+                        reviewText: v.reviewText,
+                        isShared: v.isShared
                     });
                 });
 
@@ -337,20 +340,43 @@ const Api = (function () {
 
         // data: { userId, countryId, listType }
         /**
-         * Adds a country to a user's visited or wishlist list depending on data.listType (different real endpoint for each), raw $.ajax() promise.
-         * A duplicate (userId+countryId+listType) insert is a composite-key conflict server-side (HTTP 409) - it just reaches
-         * the caller's .fail() like any other error.
+         * Adds a country to a user's visited or wishlist list depending on data.listType (different real endpoint for each).
+         * A country can only ever be on one list at a time, so this first checks whether it's currently on the *other*
+         * list and, if so, removes it from there before adding - otherwise a country could end up marked both visited
+         * and wanted at once. A duplicate insert on the SAME list is still a composite-key conflict server-side (HTTP 409)
+         * and just reaches the caller's .fail() like any other error.
          */
         create: function (data) {
-            if (data.listType === "wishlist") {
-                return realRequest("POST", "/Users/" + data.userId + "/wantedCountries/" + data.countryId);
+            const countryId = Number(data.countryId);
+            const oppositeType = data.listType === "wishlist" ? "visited" : "wishlist";
+
+            function addRequest() {
+                if (data.listType === "wishlist") {
+                    return realRequest("POST", "/Users/" + data.userId + "/wantedCountries/" + countryId);
+                }
+                return realRequest("POST", "/UserVisitedCountries", {
+                    userId: data.userId,
+                    country: { countryId: countryId },
+                    rating: 0,
+                    reviewText: null,
+                    isShared: false
+                });
             }
-            return realRequest("POST", "/UserVisitedCountries", {
-                userId: data.userId,
-                country: { countryId: data.countryId },
-                rating: 0,
-                reviewText: null,
-                isShared: false
+
+            return UserCountries.getByUser(data.userId).then(function (entries) {
+                const onOppositeList = (entries || []).some(function (e) {
+                    return e.countryId === countryId && e.listType === oppositeType;
+                });
+
+                if (!onOppositeList) {
+                    return addRequest();
+                }
+
+                const removeFromOpposite = oppositeType === "wishlist"
+                    ? realRequest("DELETE", "/Users/" + data.userId + "/wantedCountries/" + countryId)
+                    : realRequest("DELETE", "/UserVisitedCountries/" + data.userId + "/" + countryId);
+
+                return removeFromOpposite.then(addRequest);
             });
         },
 
