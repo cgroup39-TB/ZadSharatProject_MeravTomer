@@ -2,6 +2,11 @@
 
 namespace ServerSideCountriesProject_MeravTomer.BL
 {
+    /// <summary>
+    /// Records that a user has visited a country, with an optional rating/review and a flag for
+    /// whether the review is publicly shared. Has a composite (UserId, CountryId) primary key in
+    /// the database - see <see cref="Insert"/>.
+    /// </summary>
     public class UserVisitedCountry
     {
         private int userId;
@@ -15,10 +20,12 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         // Constructors
         // =========================
 
+        /// <summary>Creates an empty instance (used by model binding/deserialization).</summary>
         public UserVisitedCountry()
         {
         }
 
+        /// <summary>Creates a fully-populated visit record.</summary>
         public UserVisitedCountry(
             int userId,
             Country country,
@@ -90,6 +97,11 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         // CRUD
         // =========================
 
+        /// <summary>
+        /// Inserts this visit record. UserVisitedCountries has a composite (UserId, CountryId)
+        /// primary key, so marking the same country as visited twice throws a SqlException
+        /// (2627/2601) - the calling controller catches that and returns 409 Conflict.
+        /// </summary>
         public UserVisitedCountry Insert()
         {
             DBUserVisitCountryServices db =
@@ -100,6 +112,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             return this;
         }
 
+        /// <summary>Updates the rating/review/share flag for this visit and returns the number of affected rows.</summary>
         public int Update()
         {
             DBUserVisitCountryServices db =
@@ -108,6 +121,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
             return db.UpdateVisit(this);
         }
 
+        /// <summary>Deletes this visit record (by UserId + Country.CountryId). Returns true if a row was removed.</summary>
         public bool Delete()
         {
             DBUserVisitCountryServices db =
@@ -124,6 +138,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         // Read
         // =========================
 
+        /// <summary>Returns every country <paramref name="userId"/> has marked as visited (including unrated/unreviewed ones).</summary>
         public static List<UserVisitedCountry>
             ReadVisitedCountriesByUser(int userId)
         {
@@ -134,6 +149,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         }
 
 
+        /// <summary>Returns every visit record for the given country, across all users.</summary>
         public static List<UserVisitedCountry>
             ReadVisitsByCountry(int countryId)
         {
@@ -148,6 +164,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         // Shared Reviews
         // =========================
 
+        /// <summary>Returns only the visits for this country where IsShared is true (public reviews), including the reviewer's name.</summary>
         public static List<UserVisitedCountry>
             ReadSharedReviewsByCountry(int countryId)
         {
@@ -158,6 +175,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         }
 
 
+        /// <summary>Returns the shared (public) reviews written by this user.</summary>
         public static List<UserVisitedCountry>
             ReadSharedReviewsByUser(int userId)
         {
@@ -168,6 +186,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         }
 
 
+        /// <summary>Returns every shared (public) review across all users and countries.</summary>
         public static List<UserVisitedCountry>
             ReadAllSharedReviews()
         {

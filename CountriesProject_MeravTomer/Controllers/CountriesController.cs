@@ -3,10 +3,15 @@ using ServerSideCountriesProject_MeravTomer.BL;
 
 namespace ServerSideCountriesProject_MeravTomer.Controllers
 {
+    /// <summary>
+    /// REST endpoints for browsing, searching, importing and managing countries.
+    /// Thin wrapper around <see cref="Country"/> (BL) - no business logic lives here.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class CountriesController : ControllerBase
     {
+        /// <summary>Returns every country.</summary>
         // GET: api/Countries
         [HttpGet]
         public IEnumerable<Country> Get()
@@ -16,6 +21,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns the country matching <paramref name="id"/>, or 404 if none exists.</summary>
         // GET: api/Countries/5
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
@@ -32,6 +38,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns the country matching <paramref name="countryName"/> (exact match), or 404 if none exists.</summary>
         // GET: api/Countries/getByName?countryName=Israel
         [HttpGet("getByName")]
         public IActionResult GetByName(string countryName)
@@ -48,6 +55,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns all countries in the named region, or 404 if the region itself doesn't exist.</summary>
         // GET: api/Countries/getByRegion/Europe
         [HttpGet("getByRegion/{regionName}")]
         public IActionResult GetByRegion(string regionName)
@@ -69,6 +77,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Returns all countries sorted by "name" or "population" (400 for any other value); ascending unless <paramref name="ascending"/> is false.</summary>
         // GET: api/Countries/sort?sortBy=name&ascending=true
         // GET: api/Countries/sort?sortBy=population&ascending=false
         [HttpGet("sort")]
@@ -94,6 +103,11 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>
+        /// Currently a no-op: <see cref="Country.Insert"/> is a stub that does not persist to the
+        /// database, so this endpoint always returns the posted object back unchanged rather than
+        /// actually creating a country. Real country creation happens via <see cref="ImportCountries"/>.
+        /// </summary>
         // POST: api/Countries
         [HttpPost]
         public IActionResult Post(
@@ -111,6 +125,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Updates the country identified by <paramref name="id"/>; returns 404 if it doesn't exist.</summary>
         // PUT: api/Countries/5
         [HttpPut("{id}")]
         public IActionResult UpdateCountry(
@@ -137,6 +152,7 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>Deletes the country identified by <paramref name="id"/>; returns 404 if it doesn't exist.</summary>
         // DELETE: api/Countries/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
@@ -161,6 +177,11 @@ namespace ServerSideCountriesProject_MeravTomer.Controllers
         }
 
 
+        /// <summary>
+        /// Triggers a bulk import from the public countries.dev API, skipping countries that already
+        /// exist. This is the actual way countries get created in this project (see note on <see cref="Post"/>).
+        /// Any exception from the import is returned as 400 with the exception message.
+        /// </summary>
         // POST: api/Countries/import
         [HttpPost("import")]
         public async Task<IActionResult> ImportCountries()

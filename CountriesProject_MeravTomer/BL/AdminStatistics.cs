@@ -1,5 +1,9 @@
 ﻿namespace ServerSideCountriesProject_MeravTomer.BL
 {
+    /// <summary>
+    /// Aggregated counters shown on the admin dashboard (logins, imported/saved
+    /// countries, shared reviews). Populated by <see cref="DAL.DBUserServices.ReadStatistics"/>.
+    /// </summary>
     public class AdminStatistics
     {
         public int DailyLogins { get; set; }

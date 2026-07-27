@@ -11,6 +11,10 @@ $(function () {
 
     init();
 
+    /**
+     * Bootstraps the page: toggles admin/logged-in-only controls, fills the
+     * region filter, wires up event handlers, and triggers the first load.
+     */
     function init() {
         $("#addCountryBtn").toggle(Auth.isAdmin());
         $("#myStatusFilterRow").toggle(Auth.isLoggedIn());
@@ -19,6 +23,10 @@ $(function () {
         loadCountries();
     }
 
+    /**
+     * Wires the search form, reset button, and sort/status controls so any
+     * of them re-runs loadCountries().
+     */
     function bindEvents() {
         $("#searchForm").on("submit", function (e) {
             e.preventDefault();
@@ -31,6 +39,10 @@ $(function () {
         $("#sortBy, #sortDir, #myStatusFilter").on("change", loadCountries);
     }
 
+    /**
+     * Fills the region filter dropdown from a hardcoded region list rather
+     * than deriving it from the loaded countries.
+     */
     function populateRegionFilter() {
         // Static list is enough for a student project; could also be derived from Api.Countries.getAll()
         const regions = ["Africa", "Americas", "Asia", "Europe", "Oceania"];
@@ -40,6 +52,10 @@ $(function () {
         });
     }
 
+    /**
+     * Reads and trims every search/filter/sort control into a single params
+     * object shaped for Api.Countries.search().
+     */
     function readFiltersFromForm() {
         return {
             name: $("#nameSearch").val().trim(),
@@ -55,6 +71,11 @@ $(function () {
         };
     }
 
+    /**
+     * Issues a new search request tagged with an incrementing sequence
+     * number, so a slower/older response that arrives after a newer request
+     * was issued can be detected and ignored instead of clobbering it.
+     */
     function loadCountries() {
         const params = readFiltersFromForm();
         const seq = ++requestSeq;
@@ -72,6 +93,7 @@ $(function () {
                 if (seq !== requestSeq) return;
                 Common.showError(err);
             });
+<<<<<<< HEAD
     }
 
     function applyMyStatusFilter(countries, seq) {
@@ -97,8 +119,44 @@ $(function () {
             allCountries = filtered;
             renderCountries(filtered);
         });
+=======
+>>>>>>> 1ae1bae4720eec596a5e22d21e582b0a22cff50d
     }
 
+    /**
+     * When a "my status" filter is set, fetches the user's visited/wishlist
+     * entries and narrows the already-loaded countries by them; re-checks
+     * seq against requestSeq so a stale call can't overwrite a newer one.
+     */
+    function applyMyStatusFilter(countries, seq) {
+        const statusFilter = $("#myStatusFilter").val();
+        if (!statusFilter || !Auth.isLoggedIn()) {
+            allCountries = countries;
+            renderCountries(countries);
+            return;
+        }
+
+        const user = Auth.getCurrentUser();
+        Api.UserCountries.getByUser(user.id).done(function (entries) {
+            if (seq !== requestSeq) return;
+
+            const statusByCountry = {};
+            (entries || []).forEach(function (e) { statusByCountry[e.countryId] = e.listType; });
+
+            const filtered = countries.filter(function (c) {
+                const status = statusByCountry[c.id];
+                return statusFilter === "none" ? !status : status === statusFilter;
+            });
+
+            allCountries = filtered;
+            renderCountries(filtered);
+        });
+    }
+
+    /**
+     * Renders the country grid and (re)binds the delete-button click handler
+     * on every call, since the buttons themselves are recreated each render.
+     */
     function renderCountries(countries) {
         const $grid = $("#countriesGrid");
         $grid.empty();

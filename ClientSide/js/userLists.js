@@ -49,6 +49,11 @@ $(function () {
     });
 });
 
+/**
+ * Loads both the visited and wishlist entries plus the full country catalog
+ * in parallel via $.when, then renders each list. See the comment below on
+ * why neither result is [0]-indexed.
+ */
 function loadLists() {
     const user = Auth.getCurrentUser();
 
@@ -67,6 +72,11 @@ function loadLists() {
         .fail(Common.showError);
 }
 
+/**
+ * Renders one list (visited or wishlist) by filtering entries to listType
+ * and joining each to its country record; entries whose country can't be
+ * found (e.g. stale data) are silently skipped.
+ */
 function renderList(entries, countries, listType, containerSelector) {
     const $container = $(containerSelector);
     $container.empty();
@@ -105,6 +115,10 @@ function renderList(entries, countries, listType, containerSelector) {
     });
 }
 
+/**
+ * Moves an entry to the other list (visited <-> wishlist) by updating its
+ * listType, then reloads both lists to reflect the change.
+ */
 function moveEntry(entryId, targetList) {
     Api.UserCountries.update(entryId, { listType: targetList })
         .done(function () {
@@ -114,6 +128,10 @@ function moveEntry(entryId, targetList) {
         .fail(Common.showError);
 }
 
+/**
+ * Removes an entry from whichever list it belongs to, after a confirm
+ * prompt, then reloads both lists.
+ */
 function removeEntry(entryId) {
     if (!confirm("Remove this country from your list?")) return;
     Api.UserCountries.delete(entryId)

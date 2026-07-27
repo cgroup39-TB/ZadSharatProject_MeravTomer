@@ -12,6 +12,11 @@ $(function () {
 
 // ===================== Details (view) page =====================
 
+/**
+ * Bootstraps the read-only details view: loads the country and its shares,
+ * evaluates the "write a share" form's locked/unlocked state, and wires the
+ * delete/add-to-list/share-form handlers.
+ */
 function initDetailsPage() {
     const id = Common.getQueryParams().id;
     if (!id) {
@@ -45,6 +50,10 @@ function initDetailsPage() {
     });
 }
 
+/**
+ * Fetches the country and renders it, or shows a "not found" message in the
+ * details container if the request fails.
+ */
 function loadCountry(id) {
     Api.Countries.getById(id)
         .done(function (country) {
@@ -57,6 +66,9 @@ function loadCountry(id) {
         });
 }
 
+/**
+ * Renders the country header and detail list as a single HTML string.
+ */
 function renderCountry(country) {
     $("#countryDetailsView").html(
         '<div class="country-details-header">' +
@@ -76,6 +88,11 @@ function renderCountry(country) {
     );
 }
 
+/**
+ * Adds the country to the user's visited or wishlist list; when it's added
+ * as visited, also re-evaluates the share form's locked state since writing
+ * a review now becomes possible.
+ */
 function addToList(countryId, listType) {
     const user = Auth.getCurrentUser();
     Api.UserCountries.create({ userId: user.id, countryId: Number(countryId), listType: listType })
@@ -91,6 +108,13 @@ function addToList(countryId, listType) {
 // Reviews are stored as a field on the visited-country record itself, so
 // writing one only makes sense once the country is actually in "My Lists".
 // Shows the form (enabled) once visited, or a locked explanation until then.
+<<<<<<< HEAD
+=======
+/**
+ * Locks the share form by default, then unlocks it only if a fresh check of
+ * the user's visited entries confirms this country is actually visited.
+ */
+>>>>>>> 1ae1bae4720eec596a5e22d21e582b0a22cff50d
 function refreshShareFormState(countryId) {
     if (!Auth.isLoggedIn()) {
         $("#shareForm").hide();
@@ -98,6 +122,11 @@ function refreshShareFormState(countryId) {
         return;
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> client-server-quiz-integration-8wqi56
     // Fail closed: keep it locked until the visited check actually
     // confirms otherwise, instead of leaving the form's default (enabled)
     // HTML state in place if the status lookup itself fails.
@@ -105,6 +134,10 @@ function refreshShareFormState(countryId) {
     $("#shareContent, #shareSubmitBtn").prop("disabled", true);
     $("#shareLockedMsg").show();
 
+<<<<<<< HEAD
+=======
+>>>>>>> 1ae1bae4720eec596a5e22d21e582b0a22cff50d
+>>>>>>> client-server-quiz-integration-8wqi56
     const user = Auth.getCurrentUser();
     Api.UserCountries.getByUser(user.id).done(function (entries) {
         const visited = (entries || []).some(function (e) {
@@ -117,12 +150,22 @@ function refreshShareFormState(countryId) {
     });
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * Fetches the shares for this country and renders them.
+ */
+>>>>>>> 1ae1bae4720eec596a5e22d21e582b0a22cff50d
 function loadSharesForCountry(countryId) {
     Api.Shares.getByCountry(countryId)
         .done(renderShareList)
         .fail(Common.showError);
 }
 
+/**
+ * Renders the list of shares for the current country, or a placeholder
+ * message when there are none yet.
+ */
 function renderShareList(shares) {
     const $list = $("#sharesList");
     $list.empty();
@@ -142,6 +185,10 @@ function renderShareList(shares) {
     });
 }
 
+/**
+ * Posts a new share using the current country's displayed name (read back
+ * from the DOM rather than a stored variable) and reloads the share list.
+ */
 function submitShare(countryId) {
     const user = Auth.getCurrentUser();
     const country = $("#countryDetailsView h2").text();
@@ -163,6 +210,10 @@ function submitShare(countryId) {
 
 // ===================== Add / Edit form page =====================
 
+/**
+ * Bootstraps the admin-only add/edit form: requires admin, loads existing
+ * data to prefill when an id is present, and wires the submit handler.
+ */
 function initFormPage() {
     Auth.requireAdmin();
 
@@ -198,6 +249,10 @@ function fillForm(country) {
     $("#languages").val(country.languages.join(", "));
 }
 
+/**
+ * Reads the add/edit form into a data object; uppercases the country code
+ * and splits the comma-separated languages field into a trimmed array.
+ */
 function readFormData() {
     return {
         apiCountryCode: $("#apiCountryCode").val().trim().toUpperCase(),
@@ -216,6 +271,10 @@ function readFormData() {
     };
 }
 
+/**
+ * Creates or updates the country depending on whether id is set, then
+ * redirects back to the list on success.
+ */
 function saveCountry(id) {
     const data = readFormData();
     const request = id ? Api.Countries.update(id, data) : Api.Countries.create(data);

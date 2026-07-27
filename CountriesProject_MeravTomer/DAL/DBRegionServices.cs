@@ -6,13 +6,23 @@ using ServerSideCountriesProject_MeravTomer.BL;
 
 namespace ServerSideCountriesProject_MeravTomer.DAL
 {
+    /// <summary>
+    /// Data access layer for Region reference data (the geographic regions countries belong to).
+    /// </summary>
     public class DBRegionServices
     {
+        /// <summary>
+        /// Creates a new instance of the service. Holds no state; a fresh DB connection is opened per call.
+        /// </summary>
         public DBRegionServices()
         {
         }
 
 
+        /// <summary>
+        /// Opens and returns a new <see cref="SqlConnection"/> using the named connection string
+        /// read from appsettings.json. The caller is responsible for closing the connection.
+        /// </summary>
         public SqlConnection connect(String conString)
         {
             IConfigurationRoot configuration =
@@ -58,6 +68,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>
+        /// Returns every region in the database.
+        /// </summary>
         public List<Region> ReadAllRegions()
         {
             SqlConnection con;
@@ -112,6 +125,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>
+        /// Returns the region matching <paramref name="regionId"/>, or null if none exists.
+        /// </summary>
         public Region ReadRegionById(int regionId)
         {
             SqlConnection con;
@@ -170,6 +186,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>
+        /// Returns the region whose name matches <paramref name="regionName"/>, or null if none exists.
+        /// </summary>
         public Region ReadRegionByName(string regionName)
         {
             SqlConnection con;
@@ -228,6 +247,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>
+        /// Inserts a new region using <paramref name="region"/>'s name.
+        /// </summary>
+        /// <returns>The database-generated RegionId of the newly inserted row.</returns>
         public int InsertRegion(Region region)
         {
             SqlConnection con;

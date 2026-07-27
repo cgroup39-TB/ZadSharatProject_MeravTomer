@@ -6,8 +6,15 @@ using ServerSideCountriesProject_MeravTomer.BL;
 
 namespace ServerSideCountriesProject_MeravTomer.DAL
 {
+    /// <summary>
+    /// ADO.NET data-access layer for User data (authentication, profile, admin permissions,
+    /// preferences, wanted-countries wishlist, and statistics), executed entirely via stored procedures.
+    /// </summary>
     public class DBUserServices
     {
+        /// <summary>
+        /// Creates a new instance of the User data-access layer. Holds no state; each call opens and closes its own SQL connection via <see cref="connect"/>.
+        /// </summary>
         public DBUserServices()
         {
         }
@@ -16,6 +23,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Create DB connection
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Opens and returns a new <see cref="SqlConnection"/> using the named connection string looked up from appsettings.json.
+        /// </summary>
+        /// <param name="conString">The connection-string key to look up in appsettings.json (e.g. "myProjDB").</param>
         public SqlConnection connect(String conString)
         {
             IConfigurationRoot configuration =
@@ -72,6 +83,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Insert User
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Inserts a new user row via spInsertUser_3MD_TB (password is stored as plaintext, with no hashing) and returns the number of rows affected.
+        /// </summary>
         public int InsertUser(User user)
         {
             SqlConnection con;
@@ -125,6 +139,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read all Users
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns every user in the system via spReadAllUsers_3MD_TB, including each user's plaintext password field.
+        /// </summary>
         public List<User> ReadAllUsers()
         {
             SqlConnection con;
@@ -199,6 +216,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read User by ID
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the user matching <paramref name="userId"/> via spReadUserById_3MD_TB, or null if none exists.
+        /// </summary>
         public User ReadUserById(int userId)
         {
             SqlConnection con;
@@ -276,6 +296,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         // Read User by Email
         // Used for Login / Register check
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the user matching <paramref name="email"/> via spReadUserByEmail_3MD_TB, or null if none exists; used by the BL layer for login and registration-uniqueness checks.
+        /// </summary>
+        /// <returns>The matching <see cref="User"/>, whose password field is plaintext (no hashing is used in this project), or null.</returns>
         public User ReadUserByEmail(string email)
         {
             SqlConnection con;
@@ -352,6 +376,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read User by Name
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the user matching <paramref name="name"/> via spReadUserByName_3MD_TB, or null if none exists.
+        /// </summary>
         public User ReadUserByName(string name)
         {
             SqlConnection con;
@@ -429,6 +456,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         // Update User
         // Used by BL methods after their validation
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Overwrites the stored fields of the user identified by <paramref name="userToUpdateId"/> with the values in <paramref name="userDetails"/> via spUpdateUser_3MD_TB.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
         public int UpdateUser(
             int userToUpdateId,
             User userDetails)
@@ -490,6 +521,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read preferred Regions of User
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the regions the given user has marked as preferred, via spReadUserRegions_3MD_TB.
+        /// </summary>
         public List<Region> ReadPreferredRegions(int userId)
         {
             SqlConnection con;
@@ -554,6 +588,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Replace User preferred Regions
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Replaces the user's preferred regions: unconditionally deletes all existing rows for the user, then re-inserts one row per id in <paramref name="regionIds"/>. If <paramref name="regionIds"/> is null or empty the user is simply left with no preferred regions. The delete and the insert loop are not wrapped in a transaction, so a failure partway through the loop can leave the user with a partial region list.
+        /// </summary>
         public void UpdatePreferredRegions(
             int userId,
             List<int> regionIds)
@@ -613,6 +650,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Delete User Regions
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Deletes all preferred-region rows for the given user via spDeleteUserRegions_3MD_TB.
+        /// </summary>
+        /// <returns>The number of rows deleted.</returns>
         public int DeleteUserRegions(int userId)
         {
             SqlConnection con;
@@ -664,6 +705,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         // Read User Languages
         // UserLanguages contains UserId + Language Object + LevelLanguage
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the user's known languages, each paired with an optional proficiency level, via spReadUserLanguages_3MD_TB.
+        /// </summary>
         public List<UserLanguages> ReadUserLanguages(int userId)
         {
             SqlConnection con;
@@ -743,6 +787,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Replace User Languages
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Replaces the user's languages: unconditionally deletes all existing rows for the user, then re-inserts one row per entry in <paramref name="languages"/>. If <paramref name="languages"/> is null or empty the user is left with no languages. As with <see cref="UpdatePreferredRegions"/>, the delete and the insert loop are not wrapped in a transaction.
+        /// </summary>
         public void UpdateUserLanguages(
             int userId,
             List<UserLanguages> languages)
@@ -811,6 +858,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Delete User Languages
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Deletes all language rows for the given user via spDeleteUserLanguages_3MD_TB.
+        /// </summary>
+        /// <returns>The number of rows deleted.</returns>
         public int DeleteUserLanguages(int userId)
         {
             SqlConnection con;
@@ -861,6 +912,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read Wanted Countries
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the user's wanted-countries wishlist via spReadUserWantedCountries_3MD_TB, fully populating each <see cref="Country"/> — including its languages and currencies via separate <see cref="DBCountryServices"/> calls issued per country.
+        /// </summary>
         public List<Country> ReadWantedCountries(int userId)
         {
             SqlConnection con;
@@ -972,6 +1026,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Add Wanted Country
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Adds a country to the user's wishlist via spInsertUserWantedCountry_3MD_TB. UserWantedCountries has a composite primary key on (UserId, CountryId), so inserting a duplicate pair throws a SqlException (error 2627/2601), which the calling controller catches and translates into an HTTP 409 Conflict.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
         public int AddWantedCountry(
             int userId,
             int countryId)
@@ -1020,6 +1078,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Remove Wanted Country
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Removes a country from the user's wishlist via spDeleteUserWantedCountry_3MD_TB.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
         public int RemoveWantedCountry(
             int userId,
             int countryId)
@@ -1067,6 +1129,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
 
 
+        /// <summary>
+        /// Records a login event for the given user via spInsertUserLogin_3MD_TB.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
         public int InsertUserLogin(int userId)
         {
             SqlConnection con;
@@ -1111,6 +1177,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>
+        /// Returns aggregate admin-dashboard statistics (daily logins, imported countries, saved countries, shared reviews) via spReadAdminStatistics_3MD_TB, or null if the stored procedure returns no row.
+        /// </summary>
         public AdminStatistics ReadStatistics()
         {
             SqlConnection con;

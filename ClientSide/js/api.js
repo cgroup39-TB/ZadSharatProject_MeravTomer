@@ -23,6 +23,10 @@ const Api = (function () {
 
     // ---------- generic helpers ----------
 
+    /**
+     * Wraps a synchronous work function as an async jQuery promise with a fake network delay (CONFIG.MOCK_DELAY_MS).
+     * A thrown error inside workFn is turned into a rejected promise shaped like a real jqXHR failure ({responseJSON:{message}}).
+     */
     function mockResponse(workFn) {
         const dfd = $.Deferred();
         setTimeout(function () {
@@ -36,6 +40,10 @@ const Api = (function () {
         return dfd.promise();
     }
 
+    /**
+     * Performs the real (non-mock) $.ajax call to CONFIG.API_BASE_URL, JSON-encoding the body and attaching the auth header.
+     * Returns the raw $.ajax() promise - $.when() wraps this in a [data, status, jqXHR] array when combined with other promises.
+     */
     function realRequest(method, path, data) {
         return $.ajax({
             url: CONFIG.API_BASE_URL + path,
@@ -47,6 +55,7 @@ const Api = (function () {
         });
     }
 
+    /** Returns a shallow copy of a user object with the password field removed. */
     function sanitizeUser(user) {
         if (!user) return user;
         const copy = $.extend({}, user);
@@ -60,6 +69,7 @@ const Api = (function () {
     //   { countryId, cca3, name, capital, region:{regionId,regionName}, subRegion,
     //     population, area, flagUrl, borders[], languages:[{languageId,languageName}],
     //     currencies:[{currencyId,currencyCode,name,symbol}] }
+    /** Maps a server Country DTO to the client's flat view-model shape; reuses the single server flag URL for both flagPng and flagSvg and only keeps the first currency. */
     function mapCountryFromServer(c) {
         if (!c) return c;
         const firstCurrency = (c.currencies && c.currencies[0]) || {};
@@ -82,6 +92,7 @@ const Api = (function () {
     }
 
     // Server User (BL/User.cs): { userId, name, email, password, isActive, isAdmin, canShare }
+    /** Maps a server User DTO to the client's view-model shape and strips the password via sanitizeUser. */
     function mapUserFromServer(u) {
         if (!u) return u;
         return sanitizeUser({
@@ -97,6 +108,10 @@ const Api = (function () {
     // Finds the region object (with its real RegionId) of an existing country
     // with the given region name - there's no dedicated GET /Regions endpoint,
     // so this is derived from the countries that already carry one.
+    /**
+     * Returns a `.then()`-derived promise: the underlying $.ajax() result is transformed into a plain region object (or null) via `.then()`,
+     * so it resolves with that single value directly (not the [data,status,jqXHR] triple) - `$.when()` callers must NOT index the result with [0].
+     */
     function findRegionRaw(regionName) {
         return realRequest("GET", "/Countries").then(function (countries) {
             const match = (countries || []).find(function (c) {
@@ -113,6 +128,7 @@ const Api = (function () {
     //   PUT  /api/Users/{id}/profile?actingUserId=...
     //   GET  /api/Users/{id}
     const Users = {
+        /** Registers a new user. Mock branch pre-checks for a duplicate email and throws; real branch just posts to /Users/register (raw $.ajax() promise) and lets the server validate. */
         register: function (userData) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -136,6 +152,10 @@ const Api = (function () {
             return realRequest("POST", "/Users/register", userData);
         },
 
+        /**
+         * Logs in a user. The real server issues no JWT, so a lightweight local session token ("session-{id}-{timestamp}") is synthesized client-side from the returned user row.
+         * Real branch is a `.then()`-derived promise - resolves directly with {token, user}, not the [data,status,jqXHR] triple, so `$.when()` callers must NOT index the result with [0].
+         */
         login: function (credentials) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -162,6 +182,10 @@ const Api = (function () {
             });
         },
 
+        /**
+         * Updates a user's profile. Real branch is a `.then()`-derived promise that ultimately resolves with a single mapped user object
+         * (not the [data,status,jqXHR] triple), so `$.when()` callers must NOT index the result with [0].
+         */
         update: function (id, data) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -209,6 +233,7 @@ const Api = (function () {
             });
         },
 
+        /** Fetches a user by id. Real branch is `.then()`-derived (maps through mapUserFromServer), resolving with a single object - not the [data,status,jqXHR] triple. */
         getById: function (id) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -231,6 +256,10 @@ const Api = (function () {
     // (no generic /Countries/search - filtering/sorting is done client-side
     // over the full list, same as the mock branch already did)
     const Countries = {
+        /**
+         * Fetches and maps every country. Real branch is a `.then()`-derived promise - resolves directly with the mapped array
+         * (not the [data,status,jqXHR] triple), so `$.when()` callers must NOT index the result with [0].
+         */
         getAll: function () {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () { return Mock.getCountries().slice(); });
@@ -240,6 +269,7 @@ const Api = (function () {
             });
         },
 
+        /** Fetches a single country. Real branch is `.then()`-derived (maps through mapCountryFromServer), resolving with a single object. */
         getById: function (id) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -251,6 +281,12 @@ const Api = (function () {
             return realRequest("GET", "/Countries/" + id).then(mapCountryFromServer);
         },
 
+        /**
+         * Creates a country: real branch resolves the region via findRegionRaw, then POSTs.
+         * NOTE ON PROMISE SHAPE: although this chains `.then()`, the callback's `return realRequest(...)` returns the raw ajax
+         * promise itself (not a plain value), so the outer promise adopts its multi-arg resolution - it behaves like a raw
+         * $.ajax() promise for `$.when()` purposes (wrapped as [data,status,jqXHR]), unlike Countries.getAll/getById/update.
+         */
         create: function (data) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -280,6 +316,10 @@ const Api = (function () {
             });
         },
 
+        /**
+         * Updates a country: resolves the region via findRegionRaw, PUTs the change, then re-fetches via Countries.getById.
+         * Real branch is a `.then()`-derived promise that ultimately resolves with the single mapped country object (not the [data,status,jqXHR] triple).
+         */
         update: function (id, data) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -308,6 +348,7 @@ const Api = (function () {
             });
         },
 
+        /** Deletes a country by id; real branch is a raw $.ajax() promise (unlike most other Countries methods), so $.when() wraps a single result as [data,status,jqXHR]. */
         delete: function (id) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -320,6 +361,10 @@ const Api = (function () {
         },
 
         // params: { name, region, language, currency, minPopulation, maxPopulation, minArea, maxArea, sortBy, sortDir }
+        /**
+         * Searches/filters countries entirely client-side (no server-side search endpoint): real branch fetches the full list
+         * via Countries.getAll() and then filters/sorts it in JS. `.then()`-derived promise - resolves with a single array.
+         */
         search: function (params) {
             params = params || {};
             if (CONFIG.USE_MOCK) {
@@ -333,6 +378,7 @@ const Api = (function () {
         }
     };
 
+    /** Applies client-side filtering (name/region/language/currency/min-max population/area) and optional sorting to a country list. */
     function filterAndSortCountries(list, params) {
         if (params.name) {
             const term = params.name.toLowerCase();
@@ -373,6 +419,13 @@ const Api = (function () {
     // userId+countryId), so a synthetic "listType:countryId" id is used - the
     // rest of the app (userLists.js, countryDetails.js) treats it as opaque.
     const UserCountries = {
+        /**
+         * Combines the visited list (/UserVisitedCountries/user/{id}) and wishlist (/Users/{id}/wantedCountries) into one array
+         * with synthetic "visited:{countryId}" / "wishlist:{countryId}" ids. Internally uses $.when() on two raw $.ajax() promises,
+         * so indexing visitedResp[0]/wantedResp[0] there is correct - but the function AS A WHOLE returns a `.then()`-derived
+         * promise that resolves directly with the entries array (not the [data,status,jqXHR] triple), so callers who wrap
+         * THIS function's result in their own `$.when()` must NOT index the result with [0] (see userLists.js loadLists()).
+         */
         getByUser: function (userId) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -411,6 +464,11 @@ const Api = (function () {
         },
 
         // data: { userId, countryId, listType }
+        /**
+         * Adds a country to a user's visited or wishlist list depending on data.listType (different real endpoint for each), raw $.ajax() promise.
+         * A duplicate (userId+countryId+listType) insert is a composite-key conflict server-side (HTTP 409); this function does no special
+         * handling for it - the 409 just reaches the caller's .fail() like any other error (mock branch instead throws a JS Error up front).
+         */
         create: function (data) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -439,6 +497,11 @@ const Api = (function () {
         },
 
         // used to "move" a country between lists by changing listType
+        /**
+         * Moves an entry between lists by deleting from the source list then creating on the target list (two chained real requests).
+         * Promise shape is inconsistent by branch: a same-type no-op resolves with a single {success:true} value, while an actual
+         * move's `.then()` callback returns the raw ajax promise of the final POST, so it resolves multi-arg like a raw $.ajax() call.
+         */
         update: function (id, data) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -479,6 +542,7 @@ const Api = (function () {
             });
         },
 
+        /** Removes an entry from whichever list it belongs to (parsed from the synthetic id's "visited:"/"wishlist:" prefix); real branch is a raw $.ajax() promise. */
         delete: function (id) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -504,6 +568,7 @@ const Api = (function () {
     // Composed from api/UserVisitedCountries - a "share" is simply a visited
     // country with IsShared = true. There's no separate share id on the
     // server, so a synthetic "userId_countryId" id is used (opaque to shares.js).
+    /** Maps a visited-country server record (with isShared=true) into the client's "share" shape, using a synthetic "userId_countryId" id since shares have no id of their own on the server. */
     function mapShareFromVisit(v) {
         return {
             id: v.userId + "_" + v.country.countryId,
@@ -516,6 +581,11 @@ const Api = (function () {
         };
     }
 
+    /**
+     * Finds a user's existing UserVisitedCountries entry for a given country by fetching the user's full visited list and
+     * searching client-side (no direct GET-by-pair endpoint). `.then()`-derived promise - resolves directly with the entry
+     * or null (not the [data,status,jqXHR] triple), so `$.when()` callers must NOT index the result with [0].
+     */
     function findVisitEntry(userId, countryId) {
         return realRequest("GET", "/UserVisitedCountries/user/" + userId).then(function (visits) {
             return (visits || []).find(function (v) {
@@ -525,6 +595,7 @@ const Api = (function () {
     }
 
     const Shares = {
+        /** Fetches every shared review across all users. Real branch is `.then()`-derived (maps through mapShareFromVisit), resolving with a single array. */
         getAll: function () {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () { return Mock.getShares().slice().reverse(); });
@@ -534,6 +605,7 @@ const Api = (function () {
             });
         },
 
+        /** Fetches shared reviews for one country. Real branch is `.then()`-derived (maps through mapShareFromVisit), resolving with a single array. */
         getByCountry: function (countryId) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -546,6 +618,12 @@ const Api = (function () {
         },
 
         // data: { userId, countryId, userName, countryName, content }
+        /**
+         * Posts/shares a review: looks up any existing visited entry for the pair first - if found it's PUT (preserving its
+         * rating) with isShared=true, otherwise a new UserVisitedCountries row is POSTed. Because the `.then()` callback
+         * returns that raw PUT/POST ajax promise directly, the outer promise adopts its multi-arg resolution and behaves
+         * like a raw $.ajax() promise for `$.when()` (wrapped as [data,status,jqXHR]), unlike most other `.then()`-derived Api functions.
+         */
         create: function (data) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -577,6 +655,11 @@ const Api = (function () {
             });
         },
 
+        /**
+         * Edits a share's text by re-fetching the existing visited entry (to preserve its rating) and PUTting the new reviewText;
+         * rejects if no matching entry is found. Same promise-shape caveat as Shares.create: on success it adopts the raw PUT ajax
+         * promise's multi-arg resolution, so it behaves like raw $.ajax() for `$.when()` purposes.
+         */
         update: function (id, data) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -607,6 +690,10 @@ const Api = (function () {
             });
         },
 
+        /**
+         * "Deletes" a share by PUTting isShared=false on the underlying visited entry (see note below); rejects if no matching entry is found.
+         * Same promise-shape caveat as Shares.create/update: on success it adopts the raw PUT ajax promise's multi-arg resolution.
+         */
         delete: function (id) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -643,6 +730,7 @@ const Api = (function () {
     //   GET  /api/Quizzes/{quizId}/questions
     //   POST /api/Quizzes/submit
     const Quizzes = {
+        /** Returns the quiz catalog (id/title/description); real branch is a raw $.ajax() promise. */
         getCatalog: function () {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -654,6 +742,7 @@ const Api = (function () {
             return realRequest("GET", "/Quizzes");
         },
 
+        /** Returns a quiz's questions; mock branch strips correctIndex to mimic what a real server response should omit. Real branch is a raw $.ajax() promise. */
         getQuestions: function (quizId) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -670,6 +759,7 @@ const Api = (function () {
         },
 
         // data: { quizId, userId, answers: [{ questionId, selectedIndex }] }
+        /** Submits quiz answers; mock branch grades client-side and returns per-question correctness. Real branch is a raw $.ajax() promise POSTing the raw answers for server-side grading. */
         submit: function (data) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -694,6 +784,11 @@ const Api = (function () {
     //   GET /api/Users                              (catalog, reused as the admin user list)
     //   PUT /api/Users/{id}/active?actingUserId=...  (lock/unlock)
     //   GET /api/Users/statistics?actingUserId=...
+    /**
+     * Locks/unlocks a user: fetches the current row (PUT .../active overwrites every column, same reasoning as Users.update)
+     * and PUTs it back with isActive toggled. `.then()`-derived promise - resolves directly with the mapped user (not the
+     * [data,status,jqXHR] triple), so `$.when()` callers must NOT index the result with [0].
+     */
     function setUserActive(id, active) {
         const admin = Auth.getCurrentUser();
 
@@ -715,6 +810,7 @@ const Api = (function () {
     }
 
     const Admin = {
+        /** Fetches every user (reused as the admin user list). Real branch is `.then()`-derived (maps through mapUserFromServer), resolving with a single array. */
         getUsers: function () {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () { return Mock.getUsers().map(sanitizeUser); });
@@ -724,6 +820,7 @@ const Api = (function () {
             });
         },
 
+        /** Locks a user; real branch delegates directly to setUserActive(id, false) (same `.then()`-derived, single-value promise shape). */
         lockUser: function (id) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -738,6 +835,7 @@ const Api = (function () {
             return setUserActive(id, false);
         },
 
+        /** Unlocks a user; real branch delegates directly to setUserActive(id, true) (same `.then()`-derived, single-value promise shape). */
         unlockUser: function (id) {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
@@ -752,6 +850,11 @@ const Api = (function () {
             return setUserActive(id, true);
         },
 
+        /**
+         * Fetches admin dashboard stats. Real branch is `.then()`-derived and reshapes the server's aggregate-only response:
+         * todayLogins is set equal to totalLogins (server tracks no per-day breakdown) and dailyLogins is always returned
+         * empty, so the daily-logins chart has nothing to render against the real API yet.
+         */
         getStats: function () {
             if (CONFIG.USE_MOCK) {
                 return mockResponse(function () {
