@@ -828,8 +828,8 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
 
                     paramDic.Add(
                         "@LevelLanguage",
-                        userLanguage.LevelLanguage.HasValue
-                            ? userLanguage.LevelLanguage.Value
+                        userLanguage.ProficiencyLevel.HasValue
+                            ? userLanguage.ProficiencyLevel.Value
                             : DBNull.Value);
 
                     SqlCommand cmd =

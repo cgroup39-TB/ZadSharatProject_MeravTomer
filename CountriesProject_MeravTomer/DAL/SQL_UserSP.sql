@@ -243,7 +243,7 @@ BEGIN
         ul.UserId,
         l.LanguageId,
         l.LanguageName,
-        ul.LevelLanguage
+        ul.ProficiencyLevel
     FROM UserLanguages ul
     INNER JOIN Languages l
         ON ul.LanguageId = l.LanguageId
@@ -261,7 +261,7 @@ GO
 CREATE PROCEDURE spInsertUserLanguage_3MD_TB
     @UserId INT,
     @LanguageId INT,
-    @LevelLanguage INT = NULL
+    @ProficiencyLevel INT = NULL
 AS
 BEGIN
 
@@ -269,13 +269,13 @@ BEGIN
     (
         UserId,
         LanguageId,
-        LevelLanguage
+        ProficiencyLevel
     )
     VALUES
     (
         @UserId,
         @LanguageId,
-        @LevelLanguage
+        @ProficiencyLevel
     );
 
 END
