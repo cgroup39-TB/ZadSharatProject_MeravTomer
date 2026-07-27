@@ -13,11 +13,9 @@ language, just where things are and how they connect.
 - **Transport**: the client calls the server's REST API with jQuery `$.ajax`. CORS is enabled
   server-side (`Program.cs`, `AllowAnyOrigin/AllowAnyMethod/AllowAnyHeader`) specifically so the
   static client — served from a different origin/port than the API — is allowed to call it.
-- **Mock mode**: `ClientSide/js/config.js` has a `CONFIG.USE_MOCK` flag. When `true`, the client
-  never calls the real API — `ClientSide/js/mockData.js` fakes all data in `localStorage`
-  instead, with an artificial delay (`MOCK_DELAY_MS`) to simulate network latency. This lets the
-  client be demoed/developed with the server turned off. `CONFIG.API_BASE_URL` points at the
-  real API's base URL when mock mode is off.
+- `ClientSide/js/config.js` holds `CONFIG.API_BASE_URL` (the real API's base URL) and the
+  `localStorage` key names used for the auth token/current user. There is no mock/offline mode —
+  the client always talks to the real API.
 
 ## 2. Server layers
 
@@ -73,8 +71,8 @@ SQL Server
 | User preferences (languages, preferred regions) | `Controllers/UsersController.cs` (`*languages`, `*regions` endpoints) | `BL/User.cs` (`ReadUserLanguages`/`UpdateUserLanguages`, `ReadPreferredRegions`/`UpdatePreferredRegions`), `BL/UserLanguages.cs` | `DAL/DBUserServices.cs` | `ClientSide/js/auth.js` / page `pages/preferences.html`, `profile.html` |
 
 Cross-cutting client files: `api.js` (all AJAX calls, one `Api.<Area>` namespace per feature),
-`common.js` (shared UI helpers: navbar, alerts, query params), `config.js` (`USE_MOCK`/API base
-URL/localStorage key names), `mockData.js` (in-browser fake data store used when `USE_MOCK` is true).
+`common.js` (shared UI helpers: navbar, alerts, query params), `config.js` (API base URL/localStorage
+key names).
 
 ## 4. Known gotchas
 
