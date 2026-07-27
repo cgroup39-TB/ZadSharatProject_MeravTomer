@@ -110,7 +110,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             try
             {
                 SqlDataReader dataReader =
-                    cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    cmd.ExecuteReader();
 
                 while (dataReader.Read())
                 {
@@ -206,7 +206,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             try
             {
                 SqlDataReader dataReader =
-                    cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    cmd.ExecuteReader();
 
                 while (dataReader.Read())
                 {
@@ -301,7 +301,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             try
             {
                 SqlDataReader dataReader =
-                    cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    cmd.ExecuteReader();
 
                 while (dataReader.Read())
                 {
@@ -402,7 +402,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             try
             {
                 SqlDataReader dataReader =
-                    cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    cmd.ExecuteReader();
 
                 while (dataReader.Read())
                 {
@@ -497,7 +497,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
             try
             {
                 SqlDataReader dataReader =
-                    cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    cmd.ExecuteReader();
 
                 while (dataReader.Read())
                 {
