@@ -252,7 +252,7 @@ const Api = (function () {
                     return {
                         userId: userId,
                         language: lang,
-                        levelLanguage: LANGUAGE_LEVEL_TO_NUMBER[l.level] || null
+                        ProficiencyLevel: LANGUAGE_LEVEL_TO_NUMBER[l.level] || null
                     };
                 })
                 .filter(Boolean);
