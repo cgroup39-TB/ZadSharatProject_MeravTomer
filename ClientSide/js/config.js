@@ -7,7 +7,7 @@
  * "applicationUrl": "https://localhost:7182;http://localhost:5262").
  */
 const CONFIG = {
-    API_BASE_URL: "https://localhost:7182/api",
+    API_BASE_URL: "https://proj.ruppin.ac.il/cgroup39/test2/tar2/api/",
 
     // localStorage keys used across the app (kept in one place to avoid typos)
     STORAGE_KEYS: {
