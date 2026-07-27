@@ -62,6 +62,7 @@ $(function () {
         // doesn't just look broken while it's blocked.
         $("#newShareContent, #newShareSubmitBtn").prop("disabled", true);
 
+
         const user = Auth.getCurrentUser();
         if (!user) return;
 
@@ -82,6 +83,7 @@ $(function () {
                 $newShareCountry.append($("<option>").val(c.id).text(c.commonName));
             });
             $("#newShareContent, #newShareSubmitBtn").prop("disabled", false);
+
         });
     }
 
