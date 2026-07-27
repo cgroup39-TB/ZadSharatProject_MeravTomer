@@ -108,13 +108,10 @@ function addToList(countryId, listType) {
 // Reviews are stored as a field on the visited-country record itself, so
 // writing one only makes sense once the country is actually in "My Lists".
 // Shows the form (enabled) once visited, or a locked explanation until then.
-<<<<<<< HEAD
-=======
 /**
  * Locks the share form by default, then unlocks it only if a fresh check of
  * the user's visited entries confirms this country is actually visited.
  */
->>>>>>> 1ae1bae4720eec596a5e22d21e582b0a22cff50d
 function refreshShareFormState(countryId) {
     if (!Auth.isLoggedIn()) {
         $("#shareForm").hide();
@@ -122,11 +119,6 @@ function refreshShareFormState(countryId) {
         return;
     }
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> client-server-quiz-integration-8wqi56
     // Fail closed: keep it locked until the visited check actually
     // confirms otherwise, instead of leaving the form's default (enabled)
     // HTML state in place if the status lookup itself fails.
@@ -134,10 +126,6 @@ function refreshShareFormState(countryId) {
     $("#shareContent, #shareSubmitBtn").prop("disabled", true);
     $("#shareLockedMsg").show();
 
-<<<<<<< HEAD
-=======
->>>>>>> 1ae1bae4720eec596a5e22d21e582b0a22cff50d
->>>>>>> client-server-quiz-integration-8wqi56
     const user = Auth.getCurrentUser();
     Api.UserCountries.getByUser(user.id).done(function (entries) {
         const visited = (entries || []).some(function (e) {
@@ -150,12 +138,9 @@ function refreshShareFormState(countryId) {
     });
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Fetches the shares for this country and renders them.
  */
->>>>>>> 1ae1bae4720eec596a5e22d21e582b0a22cff50d
 function loadSharesForCountry(countryId) {
     Api.Shares.getByCountry(countryId)
         .done(renderShareList)
@@ -211,25 +196,28 @@ function submitShare(countryId) {
 // ===================== Add / Edit form page =====================
 
 /**
- * Bootstraps the admin-only add/edit form: requires admin, loads existing
- * data to prefill when an id is present, and wires the submit handler.
+ * Bootstraps the admin-only edit form. Adding a brand-new country is
+ * disabled - this page is edit-only, so any direct navigation here without
+ * an id is redirected back to the list.
  */
 function initFormPage() {
     Auth.requireAdmin();
 
     const id = Common.getQueryParams().id;
-    const isEdit = !!id;
-    $("#formTitle").text(isEdit ? "Edit Country" : "Add Country");
-
-    if (isEdit) {
-        Api.Countries.getById(id)
-            .done(fillForm)
-            .fail(Common.showError);
+    if (!id) {
+        window.location.href = "countries-list.html";
+        return;
     }
+
+    $("#formTitle").text("Edit Country");
+
+    Api.Countries.getById(id)
+        .done(fillForm)
+        .fail(Common.showError);
 
     $("#countryForm").on("submit", function (e) {
         e.preventDefault();
-        saveCountry(isEdit ? id : null);
+        saveCountry(id);
     });
 }
 

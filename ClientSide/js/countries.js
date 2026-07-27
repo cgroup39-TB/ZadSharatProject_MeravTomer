@@ -16,7 +16,6 @@ $(function () {
      * region filter, wires up event handlers, and triggers the first load.
      */
     function init() {
-        $("#addCountryBtn").toggle(Auth.isAdmin());
         $("#myStatusFilterRow").toggle(Auth.isLoggedIn());
         populateRegionFilter();
         bindEvents();
@@ -93,34 +92,6 @@ $(function () {
                 if (seq !== requestSeq) return;
                 Common.showError(err);
             });
-<<<<<<< HEAD
-    }
-
-    function applyMyStatusFilter(countries, seq) {
-        const statusFilter = $("#myStatusFilter").val();
-        if (!statusFilter || !Auth.isLoggedIn()) {
-            allCountries = countries;
-            renderCountries(countries);
-            return;
-        }
-
-        const user = Auth.getCurrentUser();
-        Api.UserCountries.getByUser(user.id).done(function (entries) {
-            if (seq !== requestSeq) return;
-
-            const statusByCountry = {};
-            (entries || []).forEach(function (e) { statusByCountry[e.countryId] = e.listType; });
-
-            const filtered = countries.filter(function (c) {
-                const status = statusByCountry[c.id];
-                return statusFilter === "none" ? !status : status === statusFilter;
-            });
-
-            allCountries = filtered;
-            renderCountries(filtered);
-        });
-=======
->>>>>>> 1ae1bae4720eec596a5e22d21e582b0a22cff50d
     }
 
     /**
