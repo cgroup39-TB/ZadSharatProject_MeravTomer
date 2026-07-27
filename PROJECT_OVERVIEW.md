@@ -115,6 +115,15 @@ and why does the code look like this":
   the C#-side procedure name strings match the SQL scripts exactly. Worth double-checking this
   suffix any time a new stored procedure is added.
 
+- **The shared database can drift out of sync with `CreateTables.sql`/`SQL_*SP.sql`.** Since
+  there's no automatic migration step (see section 2 above), a database that was created before
+  a given seed row or stored procedure was added to those scripts just never gets it - the app
+  then throws "Could not find stored procedure '...'" (regions/languages procedures) or the
+  seeded `admin@test.com`/`test@test.com` login stops working, even though the `.sql` files
+  themselves are entirely correct. `DAL/SyncMissingDbObjects.sql` is an idempotent catch-up
+  script (safe to re-run) that creates only whatever's actually missing - run it against the
+  shared DB any time either symptom shows up.
+
 - Other things worth knowing (not bugs fixed, but relevant context if asked): passwords are
   stored/compared in plaintext (no hashing) — a known simplification for this student project,
   not something in scope to fix here. Every DAL method uses `catch (Exception ex) { throw ex; }`
