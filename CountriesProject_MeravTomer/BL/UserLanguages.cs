@@ -20,7 +20,7 @@
         {
             UserId = userId;
             Language = language;
-            LevelLanguage = levelLanguage;
+            ProficiencyLevel = levelLanguage;
         }
 
         /// <summary>Creates a user/language link with no proficiency level set.</summary>
@@ -30,7 +30,7 @@
         {
             UserId = userId;
             Language = language;
-            LevelLanguage = null;
+            ProficiencyLevel = null;
         }
 
         public int UserId
@@ -45,7 +45,7 @@
             set => language = value;
         }
 
-        public int? LevelLanguage
+        public int? ProficiencyLevel
         {
             get => levelLanguage;
             set

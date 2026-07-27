@@ -261,7 +261,7 @@ GO
 CREATE PROCEDURE spInsertUserLanguage_3MD_TB
     @UserId INT,
     @LanguageId INT,
-    @LevelLanguage INT = NULL
+    @ProficiencyLevel INT = NULL
 AS
 BEGIN
 
@@ -269,13 +269,13 @@ BEGIN
     (
         UserId,
         LanguageId,
-        LevelLanguage
+        ProficiencyLevel
     )
     VALUES
     (
         @UserId,
         @LanguageId,
-        @LevelLanguage
+        @ProficiencyLevel
     );
 
 END
