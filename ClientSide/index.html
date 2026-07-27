@@ -29,5 +29,19 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/common.js"></script>
+    <script>
+        // Ends the session when this home page is actually closed (tab/browser
+        // closed) - but not on a normal in-site navigation, e.g. clicking
+        // "Browse Countries". "pagehide" (unlike "beforeunload") sets
+        // event.persisted=true when the browser is just caching this page for
+        // back/forward navigation instead of discarding it, which is what
+        // happens on a same-site link click since nothing here blocks the
+        // bfcache - persisted is only false when the page is genuinely gone.
+        window.addEventListener("pagehide", function (event) {
+            if (!event.persisted && Auth.isLoggedIn()) {
+                Auth.logout();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -61,10 +61,6 @@ $(function () {
             region: $("#regionFilter").val(),
             language: $("#languageFilter").val().trim(),
             currency: $("#currencyFilter").val().trim(),
-            minPopulation: $("#minPopulation").val(),
-            maxPopulation: $("#maxPopulation").val(),
-            minArea: $("#minArea").val(),
-            maxArea: $("#maxArea").val(),
             sortBy: $("#sortBy").val(),
             sortDir: $("#sortDir").val()
         };

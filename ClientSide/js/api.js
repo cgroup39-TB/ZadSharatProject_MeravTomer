@@ -247,7 +247,7 @@ const Api = (function () {
             return realRequest("DELETE", "/Countries/" + id);
         },
 
-        // params: { name, region, language, currency, minPopulation, maxPopulation, minArea, maxArea, sortBy, sortDir }
+        // params: { name, region, language, currency, sortBy, sortDir }
         /**
          * Searches/filters countries entirely client-side (no server-side search endpoint): fetches the full list
          * via Countries.getAll() and then filters/sorts it in JS. `.then()`-derived promise - resolves with a single array.
@@ -260,7 +260,7 @@ const Api = (function () {
         }
     };
 
-    /** Applies client-side filtering (name/region/language/currency/min-max population/area) and optional sorting to a country list. */
+    /** Applies client-side filtering (name/region/language/currency) and optional sorting to a country list. */
     function filterAndSortCountries(list, params) {
         if (params.name) {
             const term = params.name.toLowerCase();
@@ -277,10 +277,6 @@ const Api = (function () {
             const cur = params.currency.toLowerCase();
             list = list.filter(function (c) { return c.currencyName.toLowerCase().indexOf(cur) !== -1; });
         }
-        if (params.minPopulation) list = list.filter(function (c) { return c.population >= Number(params.minPopulation); });
-        if (params.maxPopulation) list = list.filter(function (c) { return c.population <= Number(params.maxPopulation); });
-        if (params.minArea) list = list.filter(function (c) { return c.area >= Number(params.minArea); });
-        if (params.maxArea) list = list.filter(function (c) { return c.area <= Number(params.maxArea); });
 
         if (params.sortBy) {
             const dir = params.sortDir === "desc" ? -1 : 1;
