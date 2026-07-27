@@ -4,8 +4,15 @@ using System.Data.SqlClient;
 
 namespace ServerSideCountriesProject_MeravTomer.DAL
 {
+    /// <summary>
+    /// Data access layer for user-visited-country records: visits, ratings, written reviews,
+    /// and sharing of reviews between users. The primary key of a visit is the (UserId, CountryId) pair.
+    /// </summary>
     public class DBUserVisitCountryServices
     {
+        /// <summary>
+        /// Creates a new instance of the service. Holds no state; a fresh DB connection is opened per call.
+        /// </summary>
         public DBUserVisitCountryServices()
         {
         }
@@ -14,6 +21,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Create DB connection
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Opens and returns a new <see cref="SqlConnection"/> using the named connection string
+        /// read from appsettings.json. The caller is responsible for closing the connection.
+        /// </summary>
         public SqlConnection connect(String conString)
         {
             IConfigurationRoot configuration =
@@ -65,6 +76,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read all visited countries of a specific User
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns every country the given user has marked as visited (with rating, review text, and
+        /// sharing flag). Each result's <see cref="Country"/> is loaded with a separate follow-up query per row.
+        /// </summary>
         public List<UserVisitedCountry> ReadVisitsByUser(int userId)
         {
             List<UserVisitedCountry> visits =
@@ -156,6 +171,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read visits of a specific Country
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns every visit record (by any user) for the given country, with each result's
+        /// <see cref="Country"/> loaded via a separate follow-up query per row.
+        /// </summary>
         public List<UserVisitedCountry> ReadVisitsByCountry(
             int countryId)
         {
@@ -247,6 +266,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read shared reviews of a specific Country
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns only the visits for the given country that have been marked as shared
+        /// (IsShared = true), including the review's creation date and the reviewing user's name.
+        /// </summary>
         public List<UserVisitedCountry> ReadSharedVisitsByCountry(
             int countryId)
         {
@@ -344,6 +367,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read shared reviews of a specific User
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns only the given user's visits that have been marked as shared (IsShared = true),
+        /// including the review's creation date and the user's name.
+        /// </summary>
         public List<UserVisitedCountry> ReadSharedVisitsByUser(
             int userId)
         {
@@ -441,6 +468,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Read all shared reviews (every country, every user)
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns every shared review (IsShared = true) across all users and countries,
+        /// including creation date and reviewer name.
+        /// </summary>
         public List<UserVisitedCountry> ReadAllSharedVisits()
         {
             List<UserVisitedCountry> visits =
@@ -532,6 +563,13 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Insert Visit
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Inserts a new visit record for the (UserId, CountryId) pair carried by <paramref name="visit"/>.
+        /// Because that pair is the table's composite primary key, inserting a duplicate visit throws a
+        /// SqlException (error 2627/2601) which propagates out of this method to be handled by the caller
+        /// (the controller maps it to HTTP 409 Conflict).
+        /// </summary>
+        /// <returns>The number of rows affected, as reported by the stored procedure.</returns>
         public int InsertVisit(UserVisitedCountry visit)
         {
             SqlConnection con;
@@ -588,6 +626,11 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Update Visit
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Updates the rating, review text, and sharing flag of the existing visit identified by
+        /// <paramref name="visit"/>'s UserId/CountryId pair.
+        /// </summary>
+        /// <returns>The number of rows affected; 0 if no matching visit was found.</returns>
         public int UpdateVisit(UserVisitedCountry visit)
         {
             SqlConnection con;
@@ -644,6 +687,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         //--------------------------------------------------------------------------------------------------
         // Delete Visit
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Deletes the visit record for the given (userId, countryId) pair.
+        /// </summary>
+        /// <returns>True if a row was deleted; false if no matching visit existed.</returns>
         public bool DeleteVisit(
             int userId,
             int countryId)

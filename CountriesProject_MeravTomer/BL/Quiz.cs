@@ -2,6 +2,10 @@ using ServerSideCountriesProject_MeravTomer.DAL;
 
 namespace ServerSideCountriesProject_MeravTomer.BL
 {
+    /// <summary>
+    /// A quiz definition with its questions. Also hosts the static scoring logic
+    /// for grading a submitted <see cref="QuizSubmission"/>.
+    /// </summary>
     public class Quiz
     {
         public int QuizId { get; set; }
@@ -15,6 +19,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         // Read
         // =========================
 
+        /// <summary>Returns every quiz (without its questions) - used for the quiz list/catalog view.</summary>
         public static List<Quiz> ReadCatalog()
         {
             DBQuizServices db = new DBQuizServices();
@@ -23,6 +28,7 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         }
 
 
+        /// <summary>Returns the quiz matching <paramref name="quizId"/> together with its questions, or null if no such quiz exists.</summary>
         public static Quiz ReadWithQuestions(int quizId)
         {
             DBQuizServices db = new DBQuizServices();
@@ -44,6 +50,11 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         // Scoring
         // =========================
 
+        /// <summary>
+        /// Grades a submission against the correct answers stored server-side. Returns null if the
+        /// submission is null or refers to a non-existent quiz. Any question left unanswered (or with
+        /// no matching answer in the submission) is simply scored as incorrect rather than throwing.
+        /// </summary>
         public static QuizResult Score(QuizSubmission submission)
         {
             if (submission == null)

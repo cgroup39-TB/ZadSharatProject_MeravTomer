@@ -6,6 +6,12 @@ using ServerSideCountriesProject_MeravTomer.BL;
 
 namespace ServerSideCountriesProject_MeravTomer.DAL
 {
+    /// <summary>
+    /// ADO.NET data access for currencies. Talks to SQL Server exclusively through stored
+    /// procedures (see DAL/SQL_CurrencySP.sql); the "_3MD_TB" suffix on every procedure name
+    /// is just this project's naming convention and must match exactly what's defined in SQL,
+    /// which was a source of bugs when the suffix drifted between the C# and SQL scripts.
+    /// </summary>
     public class DBCurrencyServices
     {
         public DBCurrencyServices()
@@ -13,6 +19,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>Opens (and returns) a new SqlConnection using the named connection string from appsettings.json. Caller is responsible for closing it.</summary>
         public SqlConnection connect(String conString)
         {
             IConfigurationRoot configuration =
@@ -58,6 +65,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>Returns every currency row via spReadAllCurrencies_3MD_TB.</summary>
         public List<Currency> ReadAllCurrencies()
         {
             SqlConnection con;
@@ -118,6 +126,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>Returns the currency matching <paramref name="currencyId"/> via spReadCurrencyById_3MD_TB, or null if not found.</summary>
         public Currency ReadCurrencyById(int currencyId)
         {
             SqlConnection con;
@@ -182,6 +191,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>Returns the currency matching <paramref name="currencyCode"/> via spReadCurrencyByCode_3MD_TB, or null if not found.</summary>
         public Currency ReadCurrencyByCode(string currencyCode)
         {
             SqlConnection con;
@@ -246,6 +256,7 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        /// <summary>Inserts a new currency via spInsertCurrency_3MD_TB and returns the generated CurrencyId.</summary>
         public int InsertCurrency(Currency currency)
         {
             SqlConnection con;

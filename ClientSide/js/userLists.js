@@ -49,19 +49,34 @@ $(function () {
     });
 });
 
+/**
+ * Loads both the visited and wishlist entries plus the full country catalog
+ * in parallel via $.when, then renders each list. See the comment below on
+ * why neither result is [0]-indexed.
+ */
 function loadLists() {
     const user = Auth.getCurrentUser();
 
+    // Both of these are already single-value-resolving promises (each ends
+    // in its own .then() that returns one array), not raw $.ajax() promises -
+    // so $.when hands them back as-is, not wrapped in a [data, status, jqXHR]
+    // array. Indexing with [0] here would silently grab the first *entry*/
+    // *country* instead of the array, and .filter() on that throws, which
+    // jQuery swallows instead of routing to .fail() - the lists just stay
+    // empty with no visible error.
     $.when(Api.UserCountries.getByUser(user.id), Api.Countries.getAll())
-        .done(function (entriesResult, countriesResult) {
-            const entries = entriesResult[0];
-            const countries = countriesResult[0];
+        .done(function (entries, countries) {
             renderList(entries, countries, "visited", "#visitedList");
             renderList(entries, countries, "wishlist", "#wishlistList");
         })
         .fail(Common.showError);
 }
 
+/**
+ * Renders one list (visited or wishlist) by filtering entries to listType
+ * and joining each to its country record; entries whose country can't be
+ * found (e.g. stale data) are silently skipped.
+ */
 function renderList(entries, countries, listType, containerSelector) {
     const $container = $(containerSelector);
     $container.empty();
@@ -100,6 +115,10 @@ function renderList(entries, countries, listType, containerSelector) {
     });
 }
 
+/**
+ * Moves an entry to the other list (visited <-> wishlist) by updating its
+ * listType, then reloads both lists to reflect the change.
+ */
 function moveEntry(entryId, targetList) {
     Api.UserCountries.update(entryId, { listType: targetList })
         .done(function () {
@@ -109,6 +128,10 @@ function moveEntry(entryId, targetList) {
         .fail(Common.showError);
 }
 
+/**
+ * Removes an entry from whichever list it belongs to, after a confirm
+ * prompt, then reloads both lists.
+ */
 function removeEntry(entryId) {
     if (!confirm("Remove this country from your list?")) return;
     Api.UserCountries.delete(entryId)

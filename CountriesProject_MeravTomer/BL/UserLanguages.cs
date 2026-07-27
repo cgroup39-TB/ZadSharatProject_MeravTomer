@@ -1,15 +1,18 @@
 ﻿namespace ServerSideCountriesProject_MeravTomer.BL
 {
+    /// <summary>Links a user to a language they speak, with an optional proficiency level (1-5).</summary>
     public class UserLanguages
     {
         private int userId;
         private Language language;
         private int? levelLanguage;
 
+        /// <summary>Creates an empty instance (used by model binding/deserialization).</summary>
         public UserLanguages()
         {
         }
 
+        /// <summary>Creates a user/language link with an explicit proficiency level.</summary>
         public UserLanguages(
             int userId,
             Language language,
@@ -20,6 +23,7 @@
             LevelLanguage = levelLanguage;
         }
 
+        /// <summary>Creates a user/language link with no proficiency level set.</summary>
         public UserLanguages(
             int userId,
             Language language)

@@ -4,7 +4,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+// With <Nullable>enable</Nullable> set project-wide, [ApiController] infers
+// an implicit [Required] on every non-nullable reference-type property of a
+// [FromBody] model (e.g. UserVisitedCountry.ReviewText, Country.Cca3/Name/
+// Region/...). Several endpoints intentionally accept partial objects
+// (marking a country as visited only needs userId + country.countryId), so
+// that implicit requirement rejects perfectly valid requests with a 400.
+// This restores the property's actual nullability as the only source of
+// truth for "is this required".
+builder.Services.AddControllers(options =>
+{
+    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

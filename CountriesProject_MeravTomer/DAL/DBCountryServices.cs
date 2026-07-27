@@ -13,16 +13,31 @@ using System.Diagnostics.Metrics;
 
 namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject_MeravTomer.DAL
 {
+    /// <summary>
+    /// ADO.NET data-access layer for Country-related data. All database access goes through SQL Server
+    /// stored procedures (no inline SQL, no EF); stored procedure names follow the "*_3MD_TB" naming suffix
+    /// convention, which must match exactly between this file and the corresponding SQL scripts.
+    /// </summary>
     public class DBCountryServices
     {
 
+        /// <summary>
+        /// Creates a new instance of the data-access layer. Holds no state; each method opens and closes
+        /// its own database connection.
+        /// </summary>
         public DBCountryServices()
         {
         }
 
         //--------------------------------------------------------------------------------------------------
-        // This method creates a connection to the database according to the connectionString name in the web.config 
+        // This method creates a connection to the database according to the connectionString name in the web.config
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Opens and returns a new <see cref="SqlConnection"/> using the named connection string read from
+        /// appsettings.json.
+        /// </summary>
+        /// <param name="conString">Name of the connection string entry in appsettings.json (e.g. "myProjDB").</param>
+        /// <returns>An already-open connection; the caller is responsible for closing it.</returns>
         public SqlConnection connect(String conString)
         {
 
@@ -66,6 +81,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Returning a list of all countries
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Retrieves every country via the spReadAllCountries_3MD_TB stored procedure, including each
+        /// country's languages, currencies, and border list.
+        /// </summary>
         public List<Country> ReadAllCountries()
         {
             SqlConnection con;
@@ -147,6 +166,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Read country by ID
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the country matching <paramref name="id"/> via the spReadCountryById_3MD_TB stored
+        /// procedure, including its languages, currencies, and borders, or null if no matching country exists.
+        /// </summary>
         public Country ReadCountryById(int id)
         {
             SqlConnection con;
@@ -232,6 +255,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Read country by name
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the country matching <paramref name="countryName"/> via the spReadCountryByName_3MD_TB
+        /// stored procedure, including its languages, currencies, and borders, or null if no matching country exists.
+        /// </summary>
         public Country ReadCountryByName(string countryName)
         {
             SqlConnection con;
@@ -318,6 +345,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Read all countries of a specific region
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns all countries belonging to <paramref name="region"/> via the spReadCountriesByRegion_3MD_TB
+        /// stored procedure, including each country's languages, currencies, and borders.
+        /// </summary>
         public List<Country> ReadCountriesByRegion(Region region)
         {
             SqlConnection con;
@@ -404,6 +435,11 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Insert Country
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Inserts a new country row via the spInsertCountry_3MD_TB stored procedure. Borders are stored as a
+        /// single comma-separated string rather than a separate table.
+        /// </summary>
+        /// <returns>The newly generated country ID.</returns>
         public int InsertCountry(Country country)
         {
             SqlConnection con;
@@ -459,6 +495,12 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         // Update Country
         // Languages and currencies are updated separately
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Updates the country identified by <paramref name="countryId"/> with the values in
+        /// <paramref name="country"/> via the spUpdateCountry_3MD_TB stored procedure. Languages and
+        /// currencies are not touched here and must be updated through the dedicated methods.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
         public int UpdateCountry(int countryId, Country country)
         {
             SqlConnection con;
@@ -514,6 +556,12 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Delete Country
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Deletes a country and its dependent rows via the spDeleteCountry_3MD_TB stored procedure. First
+        /// removes the country's language and currency associations so the delete does not violate
+        /// foreign-key constraints, then deletes the country row itself.
+        /// </summary>
+        /// <returns>The number of rows affected by the country delete.</returns>
         public int DeleteCountry(int countryId)
         {
             SqlConnection con;
@@ -564,6 +612,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Read all Languages
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Retrieves every language row via the spReadAllLanguages_3MD_TB stored procedure.
+        /// </summary>
         public List<Language> ReadAllLanguages()
         {
             SqlConnection con;
@@ -621,6 +672,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Insert Language
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Inserts a new language row via the spInsertLanguage_3MD_TB stored procedure.
+        /// </summary>
+        /// <returns>The newly generated language ID.</returns>
         public int InsertLanguage(Language language)
         {
             SqlConnection con;
@@ -668,6 +723,9 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Read all Currencies
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Retrieves every currency row via the spReadAllCurrencies_3MD_TB stored procedure.
+        /// </summary>
         public List<Currency> ReadAllCurrencies()
         {
             SqlConnection con;
@@ -731,6 +789,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Insert Currency
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Inserts a new currency row via the spInsertCurrency_3MD_TB stored procedure.
+        /// </summary>
+        /// <returns>The newly generated currency ID.</returns>
         public int InsertCurrency(Currency currency)
         {
             SqlConnection con;
@@ -780,6 +842,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Read languages of a specific Country
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the languages associated with <paramref name="countryId"/> via the
+        /// sp_CountryLanguages_GetByCountryId_3MD_TB stored procedure.
+        /// </summary>
         public List<Language> ReadLanguagesByCountryId(int countryId)
         {
             SqlConnection con;
@@ -841,6 +907,13 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Insert Country-Language relations
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Inserts one Country-Language association row per entry in <paramref name="languages"/> via the
+        /// sp_CountryLanguages_Insert_3MD_TB stored procedure, reusing a single connection for the whole batch.
+        /// Does nothing if <paramref name="languages"/> is null or empty. The join table has a composite
+        /// (CountryId, LanguageId) key, so inserting a duplicate pair throws a SqlException that the caller
+        /// is expected to translate into an HTTP 409 Conflict.
+        /// </summary>
         public void InsertCountryLanguages(
             int countryId,
             List<Language> languages)
@@ -897,6 +970,11 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Delete Country-Language relations
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Removes all Country-Language associations for <paramref name="countryId"/> via the
+        /// spDeleteLanguageByCountryId_3MD_TB stored procedure. Used as a pre-step before deleting a country.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
         public int DeleteLanguageByCountryIdWhenDeletingCountry(
             int countryId)
         {
@@ -945,6 +1023,10 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Read currencies of a specific Country
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Returns the currencies associated with <paramref name="countryId"/> via the
+        /// sp_CountryCurrencies_GetByCountryId_3MD_TB stored procedure.
+        /// </summary>
         public List<Currency> ReadCurrenciesByCountryId(int countryId)
         {
             SqlConnection con;
@@ -1016,6 +1098,13 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Insert Country-Currency relations
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Inserts one Country-Currency association row per entry in <paramref name="currencies"/> via the
+        /// sp_CountryCurrencies_Insert_3MD_TB stored procedure, reusing a single connection for the whole batch.
+        /// Does nothing if <paramref name="currencies"/> is null or empty. The join table has a composite
+        /// (CountryId, CurrencyId) key, so inserting a duplicate pair throws a SqlException that the caller
+        /// is expected to translate into an HTTP 409 Conflict.
+        /// </summary>
         public void InsertCountryCurrencies(
             int countryId,
             List<Currency> currencies)
@@ -1072,6 +1161,11 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         //--------------------------------------------------------------------------------------------------
         // Delete Country-Currency relations
         //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Removes all Country-Currency associations for <paramref name="countryId"/> via the
+        /// spDeleteCurrencyByCountryId_3MD_TB stored procedure. Used as a pre-step before deleting a country.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
         public int DeleteCurrencyByCountryIdWhenDeletingCountry(
             int countryId)
         {
@@ -1117,6 +1211,12 @@ namespace ServerSideCountriesProject_MeravTomer.DAL// ServerSideCountriesProject
         }
 
 
+        /// <summary>
+        /// Returns all countries sorted via the spReadSortedCountries_3MD_TB stored procedure, including
+        /// each country's languages, currencies, and borders.
+        /// </summary>
+        /// <param name="sortBy">Column name to sort by; passed through directly to the stored procedure.</param>
+        /// <param name="ascending">True for ascending order, false for descending.</param>
         public List<Country> ReadSortedCountries(
     string sortBy,
     bool ascending)

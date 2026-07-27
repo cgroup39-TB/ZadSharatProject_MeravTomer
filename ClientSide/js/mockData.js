@@ -77,6 +77,10 @@ const Mock = (function () {
 
     // ---------- low level localStorage helpers ----------
 
+    /**
+     * Reads and JSON-parses a localStorage entry, returning `fallback` if the
+     * key is missing or the stored value fails to parse (e.g. corrupted JSON).
+     */
     function readStore(key, fallback) {
         const raw = localStorage.getItem(key);
         if (!raw) return fallback;
@@ -91,11 +95,18 @@ const Mock = (function () {
         localStorage.setItem(key, JSON.stringify(value));
     }
 
+    /**
+     * Computes the next integer id for a mock list by taking the max existing
+     * `id` and adding 1, or returns 1 if the list is empty.
+     */
     function nextId(list) {
         return list.length ? Math.max.apply(null, list.map(function (item) { return item.id; })) + 1 : 1;
     }
 
-    // Seed localStorage once so CRUD changes survive page reloads during the demo
+    /**
+     * Seed localStorage once so CRUD changes survive page reloads during the demo.
+     * Guarded by the SEEDED flag key, so it is a no-op on every run after the first.
+     */
     function ensureSeeded() {
         if (localStorage.getItem(CONFIG.STORAGE_KEYS.SEEDED)) return;
         writeStore(CONFIG.STORAGE_KEYS.COUNTRIES, seedCountries);
@@ -137,6 +148,10 @@ const Mock = (function () {
 
         // Quizzes are read-only mock content, no localStorage needed
         getQuizzes: function () { return quizzes; },
+        /**
+         * Looks up a quiz by id, coercing `quizId` to a Number so it matches
+         * whether it arrives as a string (e.g. from a query param) or a number.
+         */
         getQuizById: function (quizId) {
             return quizzes.find(function (q) { return q.id === Number(quizId); }) || null;
         }
