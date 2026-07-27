@@ -55,6 +55,7 @@ function initDetailsPage() {
  * details container if the request fails.
  */
 function loadCountry(id) {
+    $("#countryDetailsView").html('<p class="muted">Loading country...</p>');
     Api.Countries.getById(id)
         .done(function (country) {
             renderCountry(country);
@@ -142,6 +143,7 @@ function refreshShareFormState(countryId) {
  * Fetches the shares for this country and renders them.
  */
 function loadSharesForCountry(countryId) {
+    $("#sharesList").html('<p class="muted">Loading shares...</p>');
     Api.Shares.getByCountry(countryId)
         .done(renderShareList)
         .fail(Common.showError);
