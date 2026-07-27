@@ -104,6 +104,8 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         /// </summary>
         public UserVisitedCountry Insert()
         {
+            EnsureCanShareIfSharing();
+
             DBUserVisitCountryServices db =
                 new DBUserVisitCountryServices();
 
@@ -115,10 +117,39 @@ namespace ServerSideCountriesProject_MeravTomer.BL
         /// <summary>Updates the rating/review/share flag for this visit and returns the number of affected rows.</summary>
         public int Update()
         {
+            EnsureCanShareIfSharing();
+
             DBUserVisitCountryServices db =
                 new DBUserVisitCountryServices();
 
             return db.UpdateVisit(this);
+        }
+
+        /// <summary>
+        /// Blocks publishing a review (IsShared=true) for a user whose admin-controlled
+        /// CanShare permission is revoked. Only runs when IsShared is true, so unsharing
+        /// (IsShared=false) always goes through regardless of the flag.
+        /// </summary>
+        private void EnsureCanShareIfSharing()
+        {
+            if (!IsShared)
+            {
+                return;
+            }
+
+            User user = new User().ReadById(UserId);
+
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException(
+                    "User not found.");
+            }
+
+            if (!user.CanShare)
+            {
+                throw new UnauthorizedAccessException(
+                    "You don't have permission to share reviews. Contact an admin to enable sharing.");
+            }
         }
 
         /// <summary>Deletes this visit record (by UserId + Country.CountryId). Returns true if a row was removed.</summary>

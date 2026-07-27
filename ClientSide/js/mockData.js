@@ -9,7 +9,7 @@
  * Data shapes match the JSON contracts agreed with the server side (BL/Country.cs, BL/User.cs, ...):
  *   Country:      { id, apiCountryCode, commonName, officialName, capital, region, subregion,
  *                    population, area, flagPng, flagSvg, currencyName, currencySymbol, languages[] }
- *   User:         { id, name, email, password, active, isAdmin }
+ *   User:         { id, name, email, password, active, isAdmin, canShare }
  *   Share:        { id, userId, countryId, userName, countryName, content, createdAt }
  *   UserCountry:  { id, userId, countryId, listType: "visited" | "wishlist" }
  */
@@ -33,9 +33,9 @@ const Mock = (function () {
     ];
 
     const seedUsers = [
-        { id: 1, name: "Admin", email: "admin@test.com", password: "admin123", active: true, isAdmin: true },
-        { id: 2, name: "May", email: "test@test.com", password: "123456", active: true, isAdmin: false },
-        { id: 3, name: "Locked User", email: "locked@test.com", password: "123456", active: false, isAdmin: false }
+        { id: 1, name: "Admin", email: "admin@test.com", password: "admin123", active: true, isAdmin: true, canShare: true },
+        { id: 2, name: "May", email: "test@test.com", password: "123456", active: true, isAdmin: false, canShare: true },
+        { id: 3, name: "Locked User", email: "locked@test.com", password: "123456", active: false, isAdmin: false, canShare: true }
     ];
 
     const seedUserCountries = [

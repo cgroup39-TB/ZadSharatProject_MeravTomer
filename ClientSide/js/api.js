@@ -629,6 +629,7 @@ const Api = (function () {
                 return mockResponse(function () {
                     const author = Mock.getUsers().find(function (u) { return u.id === data.userId; });
                     if (!author || !author.active) throw new Error("Locked accounts cannot post shares.");
+                    if (!author.canShare) throw new Error("You don't have permission to share reviews. Contact an admin to enable sharing.");
 
                     const shares = Mock.getShares();
                     const newShare = $.extend({}, data, {
@@ -809,6 +810,26 @@ const Api = (function () {
         });
     }
 
+    // Grants/revokes a user's permission to publicly share reviews via PUT
+    // .../canShare (same "fetch full row first" reasoning as setUserActive).
+    function setCanShare(id, canShare) {
+        const admin = Auth.getCurrentUser();
+
+        return realRequest("GET", "/Users/" + id).then(function (user) {
+            return realRequest("PUT", "/Users/" + id + "/canShare?actingUserId=" + admin.id, {
+                userId: user.userId,
+                name: user.name,
+                email: user.email,
+                password: user.password,
+                isActive: user.isActive,
+                isAdmin: user.isAdmin,
+                canShare: canShare
+            });
+        }).then(function () {
+            return realRequest("GET", "/Users/" + id).then(mapUserFromServer);
+        });
+    }
+
     const Admin = {
         /** Fetches every user (reused as the admin user list). Real branch is `.then()`-derived (maps through mapUserFromServer), resolving with a single array. */
         getUsers: function () {
@@ -848,6 +869,36 @@ const Api = (function () {
                 });
             }
             return setUserActive(id, true);
+        },
+
+        /** Revokes a user's sharing permission; real branch delegates to setCanShare(id, false) (same `.then()`-derived, single-value promise shape). */
+        disableSharing: function (id) {
+            if (CONFIG.USE_MOCK) {
+                return mockResponse(function () {
+                    const users = Mock.getUsers();
+                    const idx = users.findIndex(function (u) { return u.id === Number(id); });
+                    if (idx === -1) throw new Error("User not found.");
+                    users[idx].canShare = false;
+                    Mock.saveUsers(users);
+                    return sanitizeUser(users[idx]);
+                });
+            }
+            return setCanShare(id, false);
+        },
+
+        /** Grants a user's sharing permission; real branch delegates to setCanShare(id, true) (same `.then()`-derived, single-value promise shape). */
+        enableSharing: function (id) {
+            if (CONFIG.USE_MOCK) {
+                return mockResponse(function () {
+                    const users = Mock.getUsers();
+                    const idx = users.findIndex(function (u) { return u.id === Number(id); });
+                    if (idx === -1) throw new Error("User not found.");
+                    users[idx].canShare = true;
+                    Mock.saveUsers(users);
+                    return sanitizeUser(users[idx]);
+                });
+            }
+            return setCanShare(id, true);
         },
 
         /**
