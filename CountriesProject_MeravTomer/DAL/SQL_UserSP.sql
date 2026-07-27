@@ -243,7 +243,7 @@ BEGIN
         ul.UserId,
         l.LanguageId,
         l.LanguageName,
-        ul.LevelLanguage
+        ul.ProficiencyLevel
     FROM UserLanguages ul
     INNER JOIN Languages l
         ON ul.LanguageId = l.LanguageId
