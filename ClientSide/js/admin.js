@@ -29,6 +29,9 @@ function initAdminUsers() {
     $("#adminUsersTable").on("click", ".btn-share-enable", function () {
         toggleCanShare($(this).data("id"), true);
     });
+    $("#adminUsersTable").on("click", ".btn-delete-user", function () {
+        deleteUser($(this).data("id"), $(this).data("name"));
+    });
 }
 
 /**
@@ -71,6 +74,10 @@ function renderUsers(users) {
                 ? '<button class="btn btn-small btn-danger btn-share-disable" data-id="' + user.id + '">Revoke sharing</button>'
                 : '<button class="btn btn-small btn-outline btn-share-enable" data-id="' + user.id + '">Allow sharing</button>');
 
+        const deleteBtn = user.id === currentUser.id
+            ? '<span class="muted">(you)</span>'
+            : '<button class="btn btn-small btn-danger btn-delete-user" data-id="' + user.id + '" data-name="' + user.name + '">Delete</button>';
+
         $tbody.append(
             '<tr>' +
             '<td>' + user.name + '</td>' +
@@ -80,6 +87,7 @@ function renderUsers(users) {
             '<td>' + shareLabel + '</td>' +
             '<td>' + actionBtn + '</td>' +
             '<td>' + shareActionBtn + '</td>' +
+            '<td>' + deleteBtn + '</td>' +
             '</tr>'
         );
     });
@@ -111,6 +119,25 @@ function toggleCanShare(userId, canShare) {
     request
         .done(function () {
             Common.showAlert(canShare ? "Sharing allowed for user." : "Sharing revoked for user.", "success");
+            loadUsers();
+        })
+        .fail(Common.showError);
+}
+
+/**
+ * Permanently deletes a user after a confirmation prompt (this cannot be undone,
+ * unlike lock/unlock), then refreshes the table. The server independently enforces
+ * both the admin check and the no-self-delete rule (BL/User.cs DeleteUser), so this
+ * is UX only, not the real gate.
+ */
+function deleteUser(userId, userName) {
+    if (!confirm('Permanently delete "' + userName + '"? This cannot be undone.')) {
+        return;
+    }
+
+    Api.Admin.deleteUser(userId)
+        .done(function () {
+            Common.showAlert("User deleted.", "success");
             loadUsers();
         })
         .fail(Common.showError);

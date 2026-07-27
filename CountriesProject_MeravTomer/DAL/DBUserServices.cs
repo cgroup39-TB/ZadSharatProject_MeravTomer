@@ -513,6 +513,60 @@ namespace ServerSideCountriesProject_MeravTomer.DAL
         }
 
 
+        //--------------------------------------------------------------------------------------------------
+        // Delete User
+        // Used by BL methods after their validation. All FKs referencing Users cascade on delete,
+        // so this also removes the user's languages/regions/visited/wanted/quiz/login rows.
+        //--------------------------------------------------------------------------------------------------
+        /// <summary>
+        /// Deletes the user identified by <paramref name="userId"/> via spDeleteUser_3MD_TB.
+        /// </summary>
+        /// <returns>The number of rows affected.</returns>
+        public int DeleteUser(int userId)
+        {
+            SqlConnection con;
+            SqlCommand cmd;
+
+            try
+            {
+                con = connect("myProjDB");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            Dictionary<string, object> paramDic =
+                new Dictionary<string, object>();
+
+            paramDic.Add("@UserId", userId);
+
+            cmd = CreateCommandWithStoredProcedureGeneral(
+                "spDeleteUser_3MD_TB",
+                con,
+                paramDic);
+
+            try
+            {
+                int numEffected =
+                    cmd.ExecuteNonQuery();
+
+                return numEffected;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                {
+                    con.Close();
+                }
+            }
+        }
+
+
         //==================================================================================================
         // USER REGIONS
         //==================================================================================================
